@@ -73,7 +73,10 @@ abstract_elink_root = ET.fromstring(abstract_elink_str)
 geneid_webenv_key = dict()
 for i in xrange(len(abstract_elink_root)):
     gene_id = abstract_elink_root[i].find('.//Id').text
-    query_key = abstract_elink_root[i].find('.//QueryKey').text
+    query_key_element = abstract_elink_root[i].find('.//QueryKey')
+    query_key = None
+    if(query_key_element != None):
+        query_key = abstract_elink_root[i].find('.//QueryKey').text
     webenv = abstract_elink_root[i].find('./WebEnv').text
     geneid_webenv_key[gene_id] = (webenv, query_key)
 
@@ -89,8 +92,6 @@ print '<html>'
 # head
 print '<head>'
 print '<title>Search Summary</title>'
-print """<link rel="stylesheet" href="../tablesorter/themes/blue/style.css" """
-print """ type="text/css" media="print, projection, screen" />"""
 print """
         <style>
             table {
@@ -101,41 +102,39 @@ print """
             table td, table th {    
                 border-left: 1px Solid Black;         
                 border-top: 1px Solid Black;              
-                border-bottom:none;    
+                border-bottom: 1px Solid Black;    
                 border-right:none;  
             }
             table td {
                 max-width:500px;
                 word-wrap:break-word;
             }
-            table.tablesorter {
-                font-size: 14px; 
-            }
         </style>
         """
-print '<script src=\"../tablesorter/jquery-latest.js\"></script>'
-print '<script src=\"../tablesorter/jquery.tablesorter.js\"></script>'
-print '<script type="text/javascript">'
-print '$(document).ready(function() {'
-for gene_id in sorted_gene_ids_list:
-    article_tb_id = '#articles_gene_id_'+str(gene_id)
-    print '$(\"'+article_tb_id+'\").tablesorter({'
-    print 'widgets: [\'blue\'], '
-    print ' sortInitialOrder: \'desc\','
-    print '});'  
-print '});' 
-print '</script>'
+print """<script src="../tablesorter/jquery-latest.js"></script>"""
 print '</head>'
 
 # body
 print '<body>'
-print '<a id=\"top\">Search Summary</a><br/><br/>'
+print '<a id="top">Search Summary</a><br/><br/>'
+print '<a href="/">Make Another Search</a><br/><br/>'
 
 # create navigation
-print '<a id=\"nav\">Navigation by Gene ID</a><br/>'
+print '<a id="nav">Navigation by Gene ID</a><br/>'
 for gene_id in sorted_gene_ids_list:
-    print '<a href=\"#gene_id_'+gene_id+'\">'+gene_id+'</a>'
-print """<br/><a href="/">Make Another Search</a><br/><br/><hr/>"""
+    print '<a href="#gene_id_'+gene_id+'">'+gene_id+'</a>'
+print '<br/><br/>'
+
+# create sort options
+print '<a id="global_sort">Sort Articles by Term Occurence</a><br/>'
+print '<a>applies to all Article Summary tables</a><br/>'
+print '<a>choose multiple terms to sort by the sum of their occurence</a><br/>'
+for term in sorted_terms_list:
+    print '<input type="checkbox">'+term
+print '<br/>'
+print '<button type="button">apply</button>'
+
+print '<br/><br/><hr/>'
 
 # iterate though gene ids
 for i in xrange(len(sorted_gene_ids_list)):
@@ -155,7 +154,7 @@ for i in xrange(len(sorted_gene_ids_list)):
     genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+gene_name
     
     # create bookmark
-    print '<a id=\"gene_id_'+gene_id+'\" href=\"#top\">'
+    print '<a id="gene_id_'+gene_id+'" href="#top">'
     print 'Return to Top</a><br/><br/>'
     
     # print gene summary information table
@@ -167,50 +166,49 @@ for i in xrange(len(sorted_gene_ids_list)):
     print '<tr><td>Aliases</td><td>'+xstr(gene_aliases)+'</td></tr>'
     print '<tr><td>Other Designations</td><td>'+xstr(gene_desg)+'</td></tr>'
     print '<tr><td>Summary</td><td>'+xstr(gene_summary)+'</td></tr>'
-    print '<tr><td>Gene URL</td><td><a href=\"'+gene_url+'\">click here</a></td></tr>'
-    print '<tr><td>RNA URL</td><td><a href=\"'+rna_url+'\">click here</a></td></tr>'
-    print '<tr><td>BioGPS URL</td><td><a href=\"'+biogps_url+'\">click here</a></td></tr>'
-    print '<tr><td>GeneCards URL</td><td><a href=\"'+genecards_url+'\">click here</a></td></tr>'
+    print '<tr><td>Gene URL</td><td><a href="'+gene_url+'">click here</a></td></tr>'
+    print '<tr><td>RNA URL</td><td><a href="'+rna_url+'">click here</a></td></tr>'
+    print '<tr><td>BioGPS URL</td><td><a href="'+biogps_url+'">click here</a></td></tr>'
+    print '<tr><td>GeneCards URL</td><td><a href="'+genecards_url+'">click here</a></td></tr>'
     print '</table>'
     print '<br/>'
-    
-    # print article summary table
-    print 'Article Summary</br>'
-    print '<table id=\"articles_gene_id_'+xstr(gene_id)+'\"class=\"tablesorter\">'
-    
-    # print table header
-    print '<thead>'
-    num_terms = len(terms_list)
-    print '<tr>'
-    print '<td>Title & Abstract</td>'
-    for term in sorted_terms_list:
-        print '<th>'+term+'</th>'
-    print '<tr/>'
-    print '</thead>'
-    
+     
     # get article abstract from eutil server
     webenv = geneid_webenv_key[gene_id][0]
     query_key = geneid_webenv_key[gene_id][1]
-    abstract_efetch_qstr = efetch_url+efetch_fixed_param+'&WebEnv='+webenv+'&query_key='+query_key
-    abstract_efetch = urllib2.urlopen(abstract_efetch_qstr)
-    abstract_efetch_str = abstract_efetch.read()
-    abstract_efetch_root = ET.fromstring(abstract_efetch_str)
+    abstract_efetch_qstr = None
+    abstract_efetch_root = []
+    if(query_key != None):
+        abstract_efetch_qstr = efetch_url+efetch_fixed_param+'&WebEnv='+webenv+'&query_key='+query_key
+        abstract_efetch = urllib2.urlopen(abstract_efetch_qstr)
+        abstract_efetch_str = abstract_efetch.read()
+        abstract_efetch_root = ET.fromstring(abstract_efetch_str)
     num_articles = len(abstract_efetch_root)
     
-    # print table body body
-    print '<tbody>'
+    # print article summary table
+    print 'Article Summary</br>'
+    print '<table id="articles_gene_id_'+xstr(gene_id)+'>'
+    
+    # print table header
+    num_terms = len(terms_list)
+    print '<tr>'
+    print '<td>Title & Abstract ('+ str(num_articles)+' related articles in total)</td>'
+    for term in sorted_terms_list:
+        print '<td><input type="checkbox">'+term+'</td>'
+    print '<tr/>'
+    
+    # print table body
     for j in xrange(num_articles):
         pmid = abstract_efetch_root[j].find('.//PMID').text
         title = abstract_efetch_root[j].find('.//ArticleTitle').text
         text_elements = abstract_efetch_root[j].findall('.//AbstractText')
         text = get_abstract_text(text_elements)
         print '<tr>'
-        print '<td><a href=\"'+pubmed_url+'/'+pmid+'\">'+title+'</a><br/>'+text+'</td>'
+        print '<td><a href="'+pubmed_url+'/'+pmid+'">'+title+'</a><br/>'+text+'</td>'
         term_count = get_term_count(terms_list, text)
         for term in sorted_terms_list:
-            print '<td>'+str(term_count[term])+'</td>'
+            print '<td><a>'+str(term_count[term])+'</a><br/>'+term+'</td>'
         print '</tr>'
-    print '</tbody>'
     
     # end article summary table
     print '</table>'
