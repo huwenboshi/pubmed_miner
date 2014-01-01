@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script src="./javascripts/sorttable.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('.local_opt').change(function() {
+                    var id_str = $(this).attr('id');
+                    var id_arr = id_str.split('_');
+                    var gene_id = id_arr[4];
+                    var table_id = "articles_gene_id_"+gene_id;
+                    sorttable(table_id);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <table id="articles_gene_id_1">
+            <tr>
+                <td>Title & Abstract</td>
+                <td><input type="checkbox" id="local_opt_gene_id_1_liver" class="local_opt">liver</td>
+                <td><input type="checkbox" id="local_opt_gene_id_1_obesity" class="local_opt">obsesity</td>
+            </tr>
+            <tr><td>article1</td><td>1</td><td>3</td></tr>
+            <tr><td>article2</td><td>10</td><td>2</td></tr>
+            <tr><td>article3</td><td>2</td><td>5</td></tr>
+        </table>
+        
+        <table id="articles_gene_id_2">
+            <tr>
+                <td>Title & Abstract</td>
+                <td><input type="checkbox" id="local_opt_gene_id_2_liver" class="local_opt">liver</td>
+                <td><input type="checkbox" id="local_opt_gene_id_2_obesity" class="local_opt">obsesity</td>
+            </tr>
+            <tr><td>article4</td><td>3</td><td>4</td></tr>
+            <tr><td>article5</td><td>1</td><td>9</td></tr>
+            <tr><td>article6</td><td>9</td><td>8</td></tr>
+            <tr><td>article7</td><td>1</td><td>3</td></tr>
+        </table>
+    </body>
+</html>

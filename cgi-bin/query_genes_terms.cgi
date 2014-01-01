@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -u
 
 import xml.etree.ElementTree as ET
 import urllib2
@@ -86,12 +86,36 @@ efetch_fixed_param = '?db=pubmed&rettype=abstract&retmode=xml'
 ##################################### HTML ####################################
 
 # header
-print 'Content-type:text/html\r\n\r\n'
+print 'Content-Type: text/html Connection: keep-alive;charset=utf-8\r\n\r\n'
 print '<html>'
 
 # head
 print '<head>'
 print '<title>Search Summary</title>'
+print """
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script src="../javascripts/sorttable.js"></script>
+      """
+print """
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.global_opt').change(function() {
+            var id_str = $(this).attr('id');
+            var id_arr = id_str.split('_');
+            var term = id_arr[2];
+            alert(term);
+        });
+        $('.local_opt').change(function() {
+            var id_str = $(this).attr('id');
+            var id_arr = id_str.split('_');
+            var gene_id = id_arr[4];
+            var table_id = "articles_gene_id_"+gene_id;
+            sorttable(table_id);
+        });
+    });
+</script>
+"""
 print """
         <style>
             table {
@@ -106,7 +130,7 @@ print """
                 border-right:none;  
             }
             table td {
-                max-width:500px;
+                max-width:750px;
                 word-wrap:break-word;
             }
         </style>
@@ -130,11 +154,12 @@ print '<a id="global_sort">Sort Articles by Term Occurence</a><br/>'
 print '<a>applies to all Article Summary tables</a><br/>'
 print '<a>choose multiple terms to sort by the sum of their occurence</a><br/>'
 for term in sorted_terms_list:
-    print '<input type="checkbox">'+term
-print '<br/>'
-print '<button type="button">apply</button>'
+    print '<input type="checkbox" id="global_opt_'+term+'" class="global_opt">'+term
 
 print '<br/><br/><hr/>'
+
+# flush the stdout buffer
+sys.stdout.flush()
 
 # iterate though gene ids
 for i in xrange(len(sorted_gene_ids_list)):
@@ -173,6 +198,9 @@ for i in xrange(len(sorted_gene_ids_list)):
     print '</table>'
     print '<br/>'
      
+    # flush the stdout buffer
+    sys.stdout.flush() 
+     
     # get article abstract from eutil server
     webenv = geneid_webenv_key[gene_id][0]
     query_key = geneid_webenv_key[gene_id][1]
@@ -186,16 +214,16 @@ for i in xrange(len(sorted_gene_ids_list)):
     num_articles = len(abstract_efetch_root)
     
     # print article summary table
-    print 'Article Summary</br>'
-    print '<table id="articles_gene_id_'+xstr(gene_id)+'>'
+    print 'Article Summary (choose the terms you want to sort on)</br>'
+    print '<table id="articles_gene_id_'+xstr(gene_id)+'">'
     
     # print table header
     num_terms = len(terms_list)
     print '<tr>'
     print '<td>Title & Abstract ('+ str(num_articles)+' related articles in total)</td>'
     for term in sorted_terms_list:
-        print '<td><input type="checkbox">'+term+'</td>'
-    print '<tr/>'
+        print '<td><input type="checkbox" id="local_opt_gene_id_'+gene_id+"_"+term+'" class="local_opt">'+term+'</td>'
+    print '</tr>'
     
     # print table body
     for j in xrange(num_articles):
@@ -207,7 +235,7 @@ for i in xrange(len(sorted_gene_ids_list)):
         print '<td><a href="'+pubmed_url+'/'+pmid+'">'+title+'</a><br/>'+text+'</td>'
         term_count = get_term_count(terms_list, text)
         for term in sorted_terms_list:
-            print '<td><a>'+str(term_count[term])+'</a><br/>'+term+'</td>'
+            print '<td><a class="term_count">'+str(term_count[term])+'</a><br/>'+term+'</td>'
         print '</tr>'
     
     # end article summary table
@@ -215,6 +243,9 @@ for i in xrange(len(sorted_gene_ids_list)):
     
     # print separator
     print '<hr/>'
+    
+    # flush the stdout buffer
+    sys.stdout.flush()
     
     # sleep for 1 second
     time.sleep(1)
