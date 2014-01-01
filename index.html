@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script type="text/javascript">
+            function validate_form() {
+                var x = document.forms["user_input"]["genes"].value;
+                if (x == null || x== "") {
+                    alert("\"Genes\" must not be blank!");
+                    return false;
+                }
+                return true;
+            }
+        </script>
     </head>
     <body>
-        <form action="/cgi-bin/query_genes_terms.cgi" method="post">
-            Genes: <textarea name="genes" size=200></textarea>
+        Input field marked with "*" must not be blank. <br/><br/>
+        <form name="user_input" action="/cgi-bin/query_genes_terms.cgi" onsubmit="return validate_form()" method="post">
+            Genes*: <textarea name="genes" size=200></textarea>
             <br/>
             <br/>
             Terms: <textarea name="terms" size=200></textarea>
