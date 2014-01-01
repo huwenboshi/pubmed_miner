@@ -44,7 +44,14 @@ gene_ids_summary_qstr = 'id=' + ','.join(sorted_gene_ids_list)
 terms = form['terms'].value
 terms_list = terms.split()
 sorted_terms_list = sorted(terms_list)
-terms_qstr = 'term=' + '+OR+'.join(terms_list)
+terms_qstr = ""
+if('tiab_only' not in form):
+    # search in full-text
+    terms_qstr = 'term=' + '+OR+'.join(sorted_terms_list)
+else:
+    # search in title and abstract only
+    sorted_terms_abstract_list = [s + "[TIAB]" for s in sorted_terms_list]
+    terms_qstr = 'term=' + '+OR+'.join(sorted_terms_abstract_list)
 
 # eutils base url
 eutils_url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils'
