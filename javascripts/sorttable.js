@@ -38,17 +38,19 @@ function sorttable(table_id) {
     var table = document.getElementById(table_id);
     var num_rows = table.rows.length;
     var num_cols = table.rows[0].cells.length;
+    
     for (var i = 1; i < num_rows; i++) {
         row_content = new Object();
         row_content["sort_key"] = 0;
-        for (var j = 0; j < num_cols; j++) {
-            if (j == 0) {
+        // skip index column
+        for (var j = 1; j < num_cols; j++) {
+            if (j == 1) {
                 row_content["title_abstract"] = table.rows[i].cells[j].innerHTML;
             }
             else {
-                row_content[j] = table.rows[i].cells[j].innerHTML;
+                row_content[j-2] = table.rows[i].cells[j].innerHTML;
                 // add up sort key
-                if (checkboxes_status[j-1] == true) {
+                if (checkboxes_status[j-2] == true) {
                     var term_count_str = table.rows[i].cells[j].getElementsByClassName("term_count")[0].innerHTML;
                     var term_count = parseInt(term_count_str);
                     row_content["sort_key"] += term_count;
@@ -65,15 +67,16 @@ function sorttable(table_id) {
         }
     }
     
-    // rerender the table
+    // rerender the table, skip header row
     for (var i = 1; i < num_rows; i++) {
-        for (var j = 0; j < num_cols; j++) {
-            if (j == 0) {
+        // skip index column
+        for (var j = 1; j < num_cols; j++) {
+            if (j == 1) {
                 table.rows[i].cells[j].innerHTML = table_content[i-1].title_abstract;
             }
             else {
-                table.rows[i].cells[j].innerHTML = table_content[i-1][j];
-                if (checkboxes_status[j-1] == true) {
+                table.rows[i].cells[j].innerHTML = table_content[i-1][j-2];
+                if (checkboxes_status[j-2] == true) {
                     table.rows[i].cells[j].style.fontWeight = "bold";
                 }
                 else {

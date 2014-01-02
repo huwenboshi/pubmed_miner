@@ -5,7 +5,7 @@
             function validate_form() {
                 var x = document.forms["user_input"]["genes"].value;
                 if (x == null || x== "") {
-                    alert("\"Genes\" must not be blank!");
+                    alert("\"Genes IDs\" must not be blank!");
                     return false;
                 }
                 return true;
@@ -13,15 +13,22 @@
         </script>
     </head>
     <body>
-        Input field marked with "*" must not be blank. <br/><br/>
+        <h2>PubMed Article Recommender</h2>
+        <a>Input field marked with "*" must not be blank.</a>
+        <br/>
+        <br/>
         <form name="user_input" action="/cgi-bin/query_genes_terms.cgi" onsubmit="return validate_form()" method="post">
-            Genes*: <textarea name="genes" size=200></textarea>
+            <a>Gene IDs*:</a>
+            <br/>
+            <textarea name="genes" size=200></textarea>
             <br/>
             <br/>
-            Terms: <textarea name="terms" size=200></textarea>
+            <a>Terms:</a>
+            <br/>
+            <textarea name="terms" size=200></textarea>
             <br/>
             <br/>
-            <input type="checkbox" name="tiab_only"> Search in title and abstract only
+            <input type="checkbox" name="tiab_only" checked="checked"> Search in title and abstract only
             <br/>
             <br/>
         <input type="submit" value="search">

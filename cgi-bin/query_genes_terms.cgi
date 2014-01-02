@@ -120,6 +120,19 @@ print """
             var table_id = "articles_gene_id_"+gene_id;
             sorttable(table_id);
         });
+        $('.show').live('click', function() {
+            $div = $(this).parent();
+            if ($div.data('open')) {
+                $div.css({height:'100px', overflow:'hidden'});
+                $div.data('open', 0);
+                $(this).html("show more");
+            }
+            else {
+                $div.css({height:'100%'});
+                $div.data('open', 1);
+                $(this).html("show less");
+            }
+        });
     });
 </script>
 """
@@ -140,6 +153,10 @@ print """
                 max-width:750px;
                 word-wrap:break-word;
             }
+            .abstract_txt {
+                height: 100px;
+                overflow: hidden;
+            }
         </style>
         """
 print """<script src="../tablesorter/jquery-latest.js"></script>"""
@@ -153,7 +170,7 @@ print '<a href="/">Make Another Search</a><br/><br/>'
 # create navigation
 print '<a id="nav">Navigation by Gene ID</a><br/>'
 for gene_id in sorted_gene_ids_list:
-    print '<a href="#gene_id_'+gene_id+'">'+gene_id+'</a>'
+    print '<a href="#gene_id_%s">%s</a>' % (gene_id, gene_id)
 print '<br/><br/>'
 
 # create sort options
@@ -161,7 +178,7 @@ print '<a id="global_sort">Sort Articles by Term Occurence</a><br/>'
 print '<a>applies to all Article Summary tables</a><br/>'
 print '<a>choose multiple terms to sort by the sum of their occurence</a><br/>'
 for term in sorted_terms_list:
-    print '<input type="checkbox" id="global_opt_'+term+'" class="global_opt">'+term
+    print '<input type="checkbox" id="global_opt_%s" class="global_opt">%s' % (term, term)
 
 print '<br/><br/><hr/>'
 
@@ -186,22 +203,22 @@ for i in xrange(len(sorted_gene_ids_list)):
     genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+gene_name
     
     # create bookmark
-    print '<a id="gene_id_'+gene_id+'" href="#top">'
+    print '<a id="gene_id_%s" href="#top">' % gene_id
     print 'Return to Top</a><br/><br/>'
     
     # print gene summary information table
     print 'Gene Summary</br>'
     print '<table>'
-    print '<tr><td>Id</td><td>'+xstr(gene_id)+'</td></tr>'
-    print '<tr><td>Name</td><td>'+xstr(gene_name)+'</td></tr>'
-    print '<tr><td>Description</td><td>'+xstr(gene_descp)+'</td></tr>'
-    print '<tr><td>Aliases</td><td>'+xstr(gene_aliases)+'</td></tr>'
-    print '<tr><td>Other Designations</td><td>'+xstr(gene_desg)+'</td></tr>'
-    print '<tr><td>Summary</td><td>'+xstr(gene_summary)+'</td></tr>'
-    print '<tr><td>Gene URL</td><td><a href="'+gene_url+'">click here</a></td></tr>'
-    print '<tr><td>RNA URL</td><td><a href="'+rna_url+'">click here</a></td></tr>'
-    print '<tr><td>BioGPS URL</td><td><a href="'+biogps_url+'">click here</a></td></tr>'
-    print '<tr><td>GeneCards URL</td><td><a href="'+genecards_url+'">click here</a></td></tr>'
+    print '<tr><td>Id</td><td>%s</td></tr>' % gene_id
+    print '<tr><td>Name</td><td>%s</td></tr>' % xstr(gene_name)
+    print '<tr><td>Description</td><td>%s</td></tr>' % xstr(gene_descp)
+    print '<tr><td>Aliases</td><td>%s</td></tr>' % xstr(gene_aliases)
+    print '<tr><td>Other Designations</td><td>%s</td></tr>' % xstr(gene_desg)
+    print '<tr><td>Summary</td><td>%s</td></tr>' % xstr(gene_summary)
+    print '<tr><td>Gene URL</td><td><a href="%s">click here</a></td></tr>' % gene_url
+    print '<tr><td>RNA URL</td><td><a href="%s">click here</a></td></tr>' % rna_url
+    print '<tr><td>BioGPS URL</td><td><a href="%s">click here</a></td></tr>' % biogps_url
+    print '<tr><td>GeneCards URL</td><td><a href="%s">click here</a></td></tr>' % genecards_url
     print '</table>'
     print '<br/>'
      
@@ -222,14 +239,15 @@ for i in xrange(len(sorted_gene_ids_list)):
     
     # print article summary table
     print 'Article Summary (choose the terms you want to sort on)</br>'
-    print '<table id="articles_gene_id_'+xstr(gene_id)+'">'
+    print '<table id="articles_gene_id_%s">' % xstr(gene_id)
     
     # print table header
     num_terms = len(terms_list)
     print '<tr>'
+    print '<td>Index</td>'
     print '<td>Title & Abstract ('+ str(num_articles)+' related articles in total)</td>'
     for term in sorted_terms_list:
-        print '<td><input type="checkbox" id="local_opt_gene_id_'+gene_id+"_"+term+'" class="local_opt">'+term+'</td>'
+        print '<td><input type="checkbox" id="local_opt_gene_id_%s_%s" class="local_opt">%s</td>' % (gene_id,term,term)
     print '</tr>'
     
     # print table body
@@ -239,10 +257,12 @@ for i in xrange(len(sorted_gene_ids_list)):
         text_elements = abstract_efetch_root[j].findall('.//AbstractText')
         text = get_abstract_text(text_elements)
         print '<tr>'
-        print '<td><a href="'+pubmed_url+'/'+pmid+'">'+title+'</a><br/>'+text+'</td>'
+        print '<td>%d/%d</td>' % (j+1, num_articles)
+        print '<td><a href="%s/%s">%s</a>' % (pubmed_url,pmid,title)
+        print '<div class="abstract_txt"><button class="show" type="button">show more</button>%s</div></td>' % text
         term_count = get_term_count(terms_list, text)
         for term in sorted_terms_list:
-            print '<td><a class="term_count">'+str(term_count[term])+'</a><br/>'+term+'</td>'
+            print '<td><a class="term_count">%d</a><br/>%s</td>' % (term_count[term], term)
         print '</tr>'
     
     # end article summary table
