@@ -130,7 +130,7 @@ print """
             var table_id = "articles_gene_id_"+gene_id;
             sorttable(table_id);
         });
-        $('.show').live('click', function() {
+        $('.show_more_less').live('click', function() {
             $div = $(this).parent();
             if ($div.data('open')) {
                 $div.css({height:'100px', overflow:'hidden'});
@@ -141,6 +141,16 @@ print """
                 $div.css({height:'100%'});
                 $div.data('open', 1);
                 $(this).html("show less");
+            }
+        });
+        $('.show_hide').live('click', function() {
+            if ($(this).html() == "hide") {
+                $(this).siblings("table").css({display:'none'});
+                $(this).html("show");
+            }
+            else {
+                $(this).siblings("table").css({display:'inherit'});
+                $(this).html("hide");
             }
         });
     });
@@ -217,11 +227,17 @@ for i in xrange(len(sorted_gene_ids_list)):
     genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+gene_name
     
     # create bookmark
-    print '<a style="font-weight:bold" id="gene_id_%s" href="#top">Return to Top</a><br/><br/>' % gene_id
+    print '<a id="gene_id_%s" href="#top">Return to Top</a><br/><br/>' % gene_id
+    
+    # title
+    print '<b>Info and Related Abstracts for Gene %s</b><br/><br/>' % gene_id
     
     # print gene summary information table
-    print '<a style="font-weight:bold">Gene Summary</a></br>'
-    print '<table>'
+    print '<div>'
+    print '<a style="font-weight:bold">Gene Info</a>'
+    print '<button class="show_hide" type="button">hide</button>'
+    print '<br/>'
+    print '<table class="info_table">'
     print '<tr><td>Id</td><td>%s</td></tr>' % gene_id
     print '<tr><td>Name</td><td>%s</td></tr>' % xstr(gene_name)
     print '<tr><td>Description</td><td>%s</td></tr>' % xstr(gene_descp)
@@ -234,6 +250,7 @@ for i in xrange(len(sorted_gene_ids_list)):
     print '<tr><td>GeneCards URL</td><td><a href="%s" target="_blank">%s</a></td></tr>' % (genecards_url, genecards_url)
     print '<tr><td>Total PMID Count</td><td>%d</td></tr>' % gene_article_cnt
     print '</table>'
+    print '</div>'
     print '<br/>'
      
     # flush the stdout buffer
@@ -251,10 +268,55 @@ for i in xrange(len(sorted_gene_ids_list)):
         abstract_efetch_root = ET.fromstring(abstract_efetch_str)
     num_articles = len(abstract_efetch_root)
     
-    # print article summary table
+    # group abstract by term
+    term_abstract = dict()
+    for term in sorted_terms_list:
+        if(term not in term_abstract):
+            term_abstract[term] = []
+        for j in xrange(num_articles):
+            pmid = abstract_efetch_root[j].find('.//PMID').text
+            article_url = pubmed_url+'/'+pmid
+            title = abstract_efetch_root[j].find('.//ArticleTitle').text
+            text_elements = abstract_efetch_root[j].findall('.//AbstractText')
+            text = get_abstract_text(text_elements)
+            if(text.lower().find(term) >= 0):
+                article_obj = {'url': article_url, 'title': title, 'text': text}
+                term_abstract[term].append(article_obj)
+    
+    # print abstract table grouped by term
+    print '<div>'
+    print '<b>Abstracts</b> (grouped by terms)'
+    print '<button class="show_hide" type="button">hide</button>'
+    print '<br/>'
+    print '<table id="articles_by_term_gene_id_%s" class="info_table">' % xstr(gene_id)
+    print '<tr><td>Term</td><td colspan="2">Title & Abstract</td></tr>'
+    for term in sorted_terms_list:
+        num_articles_for_term = len(term_abstract[term])
+        if(num_articles_for_term > 0):
+            print '<tr><td rowspan="%d">%s<br/>(%d in total)</td>' % (num_articles_for_term,term,num_articles_for_term)
+        else:
+            print '<tr><td>%s<br/>(%d in total)</td><td>0</td><td>N/A</td></tr>' % (term, num_articles_for_term)
+        for j in xrange(num_articles_for_term):
+            if(j != 0):
+                print '<tr>'
+            print '<td>%d</td>' % (j+1)
+            print '<td>'
+            print '<a href="%s" target="_blank">%s</a>' % (term_abstract[term][j]['url'],term_abstract[term][j]['title'])
+            print '<div class="abstract_txt"><button class="show_more_less" type="button">show more</button>%s</div>' % term_abstract[term][j]['text']
+            print '</td>'
+            print '</tr>'
+    print '</table>'
+    print '</div>'
+    
+    print '<br/>'
+    
+    # print abstracts table
+    print '<div>'
     print '<a style="font-weight:bold">Abstracts</a>'
-    print '<a>(choose terms to sort by the sum of their occurences in titles and abstracts)</br>'
-    print '<table id="articles_gene_id_%s">' % xstr(gene_id)
+    print '<a>(choose terms to sort by the sum of their occurences in titles and abstracts)'
+    print '<button class="show_hide" type="button">hide</button>'
+    print '<br/>'
+    print '<table id="articles_gene_id_%s" class="info_table">' % xstr(gene_id)
     
     # print table header
     num_terms = len(terms_list)
@@ -273,7 +335,7 @@ for i in xrange(len(sorted_gene_ids_list)):
         print '<tr>'
         print '<td>%d</td>' % (j+1)
         print '<td><a href="%s/%s" target="_blank">%s</a>' % (pubmed_url,pmid,title)
-        print '<div class="abstract_txt"><button class="show" type="button">show more</button>%s</div></td>' % text
+        print '<div class="abstract_txt"><button class="show_more_less" type="button">show more</button>%s</div></td>' % text
         term_count = get_term_count(terms_list, title+' '+text)
         for term in sorted_terms_list:
             print '<td><a class="term_count">%d</a><br/>%s</td>' % (term_count[term], term)
@@ -281,6 +343,7 @@ for i in xrange(len(sorted_gene_ids_list)):
     
     # end article summary table
     print '</table>'
+    print '</div>'
     
     # print separator
     print '<hr/>'
