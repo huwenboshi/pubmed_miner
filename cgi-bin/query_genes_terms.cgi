@@ -18,9 +18,10 @@ def get_abstract_text(text_elements):
     str_list = []
     for element in text_elements:
         str_list.append(element.text)
-    return '<br/>'.join(str_list)
+    return '<br/><br/>'.join(str_list)
 
 def get_term_count(term_list, text):
+    text = text.lower()
     term_count = dict()
     for term in term_list:
         term_count[term] = text.count(term)
@@ -44,7 +45,7 @@ gene_ids_summary_qstr = 'id=' + ','.join(sorted_gene_ids_list)
 terms = form['terms'].value
 terms_list = terms.split()
 sorted_terms_list = sorted(terms_list)
-terms_qstr = ""
+terms_qstr = ''
 if('tiab_only' not in form):
     # search in full-text
     terms_qstr = 'term=' + '+OR+'.join(sorted_terms_list)
@@ -224,10 +225,10 @@ for i in xrange(len(sorted_gene_ids_list)):
     print '<tr><td>Aliases</td><td>%s</td></tr>' % xstr(gene_aliases)
     print '<tr><td>Other Designations</td><td>%s</td></tr>' % xstr(gene_desg)
     print '<tr><td>Summary</td><td>%s</td></tr>' % xstr(gene_summary)
-    print '<tr><td>Gene URL</td><td><a href="%s">%s</a></td></tr>' % (gene_url, gene_url)
-    print '<tr><td>RNA URL</td><td><a href="%s">%s</a></td></tr>' % (rna_url, rna_url)
-    print '<tr><td>BioGPS URL</td><td><a href="%s">%s</a></td></tr>' % (biogps_url, biogps_url)
-    print '<tr><td>GeneCards URL</td><td><a href="%s">%s</a></td></tr>' % (genecards_url, genecards_url)
+    print '<tr><td>Gene URL</td><td><a href="%s" target="_blank">%s</a></td></tr>' % (gene_url, gene_url)
+    print '<tr><td>RNA URL</td><td><a href="%s" target="_blank">%s</a></td></tr>' % (rna_url, rna_url)
+    print '<tr><td>BioGPS URL</td><td><a href="%s" target="_blank">%s</a></td></tr>' % (biogps_url, biogps_url)
+    print '<tr><td>GeneCards URL</td><td><a href="%s" target="_blank">%s</a></td></tr>' % (genecards_url, genecards_url)
     print '<tr><td>Total PMID Count</td><td>%d</td></tr>' % gene_article_cnt
     print '</table>'
     print '<br/>'
@@ -248,8 +249,8 @@ for i in xrange(len(sorted_gene_ids_list)):
     num_articles = len(abstract_efetch_root)
     
     # print article summary table
-    print '<a style="font-weight:bold">Abstracts</a><br/>'
-    print '<a>(choose terms to sort by the sum of their occurences in abstracts)</br>'
+    print '<a style="font-weight:bold">Abstracts</a>'
+    print '<a>(choose terms to sort by the sum of their occurences in titles and abstracts)</br>'
     print '<table id="articles_gene_id_%s">' % xstr(gene_id)
     
     # print table header
@@ -269,9 +270,9 @@ for i in xrange(len(sorted_gene_ids_list)):
         text = get_abstract_text(text_elements)
         print '<tr>'
         print '<td>%d/%d</td>' % (j+1, num_articles)
-        print '<td><a href="%s/%s">%s</a>' % (pubmed_url,pmid,title)
+        print '<td><a href="%s/%s" target="_blank">%s</a>' % (pubmed_url,pmid,title)
         print '<div class="abstract_txt"><button class="show" type="button">show more</button>%s</div></td>' % text
-        term_count = get_term_count(terms_list, text)
+        term_count = get_term_count(terms_list, title+' '+text)
         for term in sorted_terms_list:
             print '<td><a class="term_count">%d</a><br/>%s</td>' % (term_count[term], term)
         print '</tr>'
