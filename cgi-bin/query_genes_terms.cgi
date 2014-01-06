@@ -57,19 +57,20 @@ else:
     terms_qstr = 'term=' + '+OR+'.join(sorted_terms_abstract_list)
 
 # eutils base url
+tool_email = 'tool=pubmed_article_rec&email=pubmed_article_rec@yahoo.com'
 eutils_url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils'
-esummary_url = eutils_url + '/esummary.fcgi'
-elink_url = eutils_url + '/elink.fcgi'
-efetch_url = eutils_url + '/efetch.fcgi'
+esummary_url = eutils_url + '/esummary.fcgi?' + tool_email
+elink_url = eutils_url + '/elink.fcgi?' + tool_email
+efetch_url = eutils_url + '/efetch.fcgi?' + tool_email
 
 # pubmed url
 pubmed_url = 'http://www.ncbi.nlm.nih.gov/pubmed'
 
 # get gene summary information
-genes_summary = urllib2.urlopen(esummary_url+'?db=gene&'+gene_ids_summary_qstr)
+genes_summary = urllib2.urlopen(esummary_url+'&db=gene&'+gene_ids_summary_qstr)
 genes_summary_str = genes_summary.read()
 time.sleep(1)
-genes_all_articles = urllib2.urlopen(elink_url+'?dbfrom=gene&db=pubmed&linkname=gene_pubmed&'+gene_ids_qstr)
+genes_all_articles = urllib2.urlopen(elink_url+'&dbfrom=gene&db=pubmed&linkname=gene_pubmed&'+gene_ids_qstr)
 genes_all_articles_str = genes_all_articles.read()
 time.sleep(1)
 
@@ -78,7 +79,7 @@ genes_summary_root = ET.fromstring(genes_summary_str)
 genes_all_articles_root = ET.fromstring(genes_all_articles_str)
 
 # get abstract information
-abstract_fixed_param = '?dbfrom=gene&db=pubmed&linkname=gene_pubmed&cmd=neighbor_history'
+abstract_fixed_param = '&dbfrom=gene&db=pubmed&linkname=gene_pubmed&cmd=neighbor_history'
 abstract_elink_qstr = elink_url+abstract_fixed_param+'&'+gene_ids_qstr+'&'+terms_qstr
 abstract_elink = urllib2.urlopen(abstract_elink_qstr)
 abstract_elink_str = abstract_elink.read()
@@ -97,7 +98,7 @@ for i in xrange(len(abstract_elink_root)):
     geneid_webenv_key[gene_id] = (webenv, query_key)
 
 # fixed params for efetch
-efetch_fixed_param = '?db=pubmed&rettype=abstract&retmode=xml'
+efetch_fixed_param = '&db=pubmed&rettype=abstract&retmode=xml'
 
 ##################################### HTML ####################################
 
@@ -159,7 +160,7 @@ print """
                 border-right:none;  
             }
             table td {
-                max-width:750px;
+                max-width:700px;
                 word-wrap:break-word;
             }
             .abstract_txt {
@@ -258,8 +259,7 @@ for i in xrange(len(sorted_gene_ids_list)):
     # print table header
     num_terms = len(terms_list)
     print '<tr>'
-    print '<td>Index</td>'
-    print '<td>Title & Abstract ('+ str(num_articles)+' related articles in total)</td>'
+    print '<td></td><td>Title & Abstract (%d related articles in total)</td>' % num_articles
     for term in sorted_terms_list:
         print '<td><input type="checkbox" id="local_opt_gene_id_%s_%s" class="local_opt">%s</td>' % (gene_id,term,term)
     print '</tr>'
@@ -271,7 +271,7 @@ for i in xrange(len(sorted_gene_ids_list)):
         text_elements = abstract_efetch_root[j].findall('.//AbstractText')
         text = get_abstract_text(text_elements)
         print '<tr>'
-        print '<td>%d/%d</td>' % (j+1, num_articles)
+        print '<td>%d</td>' % (j+1)
         print '<td><a href="%s/%s" target="_blank">%s</a>' % (pubmed_url,pmid,title)
         print '<div class="abstract_txt"><button class="show" type="button">show more</button>%s</div></td>' % text
         term_count = get_term_count(terms_list, title+' '+text)
