@@ -42,7 +42,9 @@ gene_ids_qstr = 'id=' + '&id='.join(sorted_gene_ids_list)
 gene_ids_summary_qstr = 'id=' + ','.join(sorted_gene_ids_list)
 
 # get terms and construct terms query string
-terms = form['terms'].value
+terms = ''
+if('terms' in form):
+    terms = form['terms'].value
 terms_list = terms.split()
 sorted_terms_list = sorted(terms_list)
 terms_qstr = ''
