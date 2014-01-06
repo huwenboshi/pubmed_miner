@@ -175,7 +175,7 @@ print '</head>'
 # body
 print '<body>'
 print '<h2><a id="top">Search Result</a></h2>'
-print '<a style="font-weight:bold" href="/">Make Another Search</a><br/><br/>'
+print '<a href="/">Make Another Search</a><br/><br/>'
 
 # create navigation
 print '<a style="font-weight:bold" id="nav">Navigation by Gene ID</a><br/>'
