@@ -65,15 +65,21 @@ pubmed_url = 'http://www.ncbi.nlm.nih.gov/pubmed'
 # get gene summary information
 genes_summary = urllib2.urlopen(esummary_url+'?db=gene&'+gene_ids_summary_qstr)
 genes_summary_str = genes_summary.read()
+time.sleep(1)
+genes_all_articles = urllib2.urlopen(elink_url+'?dbfrom=gene&db=pubmed&linkname=gene_pubmed&'+gene_ids_qstr)
+genes_all_articles_str = genes_all_articles.read()
+time.sleep(1)
 
 # parse gene summary information xml
 genes_summary_root = ET.fromstring(genes_summary_str)
+genes_all_articles_root = ET.fromstring(genes_all_articles_str)
 
 # get abstract information
 abstract_fixed_param = '?dbfrom=gene&db=pubmed&linkname=gene_pubmed&cmd=neighbor_history'
 abstract_elink_qstr = elink_url+abstract_fixed_param+'&'+gene_ids_qstr+'&'+terms_qstr
 abstract_elink = urllib2.urlopen(abstract_elink_qstr)
 abstract_elink_str = abstract_elink.read()
+time.sleep(1)
 
 # parse abstract elink information xml
 abstract_elink_root = ET.fromstring(abstract_elink_str)
@@ -164,23 +170,25 @@ print '</head>'
 
 # body
 print '<body>'
-print '<a id="top">Search Summary</a><br/><br/>'
-print '<a href="/">Make Another Search</a><br/><br/>'
+print '<h2><a id="top">Search Result</a></h2>'
+print '<a style="font-weight:bold" href="/">Make Another Search</a><br/><br/>'
 
 # create navigation
-print '<a id="nav">Navigation by Gene ID</a><br/>'
+print '<a style="font-weight:bold" id="nav">Navigation by Gene ID</a><br/>'
 for gene_id in sorted_gene_ids_list:
     print '<a href="#gene_id_%s">%s</a>' % (gene_id, gene_id)
-print '<br/><br/>'
+print '<br/><br/><hr/>'
 
 # create sort options
+"""
 print '<a id="global_sort">Sort Articles by Term Occurence</a><br/>'
 print '<a>applies to all Article Summary tables</a><br/>'
-print '<a>choose multiple terms to sort by the sum of their occurence</a><br/>'
+print '<a>choose multiple terms to sort by the sum of their occurence in abstracts</a><br/>'
 for term in sorted_terms_list:
     print '<input type="checkbox" id="global_opt_%s" class="global_opt">%s' % (term, term)
 
 print '<br/><br/><hr/>'
+"""
 
 # flush the stdout buffer
 sys.stdout.flush()
@@ -189,6 +197,7 @@ sys.stdout.flush()
 for i in xrange(len(sorted_gene_ids_list)):
     # parse gene summary xml
     gene_info = genes_summary_root[i]
+    gene_all_articles_info = genes_all_articles_root[i]
     gene_id = gene_info.find('Id').text
     gene_name = gene_info.find("./Item[@Name='Name']").text
     gene_descp = gene_info.find("./Item[@Name='Description']").text
@@ -198,16 +207,16 @@ for i in xrange(len(sorted_gene_ids_list)):
     gene_nn = gene_info.find("./Item[@Name='NomenclatureName']").text
     gene_summary = gene_info.find("./Item[@Name='Summary']").text
     gene_url = 'http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids='+gene_id
+    gene_article_cnt = len(gene_all_articles_info.findall("./LinkSetDb/Link"))
     rna_url = 'http://genomernai.de/GenomeRNAi/genedetails/'+gene_id
     biogps_url = 'http://biogps.org/#goto=genereport&id='+gene_id
     genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+gene_name
     
     # create bookmark
-    print '<a id="gene_id_%s" href="#top">' % gene_id
-    print 'Return to Top</a><br/><br/>'
+    print '<a style="font-weight:bold" id="gene_id_%s" href="#top">Return to Top</a><br/><br/>' % gene_id
     
     # print gene summary information table
-    print 'Gene Summary</br>'
+    print '<a style="font-weight:bold">Gene Summary</a></br>'
     print '<table>'
     print '<tr><td>Id</td><td>%s</td></tr>' % gene_id
     print '<tr><td>Name</td><td>%s</td></tr>' % xstr(gene_name)
@@ -215,10 +224,11 @@ for i in xrange(len(sorted_gene_ids_list)):
     print '<tr><td>Aliases</td><td>%s</td></tr>' % xstr(gene_aliases)
     print '<tr><td>Other Designations</td><td>%s</td></tr>' % xstr(gene_desg)
     print '<tr><td>Summary</td><td>%s</td></tr>' % xstr(gene_summary)
-    print '<tr><td>Gene URL</td><td><a href="%s">click here</a></td></tr>' % gene_url
-    print '<tr><td>RNA URL</td><td><a href="%s">click here</a></td></tr>' % rna_url
-    print '<tr><td>BioGPS URL</td><td><a href="%s">click here</a></td></tr>' % biogps_url
-    print '<tr><td>GeneCards URL</td><td><a href="%s">click here</a></td></tr>' % genecards_url
+    print '<tr><td>Gene URL</td><td><a href="%s">%s</a></td></tr>' % (gene_url, gene_url)
+    print '<tr><td>RNA URL</td><td><a href="%s">%s</a></td></tr>' % (rna_url, rna_url)
+    print '<tr><td>BioGPS URL</td><td><a href="%s">%s</a></td></tr>' % (biogps_url, biogps_url)
+    print '<tr><td>GeneCards URL</td><td><a href="%s">%s</a></td></tr>' % (genecards_url, genecards_url)
+    print '<tr><td>Total PMID Count</td><td>%d</td></tr>' % gene_article_cnt
     print '</table>'
     print '<br/>'
      
@@ -238,7 +248,8 @@ for i in xrange(len(sorted_gene_ids_list)):
     num_articles = len(abstract_efetch_root)
     
     # print article summary table
-    print 'Article Summary (choose the terms you want to sort on)</br>'
+    print '<a style="font-weight:bold">Abstracts</a><br/>'
+    print '<a>(choose terms to sort by the sum of their occurences in abstracts)</br>'
     print '<table id="articles_gene_id_%s">' % xstr(gene_id)
     
     # print table header
