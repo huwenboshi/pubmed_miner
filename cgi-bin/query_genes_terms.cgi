@@ -131,7 +131,7 @@ print """
         $('.show_more_less').live('click', function() {
             $div = $(this).parent();
             if ($div.data('open')) {
-                $div.css({height:'100px', overflow:'hidden'});
+                $div.css({height:'75px', overflow:'hidden', 'line-height':'25px'});
                 $div.data('open', 0);
                 $(this).html("show more");
             }
@@ -172,7 +172,8 @@ print """
                 word-wrap:break-word;
             }
             .abstract_txt {
-                height: 100px;
+                line-height:25px;
+                height:75px;
                 overflow: hidden;
             }
         </style>
