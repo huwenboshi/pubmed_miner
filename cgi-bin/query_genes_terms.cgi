@@ -69,10 +69,8 @@ pubmed_url = 'http://www.ncbi.nlm.nih.gov/pubmed'
 # get gene summary information
 genes_summary = urllib2.urlopen(esummary_url+'&db=gene&'+gene_ids_summary_qstr)
 genes_summary_str = genes_summary.read()
-time.sleep(1)
 genes_all_articles = urllib2.urlopen(elink_url+'&dbfrom=gene&db=pubmed&linkname=gene_pubmed&'+gene_ids_qstr)
 genes_all_articles_str = genes_all_articles.read()
-time.sleep(1)
 
 # parse gene summary information xml
 genes_summary_root = ET.fromstring(genes_summary_str)
