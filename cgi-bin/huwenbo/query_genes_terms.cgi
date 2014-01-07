@@ -116,7 +116,7 @@ print """
     <title>Search Result</title>
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-        <script src="../../sorttable.js"></script>
+        <script src="../../huwenbo/sorttable.js"></script>
         <script type="text/javascript">
             $(document).ready(function(){
                 $('.local_opt').live('change', function() {
@@ -188,7 +188,7 @@ print """
 # body
 print '<body>'
 print '<h2><a id="top">Search Result</a></h2>'
-print '<a href="../../">Make Another Search</a><br/><br/>'
+print '<a href="../../huwenbo/index.html">Make Another Search</a><br/><br/>'
 
 # create navigation
 print '<a id="nav"><b>Navigation by Gene ID</b></a><br/>'
