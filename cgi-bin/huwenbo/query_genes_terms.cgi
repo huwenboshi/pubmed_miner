@@ -98,63 +98,65 @@ for i in xrange(len(abstract_elink_root)):
 # fixed params for efetch
 efetch_fixed_param = '&db=pubmed&rettype=abstract&retmode=xml'
 
-##################################### HTML ####################################
+# initialize gene term count
+gene_term_count = dict()
+for gene_id in sorted_gene_ids_list:
+    gene_term_count[gene_id] = dict()
+    for term in sorted_terms_list:
+        gene_term_count[gene_id][term] = 0
 
+##################################### HTML ####################################
 # header
 print 'Content-Type: text/html Connection: keep-alive;charset=utf-8\r\n\r\n'
-print '<html>'
 
-# head
-print '<head>'
-print '<title>Search Summary</title>'
+# html header
 print """
+<html>
+    <head>
+    <title>Search Result</title>
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-        <script src="../javascripts/sorttable.js"></script>
-      """
-print """
-<script type="text/javascript">
-    $(document).ready(function(){
-        $('.global_opt').change(function() {
-            var id_str = $(this).attr('id');
-            var id_arr = id_str.split('_');
-            var term = id_arr[2];
-            alert(term);
-        });
-        $('.local_opt').change(function() {
-            var id_str = $(this).attr('id');
-            var id_arr = id_str.split('_');
-            var gene_id = id_arr[4];
-            var table_id = "articles_gene_id_"+gene_id;
-            sorttable(table_id);
-        });
-        $('.show_more_less').live('click', function() {
-            $div = $(this).parent();
-            if ($div.data('open')) {
-                $div.css({height:'75px', overflow:'hidden', 'line-height':'25px'});
-                $div.data('open', 0);
-                $(this).html("show more");
-            }
-            else {
-                $div.css({height:'100%'});
-                $div.data('open', 1);
-                $(this).html("show less");
-            }
-        });
-        $('.show_hide').live('click', function() {
-            if ($(this).html() == "hide") {
-                $(this).siblings("table").css({display:'none'});
-                $(this).html("show");
-            }
-            else {
-                $(this).siblings("table").css({display:'inherit'});
-                $(this).html("hide");
-            }
-        });
-    });
-</script>
-"""
-print """
+        <script src="../../sorttable.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('.local_opt').live('change', function() {
+                    var id_str = $(this).attr('id');
+                    var id_arr = id_str.split('_');
+                    var gene_id = id_arr[4];
+                    var table_id = "articles_gene_id_"+gene_id;
+                    sorttable(table_id);
+                });
+                $('.overview_opt').live('change', function() {
+                    sortoverview("overview_top");
+                });
+                $('.show_more_less').live('click', function() {
+                    $div = $(this).parent();
+                    if ($div.data('open')) {
+                        $div.css({height:'75px', overflow:'hidden', 'line-height':'25px'});
+                        $div.data('open', 0);
+                        $(this).html("show more");
+                    }
+                    else {
+                        $div.css({height:'100%'});
+                        $div.data('open', 1);
+                        $(this).html("show less");
+                    }
+                });
+                $('.show_hide').live('click', function() {
+                    if ($(this).html() == "hide") {
+                        $(this).siblings("table").css({display:'none'});
+                        $(this).html("show");
+                    }
+                    else {
+                        $(this).siblings("table").css({display:'inherit'});
+                        $(this).html("hide");
+                    }
+                });
+                $("#overview_top").html($("#overview_bottom").html());
+                $("#overview_bottom").html("");
+                $("#loading").css({display: 'none'});
+            });
+        </script>
         <style>
             table {
                 border-bottom: 1px Solid Black;         
@@ -176,35 +178,38 @@ print """
                 height:75px;
                 overflow: hidden;
             }
+            #overview_bottom {
+                display: none;
+            }
         </style>
-        """
-print """<script src="../tablesorter/jquery-latest.js"></script>"""
-print '</head>'
+    </head>
+"""
 
 # body
 print '<body>'
 print '<h2><a id="top">Search Result</a></h2>'
-print '<a href="/">Make Another Search</a><br/><br/>'
+print '<a href="../../">Make Another Search</a><br/><br/>'
 
 # create navigation
-print '<a style="font-weight:bold" id="nav">Navigation by Gene ID</a><br/>'
+print '<a id="nav"><b>Navigation by Gene ID</b></a><br/>'
 for gene_id in sorted_gene_ids_list:
     print '<a href="#gene_id_%s">%s</a>' % (gene_id, gene_id)
 print '<br/><br/><hr/>'
 
-# create sort options
-"""
-print '<a id="global_sort">Sort Articles by Term Occurence</a><br/>'
-print '<a>applies to all Article Summary tables</a><br/>'
-print '<a>choose multiple terms to sort by the sum of their occurence in abstracts</a><br/>'
-for term in sorted_terms_list:
-    print '<input type="checkbox" id="global_opt_%s" class="global_opt">%s' % (term, term)
-
-print '<br/><br/><hr/>'
-"""
-
 # flush the stdout buffer
 sys.stdout.flush()
+
+# create overview
+print '<div>'
+print '<a href="#top">Return to Top</a><br/><br/>'
+print '<b>Overview (choose terms to sort by the sum of number of abstracts containing these terms)</b>'
+print '<button class="show_hide" type="button">hide</button><br/>'
+print '<a>each cell shows the number of abstracts related to the gene (left-most column) and term (top-most row)</a><br/><br/>'
+print '<a id="loading">Loading...</a>'
+print '<table id="overview_top">'
+print '</table>'
+print '</div>'
+print '<br/><hr/>'
 
 # iterate though gene ids
 for i in xrange(len(sorted_gene_ids_list)):
@@ -225,15 +230,15 @@ for i in xrange(len(sorted_gene_ids_list)):
     biogps_url = 'http://biogps.org/#goto=genereport&id='+gene_id
     genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+gene_name
     
-    # create bookmark
+    # create "return to top" bookmark
     print '<a id="gene_id_%s" href="#top">Return to Top</a><br/><br/>' % gene_id
     
     # title
     print '<b>Info and Related Abstracts for Gene %s</b><br/><br/>' % gene_id
     
-    # print gene summary information table
+    # print gene info table
     print '<div>'
-    print '<a style="font-weight:bold">Gene Info</a>'
+    print '<a><b>Gene Info</b></a>'
     print '<button class="show_hide" type="button">hide</button>'
     print '<br/>'
     print '<table class="info_table">'
@@ -278,17 +283,19 @@ for i in xrange(len(sorted_gene_ids_list)):
             title = abstract_efetch_root[j].find('.//ArticleTitle').text
             text_elements = abstract_efetch_root[j].findall('.//AbstractText')
             text = get_abstract_text(text_elements)
-            if(text.lower().find(term) >= 0):
+            title_and_text = title + text
+            if(title_and_text.lower().find(term) >= 0):
                 article_obj = {'url': article_url, 'title': title, 'text': text}
                 term_abstract[term].append(article_obj)
+        gene_term_count[gene_id][term] += len(term_abstract[term])
     
     # print abstract table grouped by term
     print '<div>'
-    print '<b>Abstracts</b> (grouped by terms)'
+    print '<b>Abstracts (grouped by terms)</b>'
     print '<button class="show_hide" type="button">hide</button>'
     print '<br/>'
     print '<table id="articles_by_term_gene_id_%s" class="info_table">' % xstr(gene_id)
-    print '<tr><td>Term</td><td colspan="2">Title & Abstract</td></tr>'
+    print '<tr><td>Term</td><td colspan="2">Title & Abstract Containing the Term</td></tr>'
     for term in sorted_terms_list:
         num_articles_for_term = len(term_abstract[term])
         if(num_articles_for_term > 0):
@@ -311,8 +318,7 @@ for i in xrange(len(sorted_gene_ids_list)):
     
     # print abstracts table
     print '<div>'
-    print '<a style="font-weight:bold">Abstracts</a>'
-    print '<a>(choose terms to sort by the sum of their occurences in titles and abstracts)'
+    print '<a><b>Abstracts (choose terms to sort by the sum of their occurences in titles and abstracts)</b></a>'
     print '<button class="show_hide" type="button">hide</button>'
     print '<br/>'
     print '<table id="articles_gene_id_%s" class="info_table">' % xstr(gene_id)
@@ -352,6 +358,23 @@ for i in xrange(len(sorted_gene_ids_list)):
     
     # sleep for 1 second
     time.sleep(1)
+
+# print overview bottom, this is a dummy and will not be displayed
+print '<table id="overview_bottom">'
+print '<tr>'
+print '<td>Gene ID\Term</td>'
+# print first row
+for term in sorted_terms_list:
+    print '<td><input type="checkbox" id="overview_%s" class="overview_opt">%s</td>' % (term, term)
+print '</tr>'
+# print following rows
+for gene_id in sorted_gene_ids_list:
+    print '<tr>'
+    print '<td>%s</td>' % gene_id
+    for term in sorted_terms_list:
+        print '<td><a class="abstract_count">%d</a></td>' % gene_term_count[gene_id][term]
+    print '</tr>'
+print '</table>'
     
 # end html
 print '</body>'

@@ -18,19 +18,19 @@
             PubMed Article Recommender searches PudMed databases for articles related to genes and terms you are interested in. <br/>
             In <b>Gene IDs</b> field, please enter RefSeq gene IDs of the genes you are interested in,
             separated by space or new line. <br/>
-            In <b>Terms</b> field, please enter the terms (e.g. diabetes, liver) you are interested in, separated by space or new line.
+            In <b>Terms</b> field, please enter the terms (e.g. diabetes, liver, obesity) you are interested in, separated by space or new line.
         </p>
         <p> To find most related articles, it's recommended to search terms in article title and abstract only. Please see the checkbox below.</p>
         <p> Input field marked with "*" must not be blank.</p>
-        <form name="user_input" action="/cgi-bin/query_genes_terms.cgi" onsubmit="return validate_form()" method="post">
+        <form name="user_input" action="./cgi-bin/huwenbo/query_genes_terms.cgi" onsubmit="return validate_form()" method="post">
             <a>Gene IDs*:</a>
             <br/>
-            <textarea name="genes" size=200></textarea>
+            <textarea name="genes" rows="5" cols="20"></textarea>
             <br/>
             <br/>
             <a>Terms:</a>
             <br/>
-            <textarea name="terms" size=200></textarea>
+            <textarea name="terms" rows="5" cols="20"></textarea>
             <br/>
             <br/>
             <input type="checkbox" name="tiab_only" checked="checked"> Search terms in article title and abstract only (recommended)
