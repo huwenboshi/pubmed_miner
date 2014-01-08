@@ -107,7 +107,7 @@ for gene_id in sorted_gene_ids_list:
 
 ##################################### HTML ####################################
 # header
-print 'Content-Type: text/html Connection: keep-alive;charset=utf-8\r\n\r\n'
+print 'Status: 200 Content-Type: text/html; charset=utf-8\r\n\r\n'
 
 # html header
 print """
