@@ -149,7 +149,7 @@ print """
                         $(this).html("show");
                     }
                     else {
-                        $(this).siblings("table").css({display:'inherit'});
+                        $(this).siblings("table").css({display:'inline-table'});
                         $(this).html("hide");
                     }
                 });
@@ -300,7 +300,7 @@ for i in xrange(len(sorted_gene_ids_list)):
     for term in sorted_terms_list:
         num_articles_for_term = len(term_abstract[term])
         if(num_articles_for_term > 0):
-            print '<tr><td rowspan="%d">%s<br/>(%d in total)</td>' % (num_articles_for_term,term,num_articles_for_term)
+            print '<tr><td valign="top" rowspan="%d">%s<br/>(%d in total)</td>' % (num_articles_for_term,term,num_articles_for_term)
         else:
             print '<tr><td>%s<br/>(%d in total)</td><td>0</td><td>N/A</td></tr>' % (term, num_articles_for_term)
         for j in xrange(num_articles_for_term):
@@ -371,7 +371,7 @@ print '</tr>'
 # print following rows
 for gene_id in sorted_gene_ids_list:
     print '<tr>'
-    print '<td>%s</td>' % gene_id
+    print '<td><a href="#gene_id_%s">%s</a></td>' % (gene_id, gene_id)
     for term in sorted_terms_list:
         print '<td><a class="abstract_count">%d</a></td>' % gene_term_count[gene_id][term]
     print '</tr>'
