@@ -107,13 +107,15 @@ for gene_id in sorted_gene_ids_list:
 
 ##################################### HTML ####################################
 # header
-print 'Status: 200 Content-Type: text/html;charset=utf-8\r\n\r\n'
+print 'HTTP/1.1 200 OK Content-Type: text/html'
+print ''
 
 # html header
 print """
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
     <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8"/>
     <title>Search Result</title>
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
