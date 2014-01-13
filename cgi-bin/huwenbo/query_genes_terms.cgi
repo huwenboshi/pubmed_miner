@@ -8,28 +8,12 @@ import cgi
 import sys
 import codecs
 
-################################### Functions #################################
-def xstr(s):
-    if s is None:
-        return ''
-    return str(s)
+from utils import *
 
-def get_abstract_text(text_elements):
-    str_list = []
-    for element in text_elements:
-        str_list.append(element.text)
-    return '<br/><br/>'.join(str_list)
-
-def get_term_count(term_list, text):
-    text = text.lower()
-    term_count = dict()
-    for term in term_list:
-        term_count[term] = text.count(term)
-    return term_count
-
-##################################### Handle ##################################
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
+
+##################################### Get User Input ##################################
 
 # get form data
 form = cgi.FieldStorage()
@@ -56,16 +40,6 @@ else:
     sorted_terms_abstract_list = [s + "[TIAB]" for s in sorted_terms_list]
     terms_qstr = 'term=' + '+OR+'.join(sorted_terms_abstract_list)
 
-# eutils base url
-tool_email = 'tool=pubmed_article_rec&email=pubmed_article_rec@yahoo.com'
-eutils_url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils'
-esummary_url = eutils_url + '/esummary.fcgi?' + tool_email
-elink_url = eutils_url + '/elink.fcgi?' + tool_email
-efetch_url = eutils_url + '/efetch.fcgi?' + tool_email
-
-# pubmed url
-pubmed_url = 'http://www.ncbi.nlm.nih.gov/pubmed'
-
 # get gene summary information
 genes_summary = urllib2.urlopen(esummary_url+'&db=gene&'+gene_ids_summary_qstr)
 genes_summary_str = genes_summary.read()
@@ -77,7 +51,6 @@ genes_summary_root = ET.fromstring(genes_summary_str)
 genes_all_articles_root = ET.fromstring(genes_all_articles_str)
 
 # get abstract information
-abstract_fixed_param = '&dbfrom=gene&db=pubmed&linkname=gene_pubmed&cmd=neighbor_history'
 abstract_elink_qstr = elink_url+abstract_fixed_param+'&'+gene_ids_qstr+'&'+terms_qstr
 abstract_elink = urllib2.urlopen(abstract_elink_qstr)
 abstract_elink_str = abstract_elink.read()
@@ -95,9 +68,6 @@ for i in xrange(len(abstract_elink_root)):
     webenv = abstract_elink_root[i].find('./WebEnv').text
     geneid_webenv_key[gene_id] = (webenv, query_key)
 
-# fixed params for efetch
-efetch_fixed_param = '&db=pubmed&rettype=abstract&retmode=xml'
-
 # initialize gene term count
 gene_term_count = dict()
 for gene_id in sorted_gene_ids_list:
@@ -107,8 +77,7 @@ for gene_id in sorted_gene_ids_list:
 
 ##################################### HTML ####################################
 # header
-print 'HTTP/1.1 200 OK Content-Type: text/html'
-print ''
+print 'Connection: keep-alive Content-Type: text/html\r\n\r\n'
 
 # html header
 print """
