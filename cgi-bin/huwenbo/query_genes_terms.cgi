@@ -118,12 +118,10 @@ for i in xrange(len(gene_ids_list)):
     if(tiab_only):
         gene_term_count = print_tiab_search_result(terms_list, gene_id,
             gene_webenv_querykey, gene_term_count)
+        time.sleep(1)
+    else:
+        print_fulltext_search_result(terms_list, gene_id, gene_term_count)
     
-    # flush the stdout buffer
-    sys.stdout.flush()
-    
-    # sleep for 1 second to obey 3 queries/second rule
-    time.sleep(1)
 
 # print overview bottom, this is a dummy and will not be displayed
 print '<table id="overview_bottom">'

@@ -1,6 +1,8 @@
 from consts import *
 import urllib2
 import xml.etree.ElementTree as ET
+import time
+import sys
 
 #################################### HELPERS ###################################
 
@@ -287,3 +289,96 @@ gene_webenv_querykey, gene_term_count):
     return gene_term_count
 
 ############################# FULL-TEXT STUFF ##################################
+
+# get webenv and query key for full text search
+def get_webenv_querykey_full_text(gene_id, term):
+    terms_qstr = 'term=' + term
+    gene_ids_qstr = 'id=' + gene_id
+    qstr_url = elink_url+dbfrom_db_lknm_cmd+'&'+gene_ids_qstr+'&'+terms_qstr
+    abstract_elink = urllib2.urlopen(qstr_url)
+    abstract_elink_str = abstract_elink.read()
+    abstract_elink_root = ET.fromstring(abstract_elink_str)
+    query_key_element = abstract_elink_root[0].find('.//QueryKey')
+    query_key = None
+    if(query_key_element != None):
+        query_key = abstract_elink_root[0].find('.//QueryKey').text
+    webenv = abstract_elink_root[0].find('./WebEnv').text
+    return (webenv, query_key)
+
+# print full text search result
+def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
+
+    print """
+        <div>
+            <b>Abstracts (grouped by terms)</b>
+            <button class="show_hide" type="button">hide</button>
+            <br/>
+    """
+
+    # print table header
+    print '<table id="articles_by_term_gene_id_%s"' % gene_id
+    print 'class="info_table">'
+    print """
+        <tr><td>Term</td><td colspan="2">Title & Abstract 
+        Containing the Term</td></tr>
+    """
+    
+    # iterate through terms
+    for term in terms_list:
+        # get WebEnv and QueryKey
+        webenv_querykey = get_webenv_querykey_full_text(gene_id, term)
+        webenv = webenv_querykey[0]
+        query_key = webenv_querykey[1]
+        
+        # sleep for 1 second to keep query under limit
+        time.sleep(1)
+        
+        # fetch abstract
+        efetch_root = []
+        if(query_key != None):
+            efetch_qstr = efetch_url+efetch_fixed_param
+            efetch_qstr += '&WebEnv='+webenv+'&query_key='+query_key
+            efetch = urllib2.urlopen(efetch_qstr)
+            efetch_str = efetch.read()
+            efetch_root = ET.fromstring(efetch_str)
+        
+        # display result in table
+        in_total = len(efetch_root)
+        gene_term_count[gene_id][term] += in_total
+        
+        if(in_total > 0):
+            print '<tr>'
+            print '<td valign="top" rowspan="%d">%s<br/>' % (in_total, term)
+            print '(%d in total)</td>' % in_total
+        else:
+            print '<tr><td>%s<br/>(%d in total)</td>' % (term, in_total)
+            print '<td>0</td><td>N/A</td></tr>'
+        
+        # print table body
+        for j in xrange(in_total):
+            pmid = efetch_root[j].find('.//PMID').text
+            url = pubmed_url + '/' + pmid
+            title = efetch_root[j].find('.//ArticleTitle').text
+            text_elements = efetch_root[j].findall('.//AbstractText')
+            text = get_abstract_text(text_elements)
+            if(j != 0):
+                    print '<tr>'
+            print '<td>%d</td>' % (j+1)
+            print '<td>'
+            print '<a href="%s" target="_blank">%s</a>' % (url, title)
+            print '<div class="abstract_txt"><button class="show_more_less"'
+            print 'type="button">show more</button>%s</div>' % text
+            print '</td>'
+            print '</tr>'
+            
+        time.sleep(1)
+        
+    print """
+        </table>
+        </div>
+        <hr/>
+    """
+    
+    return gene_term_count
+
+########################### ID CONVERSION STUFF ################################
