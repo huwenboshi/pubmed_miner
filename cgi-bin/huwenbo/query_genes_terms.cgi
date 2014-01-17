@@ -7,12 +7,28 @@ import time
 import cgi
 import sys
 import codecs
+import os
 
 from utils import *
 from consts import *
 
+sys.path.append('./httpagentparser-1.5.1')
+import httpagentparser
+
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
+
+########################### HTTP HTML HEADER ##################################
+
+# print http_header and html header
+user_agent = os.environ.get("HTTP_USER_AGENT", "N/A")
+os_browser = httpagentparser.simple_detect(user_agent)
+browser = os_browser[1]
+if(browser.lower().find('safari') >= 0):
+    print http_header_mac
+else:
+    print http_header
+print html_header
 
 ################################# Get User Input ###############################
 
@@ -58,11 +74,7 @@ if(tiab_only):
 # sleep for 1 second to obey the 3 queries/sec rule
 time.sleep(1)
 
-##################################### HTML #####################################
-
-# print http and html header
-print http_header
-print html_header
+########################### DISPLAY CONTENT ####################################
 
 # print body start, navigation bar
 print """
@@ -74,6 +86,7 @@ print '<a id="nav"><b>Navigation by Gene ID</b></a><br/>'
 for gene_id in gene_ids_list:
     print '<a href="#gene_id_%s">%s</a>' % (gene_id, gene_id)
 print '<br/><br/><hr/>'
+
 
 sys.stdout.flush()
 

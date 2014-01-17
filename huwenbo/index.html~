@@ -36,7 +36,7 @@
             <input type="radio"
                    name="id_type" value="entrez_id" checked>Entrez ID
             <input type="radio" 
-                   name="id_type" value="gene_sym" >Gene symbol
+                   name="id_type" value="gene_sym" checked>Gene symbol
             <br/>
             <textarea name="genes" rows="5" cols="20"></textarea>
             <br/>
