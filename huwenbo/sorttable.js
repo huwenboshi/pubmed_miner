@@ -21,6 +21,7 @@ function compare(a,b) {
 
 // sort a table
 function sorttable(table_id) {
+
     // find which checkboxes are checked
     var checkboxes_status = new Array();
     var checkboxes = $("#"+table_id+" input[type='checkbox']");

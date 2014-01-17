@@ -19,8 +19,20 @@ cgitb.enable()
 # get form data
 form = cgi.FieldStorage()
 
-gene_ids = form['genes'].value
-gene_ids_list = sorted(gene_ids.split(), key=int)
+id_type = form['id_type'].value
+
+# get entrez ids, convert to entrez gene id if input is gene symbol
+gene_ids_list = []
+if(id_type == 'gene_sym'):
+    gene_symbols = form['genes'].value
+    gene_symbols_list = gene_symbols.split()
+    sym_id = symbol2entrez(gene_symbols_list)
+    for key in sym_id:
+        gene_ids_list.append(sym_id[key])
+    gene_ids_list = sorted(gene_ids_list, key=int)
+else:
+    gene_ids = form['genes'].value
+    gene_ids_list = sorted(gene_ids.split(), key=int)
 
 terms = ''
 tiab_only = True
@@ -58,7 +70,6 @@ print """
     <h2><a id="top">Search Result</a></h2>
     <a href="../../huwenbo/index.html">Make Another Search</a><br/><br/>
 """
-
 print '<a id="nav"><b>Navigation by Gene ID</b></a><br/>'
 for gene_id in gene_ids_list:
     print '<a href="#gene_id_%s">%s</a>' % (gene_id, gene_id)
