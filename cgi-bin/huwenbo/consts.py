@@ -19,7 +19,7 @@ biogpsorg_url = 'http://biogps.org/#goto=genereport&id='
 genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='
 
 # http header
-http_header = 'Content-Type: text/html Connection: keep-alive \r\n\r\n'
+http_header = 'HTTP/1.0 Content-Type: text/html Connection: keep-alive \r\n\r\n'
 
 # html header
 html_header = """
