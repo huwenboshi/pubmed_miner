@@ -8,11 +8,8 @@ import sys
 def connect_db(db_name):
     con = None
     try:
-        con = lite.connect('test.db')
+        con = lite.connect(db_name)
+        con.text_factory = str
         return con
     except lite.Error, e:
-        return None
-    finally:
-        if con:
-            con.close()
         return None
