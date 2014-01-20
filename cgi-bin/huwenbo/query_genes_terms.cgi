@@ -18,7 +18,7 @@ import httpagentparser
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
-########################### HTTP HTML HEADER ##################################
+########################### HTTP HTML HEADER ###################################
 
 # print http_header and html header
 user_agent = os.environ.get("HTTP_USER_AGENT", "N/A")
@@ -151,21 +151,21 @@ for i in xrange(len(gene_ids_list)):
 print '<table id="overview_bottom">'
 print '<tr>'
 print '<td>Gene ID\Term</td>'
-# print first row
 for term in terms_list:
-    print '<td><input type="checkbox" id="overview_%s" class="overview_opt">%s</td>' % (term, term)
+    print '<td><input type="checkbox" '
+    print 'id="overview_%s" class="overview_opt">%s</td>' % (term, term)
 print '</tr>'
-# print following rows
 for gene_id in gene_ids_list:
     print '<tr>'
     print '<td><a href="#gene_id_%s">%s</a></td>' % (gene_id, gene_id)
     for term in terms_list:
-        print '<td><a class="abstract_count">%d</a></td>' % gene_term_count[gene_id][term]
+        print '<td><a class="abstract_count">'
+        print '%d</a></td>' % gene_term_count[gene_id][term]
     print '</tr>'
 print '</table>'
     
+#################################### HTML END ##################################
+
 # print body end
 print '</body>'
-
-# print html end
 print '</html>'

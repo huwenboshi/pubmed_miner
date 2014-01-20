@@ -46,13 +46,15 @@ function sorttable(table_id) {
         // skip index column
         for (var j = 1; j < num_cols; j++) {
             if (j == 1) {
-                row_content["title_abstract"] = table.rows[i].cells[j].innerHTML;
+                row_content["title_abstract"] = table.rows[i].
+                    cells[j].innerHTML;
             }
             else {
                 row_content[j-2] = table.rows[i].cells[j].innerHTML;
                 // add up sort key
                 if (checkboxes_status[j-2] == true) {
-                    var term_count_str = table.rows[i].cells[j].getElementsByClassName("term_count")[0].innerHTML;
+                    var term_count_str = table.rows[i].cells[j].
+                        getElementsByClassName("term_count")[0].innerHTML;
                     var term_count = parseInt(term_count_str);
                     row_content["sort_key"] += term_count;
                 }
@@ -73,7 +75,8 @@ function sorttable(table_id) {
         // skip index column
         for (var j = 1; j < num_cols; j++) {
             if (j == 1) {
-                table.rows[i].cells[j].innerHTML = table_content[i-1].title_abstract;
+                table.rows[i].cells[j].innerHTML = table_content[i-1].
+                    title_abstract;
             }
             else {
                 table.rows[i].cells[j].innerHTML = table_content[i-1][j-2];
@@ -120,7 +123,8 @@ function sortoverview(table_id) {
             else {
                 row_content[j-1] = table.rows[i].cells[j].innerHTML;
                 if (checkboxes_status[j-1] == true) {
-                    var term_count_str = table.rows[i].cells[j].getElementsByClassName("abstract_count")[0].innerHTML;
+                    var term_count_str = table.rows[i].cells[j].
+                        getElementsByClassName("abstract_count")[0].innerHTML;
                     var term_count = parseInt(term_count_str);
                     row_content["sort_key"] += term_count;
                 }
@@ -141,7 +145,7 @@ function sortoverview(table_id) {
         // skip index column
         for (var j = 0; j < num_cols; j++) {
             if (j == 0) {
-                table.rows[i].cells[j].innerHTML = table_content[i-1]["gene_id"];
+                table.rows[i].cells[j].innerHTML=table_content[i-1]["gene_id"];
             }
             else {
                 table.rows[i].cells[j].innerHTML = table_content[i-1][j-1];

@@ -74,7 +74,7 @@ if(tiab_only):
 # sleep for 1 second to obey the 3 queries/sec rule
 time.sleep(1)
 
-############################### CONTENT ########################################
+########################### DISPLAY CONTENT ####################################
 
 # print body start, navigation bar
 print """
@@ -151,21 +151,21 @@ for i in xrange(len(gene_ids_list)):
 print '<table id="overview_bottom">'
 print '<tr>'
 print '<td>Gene ID\Term</td>'
-# print first row
 for term in terms_list:
-    print '<td><input type="checkbox" id="overview_%s" class="overview_opt">%s</td>' % (term, term)
+    print '<td><input type="checkbox" '
+    print 'id="overview_%s" class="overview_opt">%s</td>' % (term, term)
 print '</tr>'
-# print following rows
 for gene_id in gene_ids_list:
     print '<tr>'
     print '<td><a href="#gene_id_%s">%s</a></td>' % (gene_id, gene_id)
     for term in terms_list:
-        print '<td><a class="abstract_count">%d</a></td>' % gene_term_count[gene_id][term]
+        print '<td><a class="abstract_count">'
+        print '%d</a></td>' % gene_term_count[gene_id][term]
     print '</tr>'
 print '</table>'
     
+#################################### HTML END ##################################
+
 # print body end
 print '</body>'
-
-# print html end
 print '</html>'

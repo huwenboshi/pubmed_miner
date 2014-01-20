@@ -398,7 +398,7 @@ def symbol2entrez(gene_symbols_list):
 		        <Attribute name = "entrezgene" /> \
 	        </Dataset> \
         </Query>""" % ','.join(gene_symbols_list)
-    url = 'http://www.biomart.org/biomart/martservice?'
+    url = 'http://www.ensembl.org/biomart//martservice?'
     values = {'query' : xml_query}
     data = urllib.urlencode(values)
     req = urllib2.Request(url, data)
@@ -415,4 +415,4 @@ def symbol2entrez(gene_symbols_list):
             entrez_id = cols[1]
             sym_id[gene_sym] = entrez_id
     
-    return the_page
+    return sym_id
