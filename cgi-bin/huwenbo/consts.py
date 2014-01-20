@@ -90,6 +90,22 @@ html_header = """
             max-width:700px;
             word-wrap:break-word;
         }
+        .gwas_title {
+            max-width:450px;
+            word-wrap:break-word;
+        }
+        .gwas_trait {
+            max-width:150px;
+            word-wrap:break-word;
+        }
+        .gwas_snp {
+            max-width:100px;
+            word-wrap:break-word;
+        }
+        .gwas_gene {
+            max-width:150px;
+            word-wrap:break-word;
+        }
         .abstract_txt {
             line-height:25px;
             height:75px;

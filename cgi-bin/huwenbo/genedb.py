@@ -22,8 +22,7 @@ def search_nhgri_gwas_catalog(con, genesym):
 
     c = con.cursor()
     query = """select * from nhgri_gwas_catalog 
-        where Reported_Genes like '%s' or 
-        Mapped_gene like '%s'""" % (genesym, genesym)
+        where Reported_Genes like '%"""+genesym+"""%'"""
     txt = c.execute(query)
     info_list = []
     for content in txt:
@@ -57,16 +56,32 @@ def print_info_list(info_list):
     print '<table class="info_table">'
     print """
         <tr>
-            <td>Publish Date</td>
-            <td>Article</td>
-            <td>Trait</td>
+            <td class="gwas_gene">Reported Gene</td>
+            <td class="gwas_title">Publication</td>
+            <td class="gwas_trait">Disease/Trait</td>
             <td>Region</td>
-            <td>Reported Gene</td>
-            <td>Mapped Gene</td>
-            <td>Strongest SNP-Risk Allele</td>
+            <td class="gwas_snp">Strongest SNP-Risk Allele</td>
             <td>P-value</td>
         </tr>
     """
+    for info_dict in info_list:
+        date = info_dict['date']
+        link = info_dict['link']
+        study = info_dict['study']
+        trait = info_dict['trait']
+        region = info_dict['region']
+        reported = info_dict['reported']
+        mapped = info_dict['mapped']
+        snp_allele = info_dict['snp_allele']
+        pval = info_dict['pval']
+        print '<tr>'
+        print '<td class="gwas_gene">%s</td>' % reported
+        print '<td class="gwas_title"><a href="%s">%s</a></td>' % (link, study)
+        print '<td class="gwas_trait">%s</td>' % trait
+        print '<td>%s</td>' % region
+        print '<td class="gwas_snp">%s</td>' % snp_allele
+        print '<td>%s</td>' % pval
+        print '</tr>'
     print """
         </table>
         </div>

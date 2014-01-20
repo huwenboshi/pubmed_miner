@@ -40,7 +40,11 @@ form = cgi.FieldStorage()
 
 id_type = form['id_type'].value
 
-# get entrez ids, convert to entrez gene id if input is gene symbol
+# id2sym, sym2id conversion
+sym_id = dict()
+id_sym = dict()
+
+# get entrez ids/symbols, convert between symbols and ids
 gene_ids_list = []
 if(id_type == 'gene_sym'):
     gene_symbols = form['genes'].value
@@ -48,10 +52,14 @@ if(id_type == 'gene_sym'):
     sym_id = symbol2entrez(gene_symbols_list)
     for key in sym_id:
         gene_ids_list.append(sym_id[key])
+        id_sym[sym_id[key]] = key
     gene_ids_list = sorted(gene_ids_list, key=int)
 else:
     gene_ids = form['genes'].value
     gene_ids_list = sorted(gene_ids.split(), key=int)
+    id_sym = entrez2symbol(gene_ids_list)
+    for key in id_sym:
+        sym_id[id_sym[key]] = key
 
 terms = ''
 tiab_only = True
@@ -85,9 +93,10 @@ print """
     <h2><a id="top">Search Result</a></h2>
     <a href="../../huwenbo/index.html">Make Another Search</a><br/><br/>
 """
-print '<a id="nav"><b>Navigation by Gene ID</b></a><br/>'
+print '<a id="nav"><b>Navigation by Gene</b></a><br/>'
 for gene_id in gene_ids_list:
-    print '<a href="#gene_id_%s">%s</a>' % (gene_id, gene_id)
+    gene_sym = id_sym[gene_id]
+    print '<a href="#gene_id_%s">%s(%s)</a>' % (gene_id, gene_sym, gene_id)
 print '<br/><br/><hr/>'
 
 
@@ -142,7 +151,7 @@ for i in xrange(len(gene_ids_list)):
     """
     
     # print gene gwas info table
-    search_and_display(con, 'AFF1')
+    search_and_display(con, id_sym[gene_id])
      
     # search result for tiab search
     if(tiab_only):
@@ -163,7 +172,8 @@ for term in terms_list:
 print '</tr>'
 for gene_id in gene_ids_list:
     print '<tr>'
-    print '<td><a href="#gene_id_%s">%s</a></td>' % (gene_id, gene_id)
+    gene_sym = id_sym[gene_id]
+    print '<td><a href="#gene_id_%s">%s(%s)</a></td>'%(gene_id,gene_sym,gene_id)
     for term in terms_list:
         print '<td><a class="abstract_count">'
         print '%d</a></td>' % gene_term_count[gene_id][term]
