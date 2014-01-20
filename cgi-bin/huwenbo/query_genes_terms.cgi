@@ -11,12 +11,15 @@ import os
 
 from utils import *
 from consts import *
+from genedb import *
 
 sys.path.append('./httpagentparser-1.5.1')
 import httpagentparser
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
+
+con = connect_db('nhgri_gwas_catalog.db')
 
 ########################### HTTP HTML HEADER ###################################
 
@@ -137,6 +140,9 @@ for i in xrange(len(gene_ids_list)):
         </div>
         <br/>
     """
+    
+    # print gene gwas info table
+    search_and_display(con, 'AFF1')
      
     # search result for tiab search
     if(tiab_only):
@@ -169,3 +175,5 @@ print '</table>'
 # print body end
 print '</body>'
 print '</html>'
+
+con.close()

@@ -273,16 +273,16 @@ gene_webenv_querykey, gene_term_count):
             <br/>
     """
     print_abstract_by_term_tiab(term_abstract, terms_list, gene_id)
-    print """
-        </div>
-        <br/>
-        <div>
-        <a><b>Abstracts (choose terms to sort by the sum of their
-        occurences in titles and abstracts)</b></a>
-        <button class="show_hide" type="button">hide</button>
-        <br/>
-    """
-    print_abstract_with_sort(abstract_efetch_root, terms_list, gene_id)
+    #print """
+    #    </div>
+    #    <br/>
+    #    <div>
+    #    <a><b>Abstracts (choose terms to sort by the sum of their
+    #    occurences in titles and abstracts)</b></a>
+    #    <button class="show_hide" type="button">hide</button>
+    #    <br/>
+    #"""
+    #print_abstract_with_sort(abstract_efetch_root, terms_list, gene_id)
     print """
         </div>
         <hr/>
