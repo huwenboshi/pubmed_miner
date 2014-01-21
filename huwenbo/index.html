@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="text/javascript">
-            function validate_form() {
-                var x = document.forms["user_input"]["genes"].value;
-                if (x == null || x== "") {
-                    alert("\"Genes IDs\" must not be blank!");
-                    return false;
-                }
-                return true;
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript">
+        function validate_form() {
+            var x = document.forms["user_input"]["genes"].value;
+            if (x == null || x== "") {
+                alert("\"Genes IDs\" must not be blank!");
+                return false;
             }
-        </script>
+            return true;
+        }
+        $(document).ready(function(){
+            $('#gene_eg').live('click', function() {
+                if ($("#gene_entrez").is(':checked')){
+                    $("#gene_txt").val("9\n10\n12");
+                }
+                else {
+                    $("#gene_txt").val("NAT1\nNAT2\nSERPINA3");
+                }
+            });
+            $('#terms_eg').live('click', function() {
+                $("#terms_txt").val("liver\ndiabetes\nobesity");
+            });
+        });
+    </script>
     </head>
     <body>
-        <h2>PubMed Article Recommender</h2>
+        <h2>PubMed Miner</h2>
         <p>
-            PubMed Article Recommender searches PudMed databases for articles
+            PubMed Miner searches PudMed databases for articles
             related to genes and terms you are interested in. <br/>
             In <b>Gene IDs</b> field, please enter Entrez gene IDs
             of the genes you are interested in,
@@ -31,19 +46,22 @@
         <form name="user_input" 
               action="../cgi-bin/huwenbo/query_genes_terms.cgi"
               onsubmit="return validate_form()" method="post">
-            <a><b>Genes*</b></a>
+            <a><b>Genes*</b></a><a href="#" id="gene_eg"> show example </a>
             <br/>
-            <input type="radio"
+            <input type="radio" id="gene_entrez"
                    name="id_type" value="entrez_id" checked>Entrez ID
-            <input type="radio" 
+            <input type="radio" id="gene_sym"
                    name="id_type" value="gene_sym" >Gene symbol
             <br/>
-            <textarea name="genes" rows="5" cols="20"></textarea>
+            <textarea id="gene_txt" name="genes" rows="5" cols="20"></textarea>
             <br/>
             <br/>
-            <a><b>Terms</b></a>
+            <a><b>Terms</b></a><a href="#" id="terms_eg"> show example </a>
             <br/>
-            <textarea name="terms" rows="5" cols="20"></textarea>
+            <input type="checkbox" name="expand_term">Expand terms into disease
+            ontology
+            <br/>
+            <textarea id="terms_txt" name="terms" rows="5" cols="20"></textarea>
             <br/>
             <br/>
             <input type="checkbox" name="tiab_only" checked="checked"> 

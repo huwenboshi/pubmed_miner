@@ -87,7 +87,7 @@ html_header = """
             border-right:none;  
         }
         table td {
-            max-width:700px;
+            max-width:800px;
             word-wrap:break-word;
         }
         .gwas_title {
