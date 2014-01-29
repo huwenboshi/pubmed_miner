@@ -42,7 +42,7 @@
         <h1>
             PubMed Miner
         </h1>
-        <form>
+        <form name="user_input" action="../cgi-bin/huwenbo/search.cgi" method="post">
             
             <h2>
                 Step 1: Choose genes
@@ -55,467 +55,467 @@
 <!--/////////////////////// Implication Type ////////////////////////////////-->
 
             <b>Select implication type (optional)</b>
-            </br>
+            <br/>
             <a>Logic relation between selections: </a>
-            <select>
-                <option value="and">AND</option>
-                <option value="or">OR</option>
+            <select name="imp_type_logic_sel">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
             </select>
             <br/>
-            <input type="checkbox"/><a>SNP (GWAS)</a>
-            </br>
-            <input type="checkbox"/><a>CG methylation (EWAS)</a>
-            </br></br>
+            <input type="checkbox" name="imp_type" value="GWAS"/><a>SNP (GWAS)</a>
+            <br/>
+            <input type="checkbox" name="imp_type" value="EWAS"/><a>CG methylation (EWAS)</a>
+            <br/><br/>
 
 <!--///////////////////////// Gene Expression  //////////////////////////////-->
             
-            <select>
-                <option value="and">AND</option>
-                <option value="or">OR</option>
-                <option value="not">NOT</option>
+            <select name="logic_gene_exp">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+                <option value="NOT">NOT</option>
             </select>
             <b>Association with gene expression (optional)</b>
-            </br>
+            <br/>
             <a>p-value less than 10^(-<a/>
-            <input style="width: 25px" type="text" />
+            <input name="gene_exp_pval" style="width: 25px" type="text" />
             <a>)</a>
-            </br></br>
+            <br/><br/>
 
 <!--/////////////////////////// Protein Level ///////////////////////////////-->
             
-            <select>
-                <option value="and">AND</option>
-                <option value="or">OR</option>
-                <option value="not">NOT</option>
+            <select name="logic_protein_exp">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+                <option value="NOT">NOT</option>
             </select>
             <b>Association with protein expression (optional)</b>
-            </br>
+            <br/>
             <a>p-value less than 10^(-<a/>
-            <input style="width: 25px" type="text" />
+            <input name="protein_exp_pval" style="width: 25px" type="text" />
             <a>)</a>
+            <br/><br/>
 
 <!--///////////////////////////// Proximity /////////////////////////////////-->
             
-            <select>
-                <option value="and">AND</option>
-                <option value="or">OR</option>
-                <option value="not">NOT</option>
+            <select name="logic_distance">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+                <option value="NOT">NOT</option>
             </select>
             <b>Distance between gene and mCG/SNP site (optional)</b>
-            </br>
+            <br/>
             <a>Less than </a>
-            <input type="text" style="width: 100px"/>
+            <input name="max_distance" type="text" style="width: 100px"/>
             <a>base pairs </a>
             <br/>
             <br/>
 
 <!--////////////////////////// Clinical Trait ///////////////////////////////-->
             
-            <select>
-                <option value="and">AND</option>
-                <option value="or">OR</option>
-                <option value="not">NOT</option>
+            <select name="logic_trait">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+                <option value="NOT">NOT</option>
             </select>
             <b>Select associated traits (optional)</b>
             <br/>
             <a>p-value less than 10^(-<a/>
-            <input style="width: 25px" type="text" />
+            <input name="trait_pval" style="width: 25px" type="text" />
             <a>)</a>
             <br/>
             <a>Logic relation between selections: </a>
-            <select>
-                <option value="and">AND</option>
-                <option value="or">OR</option>
+            <select name="trait_logic_sel">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
             </select>
             <br/>
 
-
-            <table border="1">
-                <tr>
-                    <td colspan="7">
-                        <a class="trait_show_hide" href="javascript:;">show traits</a>
-                    </td>
-                </tr>
-                <tr class="trait_header"><td>Clinical trait</td><td>Metabolite trait</td></tr>
-                <tr class="trait_row">
-                    <td>
-                        <div class="trait_div">
-                        <input type="checkbox">AB1_2_IgM<br/>
-                        <input type="checkbox">beta-hydroxybutyrate<br/>
-                        <input type="checkbox">BMD_C1-C6<br/>
-                        <input type="checkbox">BMD_femur<br/>
-                        <input type="checkbox">BMD_total<br/>
-                        <input type="checkbox">BW<br/>
-                        <input type="checkbox">CuOx_LDL_IgM<br/>
-                        <input type="checkbox">Fat_mass<br/>
-                        <input type="checkbox">FFA<br/>
-                        <input type="checkbox">FFP<br/>
-                        <input type="checkbox">FFP_percent<br/>
-                        <input type="checkbox">Free_fluid<br/>
-                        <input type="checkbox">GFP<br/>
-                        <input type="checkbox">GFP_percent<br/>
-                        <input type="checkbox">Glucose<br/>
-                        <input type="checkbox">Glucose_LC<br/>
-                        <input type="checkbox">glucose_to_insulin<br/>
-                        <input type="checkbox">GRAN<br/>
-                        <input type="checkbox">GRAN_percent<br/>
-                        <input type="checkbox">HCT<br/>
-                        <input type="checkbox">HDL<br/>
-                        <input type="checkbox">Heart_(g)<br/>
-                        <input type="checkbox">Insulin<br/>
-                        <input type="checkbox">Kidney_R_(g)<br/>
-                        <input type="checkbox">LCAT_activity<br/>
-                        <input type="checkbox">LDL_plus_VLDL<br/>
-                        <input type="checkbox">Lean_mass<br/>
-                        <input type="checkbox">log_BW<br/>
-                        <input type="checkbox">log_HDL<br/>
-                        <input type="checkbox">log_TG<br/>
-                        <input type="checkbox">LYMPH<br/>
-                        <input type="checkbox">LYMPH_percent<br/>
-                        <input type="checkbox">MCH<br/>
-                        <input type="checkbox">MCHC<br/>
-                        <input type="checkbox">MCV<br/>
-                        <input type="checkbox">MFP<br/>
-                        <input type="checkbox">MFP_percent<br/>
-                        <input type="checkbox">MONO<br/>
-                        <input type="checkbox">MONO_percent<br/>
-                        <input type="checkbox">MPV<br/>
-                        <input type="checkbox">NMR_BF_percentage<br/>
-                        <input type="checkbox">NMR_total_Mass<br/>
-                        <input type="checkbox">PLT<br/>
-                        <input type="checkbox">PLTPactivity<br/>
-                        <input type="checkbox">PON_activity<br/>
-                        <input type="checkbox">RBC_Time<br/>
-                        <input type="checkbox">RDW_percent<br/>
-                        <input type="checkbox">RDWa<br/>
-                        <input type="checkbox">Relative_syndecan-1_ectodomains_(%_vs_C57BL/6J)<br/>
-                        <input type="checkbox">RFP<br/>
-                        <input type="checkbox">RFP_percent<br/>
-                        <input type="checkbox">Spleen_wt<br/>
-                        <input type="checkbox">TC<br/>
-                        <input type="checkbox">TG<br/>
-                        <input type="checkbox">UC<br/>
-                        <input type="checkbox">WBC<br/>
-                        <input type="checkbox">WBC_Time<br/>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="trait_div">
-                        <input type="checkbox">1,2-dipalmitoylglycerol<br/>
-                        <input type="checkbox">1,2-propanediol<br/>
-                        <input type="checkbox">1,3-dipalmitoylglycerol<br/>
-                        <input type="checkbox">1,5-anhydroglucitol_(1,5-AG)<br/>
-                        <input type="checkbox">1-arachidonoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-arachidonoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">1-arachidonoylglycerophosphoinositol<br/>
-                        <input type="checkbox">1-arachidonylglycerol<br/>
-                        <input type="checkbox">1-docosahexaenoylglycerol_(1-monodocosahexaenoin)<br/>
-                        <input type="checkbox">1-docosahexaenoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-docosapentaenoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-eicosatrienoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-heptadecanoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-linoleoylglycerol_(1-monolinolein)<br/>
-                        <input type="checkbox">1-linoleoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-linoleoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">1-methylimidazoleacetate<br/>
-                        <input type="checkbox">1-myristoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-oleoylglycerol_(1-monoolein)<br/>
-                        <input type="checkbox">1-oleoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-oleoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">1-oleoylglycerophosphoinositol<br/>
-                        <input type="checkbox">1-palmitoleoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-palmitoylglycerol_(1-monopalmitin)<br/>
-                        <input type="checkbox">1-palmitoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-palmitoylglycerophosphoinositol<br/>
-                        <input type="checkbox">1-pentadecanoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-stearoylglycerophosphocholine<br/>
-                        <input type="checkbox">1-stearoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">1-stearoylglycerophosphoinositol<br/>
-                        <input type="checkbox">10-heptadecenoate_(17:1n7)<br/>
-                        <input type="checkbox">12-dehydrocholate<br/>
-                        <input type="checkbox">12-HEPE<br/>
-                        <input type="checkbox">12-HETE<br/>
-                        <input type="checkbox">15-HETE<br/>
-                        <input type="checkbox">18-HEPE<br/>
-                        <input type="checkbox">2-aminoadipate<br/>
-                        <input type="checkbox">2-aminobutyrate<br/>
-                        <input type="checkbox">2-arachidonoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-arachidonoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">2-deoxyinosine<br/>
-                        <input type="checkbox">2-docosahexaenoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-docosahexaenoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">2-docosapentaenoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-docosapentaenoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">2-eicosatrienoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-hydroxyadipate<br/>
-                        <input type="checkbox">2-hydroxybutyrate_(AHB)<br/>
-                        <input type="checkbox">2-hydroxyglutarate<br/>
-                        <input type="checkbox">2-hydroxystearate<br/>
-                        <input type="checkbox">2-ketogulonate<br/>
-                        <input type="checkbox">2-linoleoylglycerol_(2-monolinolein)<br/>
-                        <input type="checkbox">2-linoleoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-linoleoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">2-methylbutyroylcarnitine<br/>
-                        <input type="checkbox">2-oleoylglycerol_(2-monoolein)<br/>
-                        <input type="checkbox">2-oleoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-oleoylglycerophosphoethanolamine<br/>
-                        <input type="checkbox">2-palmitoleoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-palmitoylglycerol_(2-monopalmitin)<br/>
-                        <input type="checkbox">2-palmitoylglycerophosphocholine<br/>
-                        <input type="checkbox">2-phosphoglycerate<br/>
-                        <input type="checkbox">2-stearoylglycerophosphocholine<br/>
-                        <input type="checkbox">3-(4-hydroxyphenyl)lactate<br/>
-                        <input type="checkbox">3-aminoisobutyrate<br/>
-                        <input type="checkbox">3-dehydrocarnitine<br/>
-                        <input type="checkbox">3-hydroxy-3-methylglutarate<br/>
-                        <input type="checkbox">3-indoxyl_sulfate<br/>
-                        <input type="checkbox">3-methylcrotonylglycine<br/>
-                        <input type="checkbox">3-methylcytidine<br/>
-                        <input type="checkbox">3-phosphoglycerate<br/>
-                        <input type="checkbox">4-guanidinobutanoate<br/>
-                        <input type="checkbox">4-methyl-2-oxopentanoate<br/>
-                        <input type="checkbox">5-aminovalerate<br/>
-                        <input type="checkbox">5-HETE<br/>
-                        <input type="checkbox">5-methyltetrahydrofolate_(5MeTHF)<br/>
-                        <input type="checkbox">5-methylthioadenosine_(MTA)<br/>
-                        <input type="checkbox">5-methyluridine_(ribothymidine)<br/>
-                        <input type="checkbox">5-oxoproline<br/>
-                        <input type="checkbox">6-beta-hydroxylithocholate<br/>
-                        <input type="checkbox">6-phosphogluconate<br/>
-                        <input type="checkbox">7,8-dihydrofolate<br/>
-                        <input type="checkbox">7-alpha-hydroxycholesterol<br/>
-                        <input type="checkbox">7-beta-hydroxycholesterol<br/>
-                        <input type="checkbox">7-ketocholesterol<br/>
-                        <input type="checkbox">acetylcarnitine<br/>
-                        <input type="checkbox">acetylphosphate<br/>
-                        <input type="checkbox">adenine<br/>
-                        <input type="checkbox">adenosine<br/>
-                        <input type="checkbox">adenosine_2-monophosphate_(2-AMP)<br/>
-                        <input type="checkbox">adenosine_3,5-diphosphate<br/>
-                        <input type="checkbox">adrenate_(22:4n6)<br/>
-                        <input type="checkbox">alanine<br/>
-                        <input type="checkbox">allantoin<br/>
-                        <input type="checkbox">alpha-hydroxyisovalerate<br/>
-                        <input type="checkbox">alpha-muricholate<br/>
-                        <input type="checkbox">alpha-tocopherol<br/>
-                        <input type="checkbox">anthranilate<br/>
-                        <input type="checkbox">arabonate<br/>
-                        <input type="checkbox">arachidate_(20:0)<br/>
-                        <input type="checkbox">arachidonate_(20:4n6)<br/>
-                        <input type="checkbox">arg<br/>
-                        <input type="checkbox">ascorbate_(Vitamin_C)<br/>
-                        <input type="checkbox">asparagine<br/>
-                        <input type="checkbox">aspartate<br/>
-                        <input type="checkbox">azelate_(nonanedioate)<br/>
-                        <input type="checkbox">beta-alanine<br/>
-                        <input type="checkbox">beta-hydroxypyruvate<br/>
-                        <input type="checkbox">beta-muricholate<br/>
-                        <input type="checkbox">betaine<br/>
-                        <input type="checkbox">biopterin<br/>
-                        <input type="checkbox">butyrylglycine<br/>
-                        <input type="checkbox">C-glycosyltryptophan<br/>
-                        <input type="checkbox">campesterol<br/>
-                        <input type="checkbox">caprate_(10:0)<br/>
-                        <input type="checkbox">carnitine<br/>
-                        <input type="checkbox">catechol_sulfate<br/>
-                        <input type="checkbox">chenodeoxycholate<br/>
-                        <input type="checkbox">cholate<br/>
-                        <input type="checkbox">cholesterol<br/>
-                        <input type="checkbox">choline<br/>
-                        <input type="checkbox">choline_phosphate<br/>
-                        <input type="checkbox">cis-aconitate<br/>
-                        <input type="checkbox">cit<br/>
-                        <input type="checkbox">citrate<br/>
-                        <input type="checkbox">citrulline<br/>
-                        <input type="checkbox">corticosterone<br/>
-                        <input type="checkbox">creatine<br/>
-                        <input type="checkbox">cysteine<br/>
-                        <input type="checkbox">cysteine-glutathione_disulfide<br/>
-                        <input type="checkbox">cytidine<br/>
-                        <input type="checkbox">cytidine_5-diphosphocholine<br/>
-                        <input type="checkbox">cytidine_5-monophosphate_(5-CMP)<br/>
-                        <input type="checkbox">daidzein<br/>
-                        <input type="checkbox">deoxycholate<br/>
-                        <input type="checkbox">dihomo-linoleate_(20:2n6)<br/>
-                        <input type="checkbox">dihomo-linolenate_(20:3n3_or_n6)<br/>
-                        <input type="checkbox">dihydrokaempferol<br/>
-                        <input type="checkbox">dimethylarginine_(SDMA_+_ADMA)<br/>
-                        <input type="checkbox">dimethylglycine<br/>
-                        <input type="checkbox">docosadienoate_(22:2n6)<br/>
-                        <input type="checkbox">docosapentaenoate_(n3_DPA;_22:5n3)<br/>
-                        <input type="checkbox">docosatrienoate_(22:3n3)<br/>
-                        <input type="checkbox">dodecanedioate<br/>
-                        <input type="checkbox">eicosapentaenoate_(EPA;_20:5n3)<br/>
-                        <input type="checkbox">eicosenoate_(20:1n9_or_11)<br/>
-                        <input type="checkbox">ergothioneine<br/>
-                        <input type="checkbox">erythritol<br/>
-                        <input type="checkbox">erythronate<br/>
-                        <input type="checkbox">flavin_adenine_dinucleotide_(FAD)<br/>
-                        <input type="checkbox">flavin_mononucleotide_(FMN)<br/>
-                        <input type="checkbox">fructose<br/>
-                        <input type="checkbox">fumarate<br/>
-                        <input type="checkbox">gamma-aminobutyrate_(GABA)<br/>
-                        <input type="checkbox">gamma-glutamylglutamate<br/>
-                        <input type="checkbox">gamma-glutamylisoleucine<br/>
-                        <input type="checkbox">gamma-glutamylleucine<br/>
-                        <input type="checkbox">gamma-glutamylphenylalanine<br/>
-                        <input type="checkbox">gamma-glutamylthreonine<br/>
-                        <input type="checkbox">gamma-glutamylvaline<br/>
-                        <input type="checkbox">gamma-muricholate<br/>
-                        <input type="checkbox">genistein<br/>
-                        <input type="checkbox">glucarate_(saccharate)<br/>
-                        <input type="checkbox">gluconate<br/>
-                        <input type="checkbox">glucosamine<br/>
-                        <input type="checkbox">glucose<br/>
-                        <input type="checkbox">glucuronate<br/>
-                        <input type="checkbox">glutamate<br/>
-                        <input type="checkbox">glutarate_(pentanedioate)<br/>
-                        <input type="checkbox">glutaroyl_carnitine<br/>
-                        <input type="checkbox">glutathione,_oxidized_(GSSG)<br/>
-                        <input type="checkbox">glutathione,_reduced_(GSH)<br/>
-                        <input type="checkbox">glycerate<br/>
-                        <input type="checkbox">glycerol<br/>
-                        <input type="checkbox">glycerol_2-phosphate<br/>
-                        <input type="checkbox">glycerol_3-phosphate_(G3P)<br/>
-                        <input type="checkbox">glycerophosphorylcholine_(GPC)<br/>
-                        <input type="checkbox">glycine<br/>
-                        <input type="checkbox">glycocholate<br/>
-                        <input type="checkbox">glycylglycine<br/>
-                        <input type="checkbox">glycylisoleucine<br/>
-                        <input type="checkbox">glycylleucine<br/>
-                        <input type="checkbox">glycylproline<br/>
-                        <input type="checkbox">glycylvaline<br/>
-                        <input type="checkbox">guanosine<br/>
-                        <input type="checkbox">gulono-1,4-lactone<br/>
-                        <input type="checkbox">heme<br/>
-                        <input type="checkbox">hexadecanedioate<br/>
-                        <input type="checkbox">hexanoylglycine<br/>
-                        <input type="checkbox">hippurate<br/>
-                        <input type="checkbox">histidine<br/>
-                        <input type="checkbox">homoserine<br/>
-                        <input type="checkbox">homostachydrine<br/>
-                        <input type="checkbox">hydroxyisovaleroyl_carnitine<br/>
-                        <input type="checkbox">hypotaurine<br/>
-                        <input type="checkbox">hypoxanthine<br/>
-                        <input type="checkbox">inosine<br/>
-                        <input type="checkbox">inositol_1-phosphate_(I1P)<br/>
-                        <input type="checkbox">inositol_2-phosphate_(I2P)<br/>
-                        <input type="checkbox">isobutyrylcarnitine<br/>
-                        <input type="checkbox">isobutyrylglycine<br/>
-                        <input type="checkbox">isoleucine<br/>
-                        <input type="checkbox">isovalerylcarnitine<br/>
-                        <input type="checkbox">isovalerylglycine<br/>
-                        <input type="checkbox">kynurenate<br/>
-                        <input type="checkbox">kynurenine<br/>
-                        <input type="checkbox">lactate<br/>
-                        <input type="checkbox">laurate_(12:0)<br/>
-                        <input type="checkbox">leucine<br/>
-                        <input type="checkbox">linoleate_(18:2n6)<br/>
-                        <input type="checkbox">linolenate_[alpha_or_gamma;_(18:3n3_or_6)]<br/>
-                        <input type="checkbox">lys<br/>
-                        <input type="checkbox">lysine<br/>
-                        <input type="checkbox">malate<br/>
-                        <input type="checkbox">malonate_(propanedioate)<br/>
-                        <input type="checkbox">malonylcarnitine<br/>
-                        <input type="checkbox">maltose<br/>
-                        <input type="checkbox">maltotetraose<br/>
-                        <input type="checkbox">maltotriose<br/>
-                        <input type="checkbox">mannose<br/>
-                        <input type="checkbox">margarate_(17:0)<br/>
-                        <input type="checkbox">methionine<br/>
-                        <input type="checkbox">methionine_sulfoxide<br/>
-                        <input type="checkbox">methyl_lys<br/>
-                        <input type="checkbox">methylglutaroylcarnitine<br/>
-                        <input type="checkbox">methylmalonate_(MMA)<br/>
-                        <input type="checkbox">methylphosphate<br/>
-                        <input type="checkbox">mma<br/>
-                        <input type="checkbox">myo-inositol<br/>
-                        <input type="checkbox">myristate_(14:0)<br/>
-                        <input type="checkbox">myristoleate_(14:1n5)<br/>
-                        <input type="checkbox">N-acetylalanine<br/>
-                        <input type="checkbox">N-acetylasparagine<br/>
-                        <input type="checkbox">N-acetylglutamate<br/>
-                        <input type="checkbox">N-acetylglycine<br/>
-                        <input type="checkbox">N-acetylmethionine<br/>
-                        <input type="checkbox">N-acetylornithine<br/>
-                        <input type="checkbox">N-acetylthreonine<br/>
-                        <input type="checkbox">n-Butyl_Oleate<br/>
-                        <input type="checkbox">N-glycolylneuraminate<br/>
-                        <input type="checkbox">N1-methyladenosine<br/>
-                        <input type="checkbox">N2-acetyllysine<br/>
-                        <input type="checkbox">naringenin<br/>
-                        <input type="checkbox">nicotinamide<br/>
-                        <input type="checkbox">nonadecanoate_(19:0)<br/>
-                        <input type="checkbox">oleate_(18:1n9)<br/>
-                        <input type="checkbox">ophthalmate<br/>
-                        <input type="checkbox">orn<br/>
-                        <input type="checkbox">ornithine<br/>
-                        <input type="checkbox">p-cresol_sulfate<br/>
-                        <input type="checkbox">palmitate_(16:0)<br/>
-                        <input type="checkbox">palmitoyl_sphingomyelin<br/>
-                        <input type="checkbox">pantothenate<br/>
-                        <input type="checkbox">phenol_sulfate<br/>
-                        <input type="checkbox">phenylacetylglycine<br/>
-                        <input type="checkbox">phenylalanine<br/>
-                        <input type="checkbox">phenylpropionylglycine<br/>
-                        <input type="checkbox">phosphoethanolamine<br/>
-                        <input type="checkbox">pipecolate<br/>
-                        <input type="checkbox">propionylcarnitine<br/>
-                        <input type="checkbox">pseudouridine<br/>
-                        <input type="checkbox">pyridoxate<br/>
-                        <input type="checkbox">pyruvate<br/>
-                        <input type="checkbox">ribitol<br/>
-                        <input type="checkbox">riboflavin_(Vitamin_B2)<br/>
-                        <input type="checkbox">ribose<br/>
-                        <input type="checkbox">ribulose<br/>
-                        <input type="checkbox">S-methylglutathione<br/>
-                        <input type="checkbox">sdma<br/>
-                        <input type="checkbox">serine<br/>
-                        <input type="checkbox">sorbitol<br/>
-                        <input type="checkbox">spermidine<br/>
-                        <input type="checkbox">sphinganine<br/>
-                        <input type="checkbox">sphingosine<br/>
-                        <input type="checkbox">squalene<br/>
-                        <input type="checkbox">stachydrine<br/>
-                        <input type="checkbox">stearate_(18:0)<br/>
-                        <input type="checkbox">stearidonate_(18:4n3)<br/>
-                        <input type="checkbox">suberylglycine<br/>
-                        <input type="checkbox">succinate<br/>
-                        <input type="checkbox">succinylcarnitine<br/>
-                        <input type="checkbox">tauro-beta-muricholate<br/>
-                        <input type="checkbox">taurochenodeoxycholate<br/>
-                        <input type="checkbox">taurocholate<br/>
-                        <input type="checkbox">taurodeoxycholate<br/>
-                        <input type="checkbox">TDTEDKGEFLSEGGGVR<br/>
-                        <input type="checkbox">tetradecanedioate<br/>
-                        <input type="checkbox">thiamin_(Vitamin_B1)<br/>
-                        <input type="checkbox">threonine<br/>
-                        <input type="checkbox">thymidine<br/>
-                        <input type="checkbox">thymine<br/>
-                        <input type="checkbox">tigloylglycine<br/>
-                        <input type="checkbox">tiglyl_carnitine<br/>
-                        <input type="checkbox">tmano<br/>
-                        <input type="checkbox">trans-4-hydroxyproline<br/>
-                        <input type="checkbox">trigonelline_(N-methylnicotinate)<br/>
-                        <input type="checkbox">tryptophan<br/>
-                        <input type="checkbox">tyrosine<br/>
-                        <input type="checkbox">UDP-glucose<br/>
-                        <input type="checkbox">undecanedioate<br/>
-                        <input type="checkbox">uracil<br/>
-                        <input type="checkbox">urea<br/>
-                        <input type="checkbox">uridine<br/>
-                        <input type="checkbox">ursodeoxycholate<br/>
-                        <input type="checkbox">valerylglycine<br/>
-                        <input type="checkbox">valine<br/>
-                        <input type="checkbox">xanthine<br/>
-                        <input type="checkbox">xanthosine<br/>
-                        <input type="checkbox">xylitol<br/>
-                        <input type="checkbox">xylonate<br/>
-                        <input type="checkbox">xylulose<br/>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+<table border="1">
+    <tr>
+        <td colspan="7">
+            <a class="trait_show_hide" href="javascript:;">show traits</a>
+        </td>
+    </tr>
+    <tr class="trait_header"><td>Clinical Trait</td><td>Metabolite Trait</td></tr>
+    <tr class="trait_row">
+        <td>
+            <div class="trait_div">
+            <input name="trait_names" value="AB1_2_IgM" type="checkbox">AB1_2_IgM<br/>
+            <input name="trait_names" value="beta-hydroxybutyrate" type="checkbox">beta-hydroxybutyrate<br/>
+            <input name="trait_names" value="BMD_C1-C6" type="checkbox">BMD_C1-C6<br/>
+            <input name="trait_names" value="BMD_femur" type="checkbox">BMD_femur<br/>
+            <input name="trait_names" value="BMD_total" type="checkbox">BMD_total<br/>
+            <input name="trait_names" value="BW" type="checkbox">BW<br/>
+            <input name="trait_names" value="CuOx_LDL_IgM" type="checkbox">CuOx_LDL_IgM<br/>
+            <input name="trait_names" value="Fat_mass" type="checkbox">Fat_mass<br/>
+            <input name="trait_names" value="FFA" type="checkbox">FFA<br/>
+            <input name="trait_names" value="FFP" type="checkbox">FFP<br/>
+            <input name="trait_names" value="FFP_percent" type="checkbox">FFP_percent<br/>
+            <input name="trait_names" value="Free_fluid" type="checkbox">Free_fluid<br/>
+            <input name="trait_names" value="GFP" type="checkbox">GFP<br/>
+            <input name="trait_names" value="GFP_percent" type="checkbox">GFP_percent<br/>
+            <input name="trait_names" value="Glucose" type="checkbox">Glucose<br/>
+            <input name="trait_names" value="Glucose_LC" type="checkbox">Glucose_LC<br/>
+            <input name="trait_names" value="glucose_to_insulin" type="checkbox">glucose_to_insulin<br/>
+            <input name="trait_names" value="GRAN" type="checkbox">GRAN<br/>
+            <input name="trait_names" value="GRAN_percent" type="checkbox">GRAN_percent<br/>
+            <input name="trait_names" value="HCT" type="checkbox">HCT<br/>
+            <input name="trait_names" value="HDL" type="checkbox">HDL<br/>
+            <input name="trait_names" value="Heart_(g)" type="checkbox">Heart_(g)<br/>
+            <input name="trait_names" value="Insulin" type="checkbox">Insulin<br/>
+            <input name="trait_names" value="Kidney_R_(g)" type="checkbox">Kidney_R_(g)<br/>
+            <input name="trait_names" value="LCAT_activity" type="checkbox">LCAT_activity<br/>
+            <input name="trait_names" value="LDL_plus_VLDL" type="checkbox">LDL_plus_VLDL<br/>
+            <input name="trait_names" value="Lean_mass" type="checkbox">Lean_mass<br/>
+            <input name="trait_names" value="log_BW" type="checkbox">log_BW<br/>
+            <input name="trait_names" value="log_HDL" type="checkbox">log_HDL<br/>
+            <input name="trait_names" value="log_TG" type="checkbox">log_TG<br/>
+            <input name="trait_names" value="LYMPH" type="checkbox">LYMPH<br/>
+            <input name="trait_names" value="LYMPH_percent" type="checkbox">LYMPH_percent<br/>
+            <input name="trait_names" value="MCH" type="checkbox">MCH<br/>
+            <input name="trait_names" value="MCHC" type="checkbox">MCHC<br/>
+            <input name="trait_names" value="MCV" type="checkbox">MCV<br/>
+            <input name="trait_names" value="MFP" type="checkbox">MFP<br/>
+            <input name="trait_names" value="MFP_percent" type="checkbox">MFP_percent<br/>
+            <input name="trait_names" value="MONO" type="checkbox">MONO<br/>
+            <input name="trait_names" value="MONO_percent" type="checkbox">MONO_percent<br/>
+            <input name="trait_names" value="MPV" type="checkbox">MPV<br/>
+            <input name="trait_names" value="NMR_BF_percentage" type="checkbox">NMR_BF_percentage<br/>
+            <input name="trait_names" value="NMR_total_Mass" type="checkbox">NMR_total_Mass<br/>
+            <input name="trait_names" value="PLT" type="checkbox">PLT<br/>
+            <input name="trait_names" value="PLTPactivity" type="checkbox">PLTPactivity<br/>
+            <input name="trait_names" value="PON_activity" type="checkbox">PON_activity<br/>
+            <input name="trait_names" value="RBC_Time" type="checkbox">RBC_Time<br/>
+            <input name="trait_names" value="RDW_percent" type="checkbox">RDW_percent<br/>
+            <input name="trait_names" value="RDWa" type="checkbox">RDWa<br/>
+            <input name="trait_names" value="Relative_syndecan-1_ectodomains_(%_vs_C57BL/6J)" type="checkbox">Relative_syndecan-1_ectodomains_(%_vs_C57BL/6J)<br/>
+            <input name="trait_names" value="RFP" type="checkbox">RFP<br/>
+            <input name="trait_names" value="RFP_percent" type="checkbox">RFP_percent<br/>
+            <input name="trait_names" value="Spleen_wt" type="checkbox">Spleen_wt<br/>
+            <input name="trait_names" value="TC" type="checkbox">TC<br/>
+            <input name="trait_names" value="TG" type="checkbox">TG<br/>
+            <input name="trait_names" value="UC" type="checkbox">UC<br/>
+            <input name="trait_names" value="WBC" type="checkbox">WBC<br/>
+            <input name="trait_names" value="WBC_Time" type="checkbox">WBC_Time<br/>
+            </div>
+        </td>
+        <td>
+            <div class="trait_div">
+            <input name="trait_names" value="1,2-dipalmitoylglycerol" type="checkbox">1,2-dipalmitoylglycerol<br/>
+            <input name="trait_names" value="1,2-propanediol" type="checkbox">1,2-propanediol<br/>
+            <input name="trait_names" value="1,3-dipalmitoylglycerol" type="checkbox">1,3-dipalmitoylglycerol<br/>
+            <input name="trait_names" value="1,5-anhydroglucitol_(1,5-AG)" type="checkbox">1,5-anhydroglucitol_(1,5-AG)<br/>
+            <input name="trait_names" value="1-arachidonoylglycerophosphocholine" type="checkbox">1-arachidonoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-arachidonoylglycerophosphoethanolamine" type="checkbox">1-arachidonoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="1-arachidonoylglycerophosphoinositol" type="checkbox">1-arachidonoylglycerophosphoinositol<br/>
+            <input name="trait_names" value="1-arachidonylglycerol" type="checkbox">1-arachidonylglycerol<br/>
+            <input name="trait_names" value="1-docosahexaenoylglycerol_(1-monodocosahexaenoin)" type="checkbox">1-docosahexaenoylglycerol_(1-monodocosahexaenoin)<br/>
+            <input name="trait_names" value="1-docosahexaenoylglycerophosphocholine" type="checkbox">1-docosahexaenoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-docosapentaenoylglycerophosphocholine" type="checkbox">1-docosapentaenoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-eicosatrienoylglycerophosphocholine" type="checkbox">1-eicosatrienoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-heptadecanoylglycerophosphocholine" type="checkbox">1-heptadecanoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-linoleoylglycerol_(1-monolinolein)" type="checkbox">1-linoleoylglycerol_(1-monolinolein)<br/>
+            <input name="trait_names" value="1-linoleoylglycerophosphocholine" type="checkbox">1-linoleoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-linoleoylglycerophosphoethanolamine" type="checkbox">1-linoleoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="1-methylimidazoleacetate" type="checkbox">1-methylimidazoleacetate<br/>
+            <input name="trait_names" value="1-myristoylglycerophosphocholine" type="checkbox">1-myristoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-oleoylglycerol_(1-monoolein)" type="checkbox">1-oleoylglycerol_(1-monoolein)<br/>
+            <input name="trait_names" value="1-oleoylglycerophosphocholine" type="checkbox">1-oleoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-oleoylglycerophosphoethanolamine" type="checkbox">1-oleoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="1-oleoylglycerophosphoinositol" type="checkbox">1-oleoylglycerophosphoinositol<br/>
+            <input name="trait_names" value="1-palmitoleoylglycerophosphocholine" type="checkbox">1-palmitoleoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-palmitoylglycerol_(1-monopalmitin)" type="checkbox">1-palmitoylglycerol_(1-monopalmitin)<br/>
+            <input name="trait_names" value="1-palmitoylglycerophosphocholine" type="checkbox">1-palmitoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-palmitoylglycerophosphoinositol" type="checkbox">1-palmitoylglycerophosphoinositol<br/>
+            <input name="trait_names" value="1-pentadecanoylglycerophosphocholine" type="checkbox">1-pentadecanoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-stearoylglycerophosphocholine" type="checkbox">1-stearoylglycerophosphocholine<br/>
+            <input name="trait_names" value="1-stearoylglycerophosphoethanolamine" type="checkbox">1-stearoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="1-stearoylglycerophosphoinositol" type="checkbox">1-stearoylglycerophosphoinositol<br/>
+            <input name="trait_names" value="10-heptadecenoate_(17:1n7)" type="checkbox">10-heptadecenoate_(17:1n7)<br/>
+            <input name="trait_names" value="12-dehydrocholate" type="checkbox">12-dehydrocholate<br/>
+            <input name="trait_names" value="12-HEPE" type="checkbox">12-HEPE<br/>
+            <input name="trait_names" value="12-HETE" type="checkbox">12-HETE<br/>
+            <input name="trait_names" value="15-HETE" type="checkbox">15-HETE<br/>
+            <input name="trait_names" value="18-HEPE" type="checkbox">18-HEPE<br/>
+            <input name="trait_names" value="2-aminoadipate" type="checkbox">2-aminoadipate<br/>
+            <input name="trait_names" value="2-aminobutyrate" type="checkbox">2-aminobutyrate<br/>
+            <input name="trait_names" value="2-arachidonoylglycerophosphocholine" type="checkbox">2-arachidonoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-arachidonoylglycerophosphoethanolamine" type="checkbox">2-arachidonoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="2-deoxyinosine" type="checkbox">2-deoxyinosine<br/>
+            <input name="trait_names" value="2-docosahexaenoylglycerophosphocholine" type="checkbox">2-docosahexaenoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-docosahexaenoylglycerophosphoethanolamine" type="checkbox">2-docosahexaenoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="2-docosapentaenoylglycerophosphocholine" type="checkbox">2-docosapentaenoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-docosapentaenoylglycerophosphoethanolamine" type="checkbox">2-docosapentaenoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="2-eicosatrienoylglycerophosphocholine" type="checkbox">2-eicosatrienoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-hydroxyadipate" type="checkbox">2-hydroxyadipate<br/>
+            <input name="trait_names" value="2-hydroxybutyrate_(AHB)" type="checkbox">2-hydroxybutyrate_(AHB)<br/>
+            <input name="trait_names" value="2-hydroxyglutarate" type="checkbox">2-hydroxyglutarate<br/>
+            <input name="trait_names" value="2-hydroxystearate" type="checkbox">2-hydroxystearate<br/>
+            <input name="trait_names" value="2-ketogulonate" type="checkbox">2-ketogulonate<br/>
+            <input name="trait_names" value="2-linoleoylglycerol_(2-monolinolein)" type="checkbox">2-linoleoylglycerol_(2-monolinolein)<br/>
+            <input name="trait_names" value="2-linoleoylglycerophosphocholine" type="checkbox">2-linoleoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-linoleoylglycerophosphoethanolamine" type="checkbox">2-linoleoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="2-methylbutyroylcarnitine" type="checkbox">2-methylbutyroylcarnitine<br/>
+            <input name="trait_names" value="2-oleoylglycerol_(2-monoolein)" type="checkbox">2-oleoylglycerol_(2-monoolein)<br/>
+            <input name="trait_names" value="2-oleoylglycerophosphocholine" type="checkbox">2-oleoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-oleoylglycerophosphoethanolamine" type="checkbox">2-oleoylglycerophosphoethanolamine<br/>
+            <input name="trait_names" value="2-palmitoleoylglycerophosphocholine" type="checkbox">2-palmitoleoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-palmitoylglycerol_(2-monopalmitin)" type="checkbox">2-palmitoylglycerol_(2-monopalmitin)<br/>
+            <input name="trait_names" value="2-palmitoylglycerophosphocholine" type="checkbox">2-palmitoylglycerophosphocholine<br/>
+            <input name="trait_names" value="2-phosphoglycerate" type="checkbox">2-phosphoglycerate<br/>
+            <input name="trait_names" value="2-stearoylglycerophosphocholine" type="checkbox">2-stearoylglycerophosphocholine<br/>
+            <input name="trait_names" value="3-(4-hydroxyphenyl)lactate" type="checkbox">3-(4-hydroxyphenyl)lactate<br/>
+            <input name="trait_names" value="3-aminoisobutyrate" type="checkbox">3-aminoisobutyrate<br/>
+            <input name="trait_names" value="3-dehydrocarnitine" type="checkbox">3-dehydrocarnitine<br/>
+            <input name="trait_names" value="3-hydroxy-3-methylglutarate" type="checkbox">3-hydroxy-3-methylglutarate<br/>
+            <input name="trait_names" value="3-indoxyl_sulfate" type="checkbox">3-indoxyl_sulfate<br/>
+            <input name="trait_names" value="3-methylcrotonylglycine" type="checkbox">3-methylcrotonylglycine<br/>
+            <input name="trait_names" value="3-methylcytidine" type="checkbox">3-methylcytidine<br/>
+            <input name="trait_names" value="3-phosphoglycerate" type="checkbox">3-phosphoglycerate<br/>
+            <input name="trait_names" value="4-guanidinobutanoate" type="checkbox">4-guanidinobutanoate<br/>
+            <input name="trait_names" value="4-methyl-2-oxopentanoate" type="checkbox">4-methyl-2-oxopentanoate<br/>
+            <input name="trait_names" value="5-aminovalerate" type="checkbox">5-aminovalerate<br/>
+            <input name="trait_names" value="5-HETE" type="checkbox">5-HETE<br/>
+            <input name="trait_names" value="5-methyltetrahydrofolate_(5MeTHF)" type="checkbox">5-methyltetrahydrofolate_(5MeTHF)<br/>
+            <input name="trait_names" value="5-methylthioadenosine_(MTA)" type="checkbox">5-methylthioadenosine_(MTA)<br/>
+            <input name="trait_names" value="5-methyluridine_(ribothymidine)" type="checkbox">5-methyluridine_(ribothymidine)<br/>
+            <input name="trait_names" value="5-oxoproline" type="checkbox">5-oxoproline<br/>
+            <input name="trait_names" value="6-beta-hydroxylithocholate" type="checkbox">6-beta-hydroxylithocholate<br/>
+            <input name="trait_names" value="6-phosphogluconate" type="checkbox">6-phosphogluconate<br/>
+            <input name="trait_names" value="7,8-dihydrofolate" type="checkbox">7,8-dihydrofolate<br/>
+            <input name="trait_names" value="7-alpha-hydroxycholesterol" type="checkbox">7-alpha-hydroxycholesterol<br/>
+            <input name="trait_names" value="7-beta-hydroxycholesterol" type="checkbox">7-beta-hydroxycholesterol<br/>
+            <input name="trait_names" value="7-ketocholesterol" type="checkbox">7-ketocholesterol<br/>
+            <input name="trait_names" value="acetylcarnitine" type="checkbox">acetylcarnitine<br/>
+            <input name="trait_names" value="acetylphosphate" type="checkbox">acetylphosphate<br/>
+            <input name="trait_names" value="adenine" type="checkbox">adenine<br/>
+            <input name="trait_names" value="adenosine" type="checkbox">adenosine<br/>
+            <input name="trait_names" value="adenosine_2-monophosphate_(2-AMP)" type="checkbox">adenosine_2-monophosphate_(2-AMP)<br/>
+            <input name="trait_names" value="adenosine_3,5-diphosphate" type="checkbox">adenosine_3,5-diphosphate<br/>
+            <input name="trait_names" value="adrenate_(22:4n6)" type="checkbox">adrenate_(22:4n6)<br/>
+            <input name="trait_names" value="alanine" type="checkbox">alanine<br/>
+            <input name="trait_names" value="allantoin" type="checkbox">allantoin<br/>
+            <input name="trait_names" value="alpha-hydroxyisovalerate" type="checkbox">alpha-hydroxyisovalerate<br/>
+            <input name="trait_names" value="alpha-muricholate" type="checkbox">alpha-muricholate<br/>
+            <input name="trait_names" value="alpha-tocopherol" type="checkbox">alpha-tocopherol<br/>
+            <input name="trait_names" value="anthranilate" type="checkbox">anthranilate<br/>
+            <input name="trait_names" value="arabonate" type="checkbox">arabonate<br/>
+            <input name="trait_names" value="arachidate_(20:0)" type="checkbox">arachidate_(20:0)<br/>
+            <input name="trait_names" value="arachidonate_(20:4n6)" type="checkbox">arachidonate_(20:4n6)<br/>
+            <input name="trait_names" value="arg" type="checkbox">arg<br/>
+            <input name="trait_names" value="ascorbate_(Vitamin_C)" type="checkbox">ascorbate_(Vitamin_C)<br/>
+            <input name="trait_names" value="asparagine" type="checkbox">asparagine<br/>
+            <input name="trait_names" value="aspartate" type="checkbox">aspartate<br/>
+            <input name="trait_names" value="azelate_(nonanedioate)" type="checkbox">azelate_(nonanedioate)<br/>
+            <input name="trait_names" value="beta-alanine" type="checkbox">beta-alanine<br/>
+            <input name="trait_names" value="beta-hydroxypyruvate" type="checkbox">beta-hydroxypyruvate<br/>
+            <input name="trait_names" value="beta-muricholate" type="checkbox">beta-muricholate<br/>
+            <input name="trait_names" value="betaine" type="checkbox">betaine<br/>
+            <input name="trait_names" value="biopterin" type="checkbox">biopterin<br/>
+            <input name="trait_names" value="butyrylglycine" type="checkbox">butyrylglycine<br/>
+            <input name="trait_names" value="C-glycosyltryptophan" type="checkbox">C-glycosyltryptophan<br/>
+            <input name="trait_names" value="campesterol" type="checkbox">campesterol<br/>
+            <input name="trait_names" value="caprate_(10:0)" type="checkbox">caprate_(10:0)<br/>
+            <input name="trait_names" value="carnitine" type="checkbox">carnitine<br/>
+            <input name="trait_names" value="catechol_sulfate" type="checkbox">catechol_sulfate<br/>
+            <input name="trait_names" value="chenodeoxycholate" type="checkbox">chenodeoxycholate<br/>
+            <input name="trait_names" value="cholate" type="checkbox">cholate<br/>
+            <input name="trait_names" value="cholesterol" type="checkbox">cholesterol<br/>
+            <input name="trait_names" value="choline" type="checkbox">choline<br/>
+            <input name="trait_names" value="choline_phosphate" type="checkbox">choline_phosphate<br/>
+            <input name="trait_names" value="cis-aconitate" type="checkbox">cis-aconitate<br/>
+            <input name="trait_names" value="cit" type="checkbox">cit<br/>
+            <input name="trait_names" value="citrate" type="checkbox">citrate<br/>
+            <input name="trait_names" value="citrulline" type="checkbox">citrulline<br/>
+            <input name="trait_names" value="corticosterone" type="checkbox">corticosterone<br/>
+            <input name="trait_names" value="creatine" type="checkbox">creatine<br/>
+            <input name="trait_names" value="cysteine" type="checkbox">cysteine<br/>
+            <input name="trait_names" value="cysteine-glutathione_disulfide" type="checkbox">cysteine-glutathione_disulfide<br/>
+            <input name="trait_names" value="cytidine" type="checkbox">cytidine<br/>
+            <input name="trait_names" value="cytidine_5-diphosphocholine" type="checkbox">cytidine_5-diphosphocholine<br/>
+            <input name="trait_names" value="cytidine_5-monophosphate_(5-CMP)" type="checkbox">cytidine_5-monophosphate_(5-CMP)<br/>
+            <input name="trait_names" value="daidzein" type="checkbox">daidzein<br/>
+            <input name="trait_names" value="deoxycholate" type="checkbox">deoxycholate<br/>
+            <input name="trait_names" value="dihomo-linoleate_(20:2n6)" type="checkbox">dihomo-linoleate_(20:2n6)<br/>
+            <input name="trait_names" value="dihomo-linolenate_(20:3n3_or_n6)" type="checkbox">dihomo-linolenate_(20:3n3_or_n6)<br/>
+            <input name="trait_names" value="dihydrokaempferol" type="checkbox">dihydrokaempferol<br/>
+            <input name="trait_names" value="dimethylarginine_(SDMA_+_ADMA)" type="checkbox">dimethylarginine_(SDMA_+_ADMA)<br/>
+            <input name="trait_names" value="dimethylglycine" type="checkbox">dimethylglycine<br/>
+            <input name="trait_names" value="docosadienoate_(22:2n6)" type="checkbox">docosadienoate_(22:2n6)<br/>
+            <input name="trait_names" value="docosapentaenoate_(n3_DPA;_22:5n3)" type="checkbox">docosapentaenoate_(n3_DPA;_22:5n3)<br/>
+            <input name="trait_names" value="docosatrienoate_(22:3n3)" type="checkbox">docosatrienoate_(22:3n3)<br/>
+            <input name="trait_names" value="dodecanedioate" type="checkbox">dodecanedioate<br/>
+            <input name="trait_names" value="eicosapentaenoate_(EPA;_20:5n3)" type="checkbox">eicosapentaenoate_(EPA;_20:5n3)<br/>
+            <input name="trait_names" value="eicosenoate_(20:1n9_or_11)" type="checkbox">eicosenoate_(20:1n9_or_11)<br/>
+            <input name="trait_names" value="ergothioneine" type="checkbox">ergothioneine<br/>
+            <input name="trait_names" value="erythritol" type="checkbox">erythritol<br/>
+            <input name="trait_names" value="erythronate" type="checkbox">erythronate<br/>
+            <input name="trait_names" value="flavin_adenine_dinucleotide_(FAD)" type="checkbox">flavin_adenine_dinucleotide_(FAD)<br/>
+            <input name="trait_names" value="flavin_mononucleotide_(FMN)" type="checkbox">flavin_mononucleotide_(FMN)<br/>
+            <input name="trait_names" value="fructose" type="checkbox">fructose<br/>
+            <input name="trait_names" value="fumarate" type="checkbox">fumarate<br/>
+            <input name="trait_names" value="gamma-aminobutyrate_(GABA)" type="checkbox">gamma-aminobutyrate_(GABA)<br/>
+            <input name="trait_names" value="gamma-glutamylglutamate" type="checkbox">gamma-glutamylglutamate<br/>
+            <input name="trait_names" value="gamma-glutamylisoleucine" type="checkbox">gamma-glutamylisoleucine<br/>
+            <input name="trait_names" value="gamma-glutamylleucine" type="checkbox">gamma-glutamylleucine<br/>
+            <input name="trait_names" value="gamma-glutamylphenylalanine" type="checkbox">gamma-glutamylphenylalanine<br/>
+            <input name="trait_names" value="gamma-glutamylthreonine" type="checkbox">gamma-glutamylthreonine<br/>
+            <input name="trait_names" value="gamma-glutamylvaline" type="checkbox">gamma-glutamylvaline<br/>
+            <input name="trait_names" value="gamma-muricholate" type="checkbox">gamma-muricholate<br/>
+            <input name="trait_names" value="genistein" type="checkbox">genistein<br/>
+            <input name="trait_names" value="glucarate_(saccharate)" type="checkbox">glucarate_(saccharate)<br/>
+            <input name="trait_names" value="gluconate" type="checkbox">gluconate<br/>
+            <input name="trait_names" value="glucosamine" type="checkbox">glucosamine<br/>
+            <input name="trait_names" value="glucose" type="checkbox">glucose<br/>
+            <input name="trait_names" value="glucuronate" type="checkbox">glucuronate<br/>
+            <input name="trait_names" value="glutamate" type="checkbox">glutamate<br/>
+            <input name="trait_names" value="glutarate_(pentanedioate)" type="checkbox">glutarate_(pentanedioate)<br/>
+            <input name="trait_names" value="glutaroyl_carnitine" type="checkbox">glutaroyl_carnitine<br/>
+            <input name="trait_names" value="glutathione,_oxidized_(GSSG)" type="checkbox">glutathione,_oxidized_(GSSG)<br/>
+            <input name="trait_names" value="glutathione,_reduced_(GSH)" type="checkbox">glutathione,_reduced_(GSH)<br/>
+            <input name="trait_names" value="glycerate" type="checkbox">glycerate<br/>
+            <input name="trait_names" value="glycerol" type="checkbox">glycerol<br/>
+            <input name="trait_names" value="glycerol_2-phosphate" type="checkbox">glycerol_2-phosphate<br/>
+            <input name="trait_names" value="glycerol_3-phosphate_(G3P)" type="checkbox">glycerol_3-phosphate_(G3P)<br/>
+            <input name="trait_names" value="glycerophosphorylcholine_(GPC)" type="checkbox">glycerophosphorylcholine_(GPC)<br/>
+            <input name="trait_names" value="glycine" type="checkbox">glycine<br/>
+            <input name="trait_names" value="glycocholate" type="checkbox">glycocholate<br/>
+            <input name="trait_names" value="glycylglycine" type="checkbox">glycylglycine<br/>
+            <input name="trait_names" value="glycylisoleucine" type="checkbox">glycylisoleucine<br/>
+            <input name="trait_names" value="glycylleucine" type="checkbox">glycylleucine<br/>
+            <input name="trait_names" value="glycylproline" type="checkbox">glycylproline<br/>
+            <input name="trait_names" value="glycylvaline" type="checkbox">glycylvaline<br/>
+            <input name="trait_names" value="guanosine" type="checkbox">guanosine<br/>
+            <input name="trait_names" value="gulono-1,4-lactone" type="checkbox">gulono-1,4-lactone<br/>
+            <input name="trait_names" value="heme" type="checkbox">heme<br/>
+            <input name="trait_names" value="hexadecanedioate" type="checkbox">hexadecanedioate<br/>
+            <input name="trait_names" value="hexanoylglycine" type="checkbox">hexanoylglycine<br/>
+            <input name="trait_names" value="hippurate" type="checkbox">hippurate<br/>
+            <input name="trait_names" value="histidine" type="checkbox">histidine<br/>
+            <input name="trait_names" value="homoserine" type="checkbox">homoserine<br/>
+            <input name="trait_names" value="homostachydrine" type="checkbox">homostachydrine<br/>
+            <input name="trait_names" value="hydroxyisovaleroyl_carnitine" type="checkbox">hydroxyisovaleroyl_carnitine<br/>
+            <input name="trait_names" value="hypotaurine" type="checkbox">hypotaurine<br/>
+            <input name="trait_names" value="hypoxanthine" type="checkbox">hypoxanthine<br/>
+            <input name="trait_names" value="inosine" type="checkbox">inosine<br/>
+            <input name="trait_names" value="inositol_1-phosphate_(I1P)" type="checkbox">inositol_1-phosphate_(I1P)<br/>
+            <input name="trait_names" value="inositol_2-phosphate_(I2P)" type="checkbox">inositol_2-phosphate_(I2P)<br/>
+            <input name="trait_names" value="isobutyrylcarnitine" type="checkbox">isobutyrylcarnitine<br/>
+            <input name="trait_names" value="isobutyrylglycine" type="checkbox">isobutyrylglycine<br/>
+            <input name="trait_names" value="isoleucine" type="checkbox">isoleucine<br/>
+            <input name="trait_names" value="isovalerylcarnitine" type="checkbox">isovalerylcarnitine<br/>
+            <input name="trait_names" value="isovalerylglycine" type="checkbox">isovalerylglycine<br/>
+            <input name="trait_names" value="kynurenate" type="checkbox">kynurenate<br/>
+            <input name="trait_names" value="kynurenine" type="checkbox">kynurenine<br/>
+            <input name="trait_names" value="lactate" type="checkbox">lactate<br/>
+            <input name="trait_names" value="laurate_(12:0)" type="checkbox">laurate_(12:0)<br/>
+            <input name="trait_names" value="leucine" type="checkbox">leucine<br/>
+            <input name="trait_names" value="linoleate_(18:2n6)" type="checkbox">linoleate_(18:2n6)<br/>
+            <input name="trait_names" value="linolenate_[alpha_or_gamma;_(18:3n3_or_6)]" type="checkbox">linolenate_[alpha_or_gamma;_(18:3n3_or_6)]<br/>
+            <input name="trait_names" value="lys" type="checkbox">lys<br/>
+            <input name="trait_names" value="lysine" type="checkbox">lysine<br/>
+            <input name="trait_names" value="malate" type="checkbox">malate<br/>
+            <input name="trait_names" value="malonate_(propanedioate)" type="checkbox">malonate_(propanedioate)<br/>
+            <input name="trait_names" value="malonylcarnitine" type="checkbox">malonylcarnitine<br/>
+            <input name="trait_names" value="maltose" type="checkbox">maltose<br/>
+            <input name="trait_names" value="maltotetraose" type="checkbox">maltotetraose<br/>
+            <input name="trait_names" value="maltotriose" type="checkbox">maltotriose<br/>
+            <input name="trait_names" value="mannose" type="checkbox">mannose<br/>
+            <input name="trait_names" value="margarate_(17:0)" type="checkbox">margarate_(17:0)<br/>
+            <input name="trait_names" value="methionine" type="checkbox">methionine<br/>
+            <input name="trait_names" value="methionine_sulfoxide" type="checkbox">methionine_sulfoxide<br/>
+            <input name="trait_names" value="methyl_lys" type="checkbox">methyl_lys<br/>
+            <input name="trait_names" value="methylglutaroylcarnitine" type="checkbox">methylglutaroylcarnitine<br/>
+            <input name="trait_names" value="methylmalonate_(MMA)" type="checkbox">methylmalonate_(MMA)<br/>
+            <input name="trait_names" value="methylphosphate" type="checkbox">methylphosphate<br/>
+            <input name="trait_names" value="mma" type="checkbox">mma<br/>
+            <input name="trait_names" value="myo-inositol" type="checkbox">myo-inositol<br/>
+            <input name="trait_names" value="myristate_(14:0)" type="checkbox">myristate_(14:0)<br/>
+            <input name="trait_names" value="myristoleate_(14:1n5)" type="checkbox">myristoleate_(14:1n5)<br/>
+            <input name="trait_names" value="N-acetylalanine" type="checkbox">N-acetylalanine<br/>
+            <input name="trait_names" value="N-acetylasparagine" type="checkbox">N-acetylasparagine<br/>
+            <input name="trait_names" value="N-acetylglutamate" type="checkbox">N-acetylglutamate<br/>
+            <input name="trait_names" value="N-acetylglycine" type="checkbox">N-acetylglycine<br/>
+            <input name="trait_names" value="N-acetylmethionine" type="checkbox">N-acetylmethionine<br/>
+            <input name="trait_names" value="N-acetylornithine" type="checkbox">N-acetylornithine<br/>
+            <input name="trait_names" value="N-acetylthreonine" type="checkbox">N-acetylthreonine<br/>
+            <input name="trait_names" value="n-Butyl_Oleate" type="checkbox">n-Butyl_Oleate<br/>
+            <input name="trait_names" value="N-glycolylneuraminate" type="checkbox">N-glycolylneuraminate<br/>
+            <input name="trait_names" value="N1-methyladenosine" type="checkbox">N1-methyladenosine<br/>
+            <input name="trait_names" value="N2-acetyllysine" type="checkbox">N2-acetyllysine<br/>
+            <input name="trait_names" value="naringenin" type="checkbox">naringenin<br/>
+            <input name="trait_names" value="nicotinamide" type="checkbox">nicotinamide<br/>
+            <input name="trait_names" value="nonadecanoate_(19:0)" type="checkbox">nonadecanoate_(19:0)<br/>
+            <input name="trait_names" value="oleate_(18:1n9)" type="checkbox">oleate_(18:1n9)<br/>
+            <input name="trait_names" value="ophthalmate" type="checkbox">ophthalmate<br/>
+            <input name="trait_names" value="orn" type="checkbox">orn<br/>
+            <input name="trait_names" value="ornithine" type="checkbox">ornithine<br/>
+            <input name="trait_names" value="p-cresol_sulfate" type="checkbox">p-cresol_sulfate<br/>
+            <input name="trait_names" value="palmitate_(16:0)" type="checkbox">palmitate_(16:0)<br/>
+            <input name="trait_names" value="palmitoyl_sphingomyelin" type="checkbox">palmitoyl_sphingomyelin<br/>
+            <input name="trait_names" value="pantothenate" type="checkbox">pantothenate<br/>
+            <input name="trait_names" value="phenol_sulfate" type="checkbox">phenol_sulfate<br/>
+            <input name="trait_names" value="phenylacetylglycine" type="checkbox">phenylacetylglycine<br/>
+            <input name="trait_names" value="phenylalanine" type="checkbox">phenylalanine<br/>
+            <input name="trait_names" value="phenylpropionylglycine" type="checkbox">phenylpropionylglycine<br/>
+            <input name="trait_names" value="phosphoethanolamine" type="checkbox">phosphoethanolamine<br/>
+            <input name="trait_names" value="pipecolate" type="checkbox">pipecolate<br/>
+            <input name="trait_names" value="propionylcarnitine" type="checkbox">propionylcarnitine<br/>
+            <input name="trait_names" value="pseudouridine" type="checkbox">pseudouridine<br/>
+            <input name="trait_names" value="pyridoxate" type="checkbox">pyridoxate<br/>
+            <input name="trait_names" value="pyruvate" type="checkbox">pyruvate<br/>
+            <input name="trait_names" value="ribitol" type="checkbox">ribitol<br/>
+            <input name="trait_names" value="riboflavin_(Vitamin_B2)" type="checkbox">riboflavin_(Vitamin_B2)<br/>
+            <input name="trait_names" value="ribose" type="checkbox">ribose<br/>
+            <input name="trait_names" value="ribulose" type="checkbox">ribulose<br/>
+            <input name="trait_names" value="S-methylglutathione" type="checkbox">S-methylglutathione<br/>
+            <input name="trait_names" value="sdma" type="checkbox">sdma<br/>
+            <input name="trait_names" value="serine" type="checkbox">serine<br/>
+            <input name="trait_names" value="sorbitol" type="checkbox">sorbitol<br/>
+            <input name="trait_names" value="spermidine" type="checkbox">spermidine<br/>
+            <input name="trait_names" value="sphinganine" type="checkbox">sphinganine<br/>
+            <input name="trait_names" value="sphingosine" type="checkbox">sphingosine<br/>
+            <input name="trait_names" value="squalene" type="checkbox">squalene<br/>
+            <input name="trait_names" value="stachydrine" type="checkbox">stachydrine<br/>
+            <input name="trait_names" value="stearate_(18:0)" type="checkbox">stearate_(18:0)<br/>
+            <input name="trait_names" value="stearidonate_(18:4n3)" type="checkbox">stearidonate_(18:4n3)<br/>
+            <input name="trait_names" value="suberylglycine" type="checkbox">suberylglycine<br/>
+            <input name="trait_names" value="succinate" type="checkbox">succinate<br/>
+            <input name="trait_names" value="succinylcarnitine" type="checkbox">succinylcarnitine<br/>
+            <input name="trait_names" value="tauro-beta-muricholate" type="checkbox">tauro-beta-muricholate<br/>
+            <input name="trait_names" value="taurochenodeoxycholate" type="checkbox">taurochenodeoxycholate<br/>
+            <input name="trait_names" value="taurocholate" type="checkbox">taurocholate<br/>
+            <input name="trait_names" value="taurodeoxycholate" type="checkbox">taurodeoxycholate<br/>
+            <input name="trait_names" value="TDTEDKGEFLSEGGGVR" type="checkbox">TDTEDKGEFLSEGGGVR<br/>
+            <input name="trait_names" value="tetradecanedioate" type="checkbox">tetradecanedioate<br/>
+            <input name="trait_names" value="thiamin_(Vitamin_B1)" type="checkbox">thiamin_(Vitamin_B1)<br/>
+            <input name="trait_names" value="threonine" type="checkbox">threonine<br/>
+            <input name="trait_names" value="thymidine" type="checkbox">thymidine<br/>
+            <input name="trait_names" value="thymine" type="checkbox">thymine<br/>
+            <input name="trait_names" value="tigloylglycine" type="checkbox">tigloylglycine<br/>
+            <input name="trait_names" value="tiglyl_carnitine" type="checkbox">tiglyl_carnitine<br/>
+            <input name="trait_names" value="tmano" type="checkbox">tmano<br/>
+            <input name="trait_names" value="trans-4-hydroxyproline" type="checkbox">trans-4-hydroxyproline<br/>
+            <input name="trait_names" value="trigonelline_(N-methylnicotinate)" type="checkbox">trigonelline_(N-methylnicotinate)<br/>
+            <input name="trait_names" value="tryptophan" type="checkbox">tryptophan<br/>
+            <input name="trait_names" value="tyrosine" type="checkbox">tyrosine<br/>
+            <input name="trait_names" value="UDP-glucose" type="checkbox">UDP-glucose<br/>
+            <input name="trait_names" value="undecanedioate" type="checkbox">undecanedioate<br/>
+            <input name="trait_names" value="uracil" type="checkbox">uracil<br/>
+            <input name="trait_names" value="urea" type="checkbox">urea<br/>
+            <input name="trait_names" value="uridine" type="checkbox">uridine<br/>
+            <input name="trait_names" value="ursodeoxycholate" type="checkbox">ursodeoxycholate<br/>
+            <input name="trait_names" value="valerylglycine" type="checkbox">valerylglycine<br/>
+            <input name="trait_names" value="valine" type="checkbox">valine<br/>
+            <input name="trait_names" value="xanthine" type="checkbox">xanthine<br/>
+            <input name="trait_names" value="xanthosine" type="checkbox">xanthosine<br/>
+            <input name="trait_names" value="xylitol" type="checkbox">xylitol<br/>
+            <input name="trait_names" value="xylonate" type="checkbox">xylonate<br/>
+            <input name="trait_names" value="xylulose" type="checkbox">xylulose<br/>
+            </div>
+        </td>
+    </tr>
+</table>
 
 <!--/////////////////////////// User Genes //////////////////////////////////-->
 
@@ -526,11 +526,11 @@
             <b>Please enter entrez gene IDs or HGNC gene symbols here</b>
             <br/>
             <input type="radio" id="gene_entrez"
-                   name="id_type" value="entrez_id" checked>Entrez ID
+                   name="id_type" value="ENTREZ_ID" checked>Entrez ID
             <input type="radio" id="gene_sym"
-                   name="id_type" value="gene_sym" >Gene symbol
+                   name="id_type" value="GENE_SYM" >Gene symbol
             <br/>
-            <textarea id="gene_txt" name="genes" rows="5" cols="20"></textarea>
+            <textarea id="gene_txt" name="user_genes" rows="5" cols="20"></textarea>
 
 <!--/////////////////////////// Term Selection //////////////////////////////-->
 
@@ -548,7 +548,7 @@
             
             <b>Please enter terms here</b>
             <br/>
-            <textarea id="terms_txt" name="terms" rows="5" cols="20"></textarea>
+            <textarea id="terms_txt" name="user_terms" rows="5" cols="20"></textarea>
             <br/>
             <input type="checkbox" name="expand_term">Expand terms into disease ontology
             
@@ -558,8 +558,8 @@
                 Step 3: Choose search scope
             </h2>
             
-            <input type="radio" name="search_scope" checked>Title and abstract
-            <input type="radio" name="search_scope" >Full text
+            <input type="radio" value="TIAB" name="search_scope" checked>Title and abstract
+            <input type="radio" value="FULL_TEXT"name="search_scope" >Full text
             
             <br/><br/>
             
