@@ -38,31 +38,152 @@ print html_header
 # get form data
 form = cgi.FieldStorage()
 
-# get implication type and logic relation between selections
-imp_types = form.getlist("imp_type")
-imp_type_logic_sel = form.getvalue("imp_type_logic_sel")
+id_type = form['id_type'].value
 
-max_distance = form.getvalue("max_distance")
+# id2sym, sym2id conversion
+sym_id = dict()
+id_sym = dict()
 
-assoc_logic_sel = form.getvalue("assoc_logic_sel")
+# get entrez ids/symbols, convert between symbols and ids
+gene_ids_list = []
+if(id_type == 'gene_sym'):
+    gene_symbols = form['genes'].value
+    gene_symbols_list = gene_symbols.split()
+    sym_id = symbol2entrez(gene_symbols_list)
+    for key in sym_id:
+        gene_ids_list.append(sym_id[key])
+        id_sym[sym_id[key]] = key
+    gene_ids_list = sorted(gene_ids_list, key=int)
+else:
+    gene_ids = form['genes'].value
+    gene_ids_list = sorted(gene_ids.split(), key=int)
+    id_sym = entrez2symbol(gene_ids_list)
+    for key in id_sym:
+        sym_id[id_sym[key]] = key
 
-gene_exp_pval = form.getvalue("gene_exp_pval")
-protein_exp_pval = form.getvalue("protein_exp_pval")
-trait_pval = form.getvalue("trait_pval")
-trait_names = form.getlist("trait_names")
+terms = ''
+tiab_only = True
+if('terms' in form):
+    terms = form['terms'].value
+terms_list = sorted(terms.split())
+if('tiab_only' not in form):
+    tiab_only = False
 
-id_type = form.getvalue("id_type")
-user_genes = form.getvalue("user_genes")
-user_terms = form.getvalue("user_terms")
-expand_term = form.getvalue("expand_term")
-search_scope = form.getvalue("search_scope")
+############################## Download Gene Info ##############################
 
-############################## Cet Query Result ################################
+# download gene summary info
+genes_info_list = get_gene_info(gene_ids_list)
 
-ewas_query_result = get_ewas_query_result(gene_exp_pval, protein_exp_pval,
-    trait_pval, max_distance, trait_names, con, assoc_logic_sel)
-print_ewas_query_result(ewas_query_result)
+# get all gene related article count
+genes_pmids_cnt = get_genes_pmid_count(gene_ids_list)
 
-################################## Clean Up ####################################
+# get WebEnv and QueryKey for searching within TIAB
+gene_webenv_querykey = None
+if(tiab_only):
+    gene_webenv_querykey = get_webenv_querykey(gene_ids_list, terms_list)
+
+# sleep for 1 second to obey the 3 queries/sec rule
+time.sleep(1)
+
+########################### DISPLAY CONTENT ####################################
+
+# print body start, navigation bar
+print """
+<body>
+    <h2><a id="top">Search Result</a></h2>
+    <a href="../../huwenbo/index.html">Make Another Search</a><br/><br/>
+"""
+print '<a id="nav"><b>Navigation by Gene</b></a><br/>'
+for gene_id in gene_ids_list:
+    gene_sym = id_sym[gene_id]
+    print '<a href="#gene_id_%s">%s(%s)</a>' % (gene_id, gene_sym, gene_id)
+print '<br/><br/><hr/>'
+
+
+sys.stdout.flush()
+
+# create overview
+print """
+<div>
+    <a href="#top">Return to Top</a><br/><br/>
+    <b>Overview (choose terms to sort by the sum of number of abstracts
+        containing these terms)
+    </b>
+    <button class="show_hide" type="button">hide</button><br/>
+    <a>each cell shows the number of abstracts related to the gene 
+        (left-most column) and term (top-most row)
+    </a>
+    <br/>
+    <br/>
+    <a id="loading">Loading...</a>
+    <table id="overview_top">
+    </table>
+</div>
+<br/>
+<hr/>
+"""
+
+# initialize gene term count
+gene_term_count = init_gene_term_cnt(gene_ids_list, terms_list)
+
+# iterate though gene ids
+for i in xrange(len(gene_ids_list)):
+
+    # get gene id
+    gene_id = gene_ids_list[i]
+
+    # create "return to top" bookmark and title
+    print '<a id="gene_id_%s" href="#top">Return to Top</a><br/><br/>'%gene_id
+    print '<b>Info and Related Abstracts for Gene %s</b><br/><br/>'%gene_id
+    
+    # print gene info table
+    print """
+        <div>
+            <a><b>Gene Info</b></a>
+            <button class="show_hide" type="button">hide</button>
+            <br/>
+            
+    """
+    print_gene_info(genes_info_list[i], genes_pmids_cnt[i])
+    print """
+        </div>
+        <br/>
+    """
+    
+    # print gene gwas info table
+    nhgri_gwas_search_and_display(con, id_sym[gene_id])
+     
+    # search result for tiab search
+    if(tiab_only):
+        gene_term_count = print_tiab_search_result(terms_list, gene_id,
+            gene_webenv_querykey, gene_term_count)
+        time.sleep(1)
+    else:
+        print_fulltext_search_result(terms_list, gene_id, gene_term_count)
+    
+
+# print overview bottom, this is a dummy and will not be displayed
+print '<table id="overview_bottom">'
+print '<tr>'
+print '<td>Gene ID\Term</td>'
+for term in terms_list:
+    print '<td><input type="checkbox" '
+    print 'id="overview_%s" class="overview_opt">%s</td>' % (term, term)
+print '</tr>'
+for gene_id in gene_ids_list:
+    print '<tr>'
+    gene_sym = id_sym[gene_id]
+    print '<td><a href="#gene_id_%s">%s(%s)</a></td>'%(gene_id,gene_sym,gene_id)
+    for term in terms_list:
+        print '<td><a class="abstract_count">'
+        print '%d</a></td>' % gene_term_count[gene_id][term]
+    print '</tr>'
+print '</table>'
+    
+#################################### HTML END ##################################
+
+# print body end
+print '</body>'
+print '</html>'
 
 con.close()
