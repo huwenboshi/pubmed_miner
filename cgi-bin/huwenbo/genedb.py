@@ -173,6 +173,77 @@ def get_ewas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
 
 ############################### DISPLAY STUFF ##################################
 
+# display ewas query result
+def print_ewas_query_result(ewas_query_result):
+    gene_exp_result = ewas_query_result[0]
+    print '<h3>Genes implicated by CG methylations '
+    print 'associated with gene expression</h3>'
+    print '<table>'
+    print """<tr>
+                <th>mCG position</th>
+                <th>Implicated mouse gene probe ID</th>
+                <th>Gene start position</th>
+                <th>Gene end position</th>
+                <th>p-value</th>
+                <th>Human ortholog entrez ID</th>
+            </tr>"""
+    for result in gene_exp_result:
+        print '<tr>'
+        print '<td>%s</td><td>%s</td>' % (result[7], result[15])
+        print '<td>%s</td><td>%s</td>' % (result[13], result[14])
+        print '<td>%s</td><td>%s</td>' % (result[0], result[18])
+        print '</tr>'
+    print '</table>'
+    
+    print '<br/>'
+    print '<hr/>'
+    
+    prot_exp_result = ewas_query_result[1]
+    print '<h3>Genes implicated by CG methylations associated '
+    print 'with protein expression</h3>'
+    print '<table>'
+    print """<tr>
+                <th>mCG position</th>
+                <th>Implicated mouse gene entrez ID</th>
+                <th>Gene start position</th>
+                <th>Gene end position</th>
+                <th>p-value</th>
+                <th>Human ortholog entrez ID</th>
+            </tr>"""
+    for result in prot_exp_result:
+        print '<tr>'
+        print '<td>%s</td><td>%s</td>' % (result[7], result[15])
+        print '<td>%s</td><td>%s</td>' % (result[13], result[14])
+        print '<td>%s</td><td>%s</td>' % (result[0], result[18])
+        print '</tr>'
+    print '</table>'
+    
+    print '<br/>'
+    print '<hr/>'
+    
+    trait_exp_result = ewas_query_result[2]
+    print '<h3>Genes implicated by CG methylations associated '
+    print 'with clinical and metabolite trait</h3>'
+    print '<table>'
+    print """<tr>
+                <th>mCG position</th>
+                <th>Implicated gene transcript ID</th>
+                <th>Gene start position</th>
+                <th>Gene end position</th>
+                <th>Phenotype</th>
+                <th>Phenotype class</th>
+                <th>p-value</th>
+                <th>Human ortholog entrez ID</th>
+            </tr>"""
+    for result in trait_exp_result:
+        print '<tr>'
+        print '<td>%s</td><td>%s</td>' % (result[6], result[17])
+        print '<td>%s</td><td>%s</td>' % (result[15], result[16])
+        print '<td>%s</td><td>%s</td>' % (result[2], result[3])
+        print '<td>%s</td><td>%s</td>' % (result[0], result[20])
+        print '</tr>'
+    print '</table>'
+
 # print info list
 def print_nhgri_gwas_info_list(info_list):
     print """
@@ -218,7 +289,7 @@ def print_nhgri_gwas_info_list(info_list):
         <br/>
     """
 
-# search and display in one function
+# search and display nhgri in one function
 def nhgri_gwas_search_and_display(con, genesym):
     info_list = search_nhgri_gwas_catalog(con, genesym)
     print_nhgri_gwas_info_list(info_list)

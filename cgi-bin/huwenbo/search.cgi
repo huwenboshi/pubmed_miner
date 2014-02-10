@@ -57,36 +57,12 @@ user_terms = form.getvalue("user_terms")
 expand_term = form.getvalue("expand_term")
 search_scope = form.getvalue("search_scope")
 
-############################## Construct Query #################################
-"""
-query_gene = make_general_ewas_query('liver_expression_ewas',
-    gene_exp_pval, max_distance)
-print query_gene
-print '<br/>'
-query_prot = make_general_ewas_query('liver_proteomics_ewas',
-    protein_exp_pval, max_distance)
-print query_prot
-print '<br/>'
-query_trait = make_clinical_trait_ewas_query('clinical_metabolite_traits_ewas',
-    trait_pval, max_distance, trait_names)
-print query_trait
-print '<br/>'
-query_probe_to_entrez = make_to_human_gene_id_query('mouse_probe_mouse_mgi',
-    'mouse_probe_id')
-print query_probe_to_entrez
-print '<br/>'
-query_entrez_to_entrez = make_to_human_gene_id_query('mouse_entrez_mouse_mgi',
-    'mouse_entrez_id')
-print query_entrez_to_entrez
-print '<br/>'
-query_trans_to_entrez = make_to_human_gene_id_query('mouse_trans_mouse_mgi',
-    'mouse_transcript_id')
-print query_trans_to_entrez
-print '<br/>'
-print imp_type_logic_sel
-print '<br/>'
-print assoc_logic_sel
-"""
+############################## Cet Query Result ################################
+
 ewas_query_result = get_ewas_query_result(gene_exp_pval, protein_exp_pval,
     trait_pval, max_distance, trait_names, con, assoc_logic_sel)
-print ewas_query_result
+print_ewas_query_result(ewas_query_result)
+
+################################## Clean Up ####################################
+
+con.close()
