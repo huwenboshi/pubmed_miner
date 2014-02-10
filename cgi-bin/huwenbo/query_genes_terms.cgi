@@ -19,7 +19,7 @@ import httpagentparser
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
-con = connect_db('nhgri_gwas_catalog.db')
+con = connect_db('/home/huwenbo/pubmed_miner_db/pubmed_miner.db')
 
 ########################### HTTP HTML HEADER ###################################
 
@@ -151,7 +151,7 @@ for i in xrange(len(gene_ids_list)):
     """
     
     # print gene gwas info table
-    search_and_display(con, id_sym[gene_id])
+    nhgri_gwas_search_and_display(con, id_sym[gene_id])
      
     # search result for tiab search
     if(tiab_only):

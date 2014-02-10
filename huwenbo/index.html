@@ -54,82 +54,70 @@
         
 <!--/////////////////////// Implication Type ////////////////////////////////-->
 
-            <b>Select implication type (optional)</b>
-            <br/>
-            <a>Logic relation between selections: </a>
-            <select name="imp_type_logic_sel">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-            </select>
+            <b>Select implication type (at least one)</b>
             <br/>
             <input type="checkbox" name="imp_type" value="GWAS"/><a>SNP (GWAS)</a>
             <br/>
             <input type="checkbox" name="imp_type" value="EWAS"/><a>CG methylation (EWAS)</a>
-            <br/><br/>
+            <br/>
+            <a>If two implication types are selected, take </a>
+            <select name="imp_type_logic_sel">
+                <option value="INTERSECTION">intersection</option>
+                <option value="UNION">union</option>
+            </select>
+            <a> of the set of genes implicated.</a>
+            <br/>
+            <br/>
+
+<!--///////////////////////////// Proximity /////////////////////////////////-->
+            
+            <b>Distance between gene and mCG/SNP site</b>
+            <br/>
+            <a>Less than </a>
+            <input name="max_distance" type="text" style="width: 100px"/>
+            <a>bp</a>
+            <br/>
+            <br/>
+
+<!--///////////////////////// Union or Intersectin //////////////////////////-->
+
+            <b>Take </b>
+            <select name="assoc_logic_sel">
+                <option value="INTERSECTION">intersection</option>
+                <option value="UNION">union</option>
+            </select>
+            <b> of the set of genes found by the following assciations.</b>
+            <br/>
+            <br/>
 
 <!--///////////////////////// Gene Expression  //////////////////////////////-->
-            
-            <select name="logic_gene_exp">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-                <option value="NOT">NOT</option>
-            </select>
-            <b>Association with gene expression (optional)</b>
+
+            <b>Association with gene expression</b>
             <br/>
             <a>p-value less than 10^(-<a/>
             <input name="gene_exp_pval" style="width: 25px" type="text" />
             <a>)</a>
             <br/><br/>
 
-<!--/////////////////////////// Protein Level ///////////////////////////////-->
+<!--///////////////////////// Protein Expression ////////////////////////////-->
             
-            <select name="logic_protein_exp">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-                <option value="NOT">NOT</option>
-            </select>
-            <b>Association with protein expression (optional)</b>
+            <b>Association with protein expression</b>
             <br/>
             <a>p-value less than 10^(-<a/>
             <input name="protein_exp_pval" style="width: 25px" type="text" />
             <a>)</a>
             <br/><br/>
 
-<!--///////////////////////////// Proximity /////////////////////////////////-->
-            
-            <select name="logic_distance">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-                <option value="NOT">NOT</option>
-            </select>
-            <b>Distance between gene and mCG/SNP site (optional)</b>
-            <br/>
-            <a>Less than </a>
-            <input name="max_distance" type="text" style="width: 100px"/>
-            <a>base pairs </a>
-            <br/>
-            <br/>
-
 <!--////////////////////////// Clinical Trait ///////////////////////////////-->
             
-            <select name="logic_trait">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-                <option value="NOT">NOT</option>
-            </select>
-            <b>Select associated traits (optional)</b>
+            <b>Association with clinical and metabolite traits</b>
             <br/>
             <a>p-value less than 10^(-<a/>
             <input name="trait_pval" style="width: 25px" type="text" />
             <a>)</a>
             <br/>
-            <a>Logic relation between selections: </a>
-            <select name="trait_logic_sel">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-            </select>
+            <a>Please select a list of traits you are interested in: </a>
             <br/>
-
 <table border="1">
     <tr>
         <td colspan="7">
