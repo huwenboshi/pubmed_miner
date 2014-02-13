@@ -13,10 +13,12 @@ eutils_url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 esummary_url = eutils_url+'/esummary.fcgi?'+tool_email
 elink_url = eutils_url+'/elink.fcgi?'+tool_email
 efetch_url = eutils_url+'/efetch.fcgi?'+tool_email
-gene_web_url = eutils_url+'/query.fcgi?'+query_param
+gene_web_url = 'http://www.ncbi.nlm.nih.gov/gene?cmd=Retrieve&dopt='
+gene_web_url += 'full_report&list_uids='
 genomernai_url = 'http://genomernai.de/GenomeRNAi/genedetails/'
 biogpsorg_url = 'http://biogps.org/#goto=genereport&id='
 genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='
+ucsc_url = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position='
 
 # http header
 http_header = 'Content-Type: text/html Connection: keep-alive'
