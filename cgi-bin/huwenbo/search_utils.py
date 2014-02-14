@@ -449,3 +449,49 @@ def entrez2symbol(gene_ids_list):
             id_sym[entrez_id] = gene_sym
     
     return id_sym
+
+########################### GWAS CATALOG STUFF #################################
+# print info list
+def print_nhgri_gwas_info_list(info_list):
+    print """
+        <div>
+            <b>Gene GWAS Catalog Info</b>
+            <button class="show_hide" type="button">hide</button>
+            <br/>
+    """
+
+    # print table header
+    print '<table class="info_table">'
+    print """
+        <tr>
+            <td class="gwas_gene">Reported Gene</td>
+            <td class="gwas_title">Publication</td>
+            <td class="gwas_trait">Disease/Trait</td>
+            <td>Region</td>
+            <td class="gwas_snp">Strongest SNP-Risk Allele</td>
+            <td>P-value</td>
+        </tr>
+    """
+    for info_dict in info_list:
+        date = info_dict['date']
+        link = info_dict['link']
+        study = info_dict['study']
+        trait = info_dict['trait']
+        region = info_dict['region']
+        reported = info_dict['reported']
+        mapped = info_dict['mapped']
+        snp_allele = info_dict['snp_allele']
+        pval = info_dict['pval']
+        print '<tr>'
+        print '<td class="gwas_gene">%s</td>' % reported
+        print '<td class="gwas_title"><a href="%s">%s</a></td>' % (link, study)
+        print '<td class="gwas_trait">%s</td>' % trait
+        print '<td>%s</td>' % region
+        print '<td class="gwas_snp">%s</td>' % snp_allele
+        print '<td>%s</td>' % pval
+        print '</tr>'
+    print """
+        </table>
+        </div>
+        <br/>
+    """

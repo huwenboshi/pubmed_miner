@@ -151,7 +151,8 @@ for i in xrange(len(gene_ids_list)):
     """
     
     # print gene gwas info table
-    nhgri_gwas_search_and_display(con, id_sym[gene_id])
+    gwas_info_list = search_nhgri_gwas_catalog(con, id_sym[gene_id])
+    print_nhgri_gwas_info_list(gwas_info_list)
      
     # search result for tiab search
     if(tiab_only):
