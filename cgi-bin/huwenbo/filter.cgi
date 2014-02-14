@@ -65,18 +65,10 @@ print """
         </script>
     </head>
     <body>
-        <h1>
-            PubMed Miner
-        </h1>
         <h2>
-            Please confirm your query before submitting to PubMed
+            Filter Result
         </h2>
-        
-        <button id="confirm_btn">confirm</button>
-        <br/>
-        <br/>
         <a href="../../huwenbo/index.html">Make Another Search</a>
-        <br/>
         <br/>
         <hr/>
 """
@@ -150,8 +142,8 @@ print '<tr>'
 print '<td><b>Search scope</b></td><td>%s</td>' % search_scope
 print '</tr>'
 print '</table>'
-
 print '<br/>'
+print '<button id="confirm_btn">search</button>'
 print '<hr/>'
 
 print_ewas_query_result(ewas_query_result)
