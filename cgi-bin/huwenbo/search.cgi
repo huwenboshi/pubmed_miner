@@ -9,9 +9,9 @@ import sys
 import codecs
 import os
 
-from utils import *
+from search_utils import *
 from consts import *
-from genedb import *
+from db_utils import *
 
 sys.path.append('./httpagentparser-1.5.1')
 import httpagentparser
