@@ -9,6 +9,7 @@ import sys
 import codecs
 import os
 
+from utils import *
 from search_utils import *
 from consts import *
 from db_utils import *
@@ -19,7 +20,7 @@ import httpagentparser
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
-con = connect_db('/home/huwenbo/pubmed_miner_db/pubmed_miner.db')
+con = connect_db(db_loc)
 
 ########################### HTTP HTML HEADER ###################################
 
@@ -65,7 +66,7 @@ terms = ''
 tiab_only = True
 if('terms' in form):
     terms = form['terms'].value
-terms_list = sorted(terms.split())
+terms_list = sorted(list(set([term.strip() for term in terms.split()])))
 if('tiab_only' not in form):
     tiab_only = False
 

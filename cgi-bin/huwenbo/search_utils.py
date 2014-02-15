@@ -135,6 +135,7 @@ def get_webenv_querykey(gene_ids_list, terms_list):
 
     # download WebEnv and QueryKey
     terms_qstr = 'term='+'+OR+'.join([s+"[TIAB]" for s in terms_list])
+    terms_qstr = terms_qstr.replace(' ', '+')
     gene_ids_qstr = 'id='+'&id='.join(gene_ids_list)
     qstr_url = elink_url+dbfrom_db_lknm_cmd+'&'+gene_ids_qstr+'&'+terms_qstr
     abstract_elink = urllib2.urlopen(qstr_url)
@@ -382,75 +383,8 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
     
     return gene_term_count
 
-########################### ID CONVERSION STUFF ################################
-
-# convert gene symbol to entrez id
-def symbol2entrez(gene_symbols_list):
-    
-    # get conversion data from biomart
-    xml_query = """<?xml version="1.0" encoding="UTF-8"?> \
-        <!DOCTYPE Query> \
-        <Query  virtualSchemaName = "default" formatter = "TSV" header = "0" \
-         uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >	\
-	        <Dataset name = "hsapiens_gene_ensembl" interface = "default" > \
-		        <Filter name = "hgnc_symbol" value = "%s"/> \
-		        <Attribute name = "hgnc_symbol" /> \
-		        <Attribute name = "entrezgene" /> \
-	        </Dataset> \
-        </Query>""" % ','.join(gene_symbols_list)
-    url = 'http://www.ensembl.org/biomart/martservice?'
-    values = {'query' : xml_query}
-    data = urllib.urlencode(values)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    the_page = response.read()
-    
-    # parse gene id mapping
-    sym_id = dict()
-    lines = the_page.split('\n')
-    for line in lines:
-        if(len(line) > 0):
-            cols = line.split('\t')
-            gene_sym = cols[0]
-            entrez_id = cols[1]
-            sym_id[gene_sym] = entrez_id
-    
-    return sym_id
-
-# convert entrez to gene symbol
-def entrez2symbol(gene_ids_list):
-    
-    # get conversion data from biomart
-    xml_query = """<?xml version="1.0" encoding="UTF-8"?> \
-        <!DOCTYPE Query> \
-        <Query  virtualSchemaName = "default" formatter = "TSV" header = "0" \
-         uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >	\
-	        <Dataset name = "hsapiens_gene_ensembl" interface = "default" > \
-		        <Filter name = "entrezgene" value = "%s"/> \
-		        <Attribute name = "entrezgene" /> \
-		        <Attribute name = "hgnc_symbol" /> \
-	        </Dataset> \
-        </Query>""" % ','.join(gene_ids_list)
-    url = 'http://www.ensembl.org/biomart/martservice?'
-    values = {'query' : xml_query}
-    data = urllib.urlencode(values)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    the_page = response.read()
-    
-    # parse gene id mapping
-    id_sym = dict()
-    lines = the_page.split('\n')
-    for line in lines:
-        if(len(line) > 0):
-            cols = line.split('\t')
-            entrez_id = cols[0]
-            gene_sym = cols[1]
-            id_sym[entrez_id] = gene_sym
-    
-    return id_sym
-
 ########################### GWAS CATALOG STUFF #################################
+
 # print info list
 def print_nhgri_gwas_info_list(info_list):
     print """

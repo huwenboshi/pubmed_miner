@@ -24,6 +24,9 @@ ucsc_url = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position='
 http_header = 'Content-Type: text/html Connection: keep-alive'
 http_header_mac = 'HTTP/1.1 Content-Type: text/html Connection: keep-alive'
 
+# database
+db_loc = '/home/huwenbo/pubmed_miner_db/pubmed_miner.db'
+
 # html header
 html_header = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 

@@ -11,6 +11,7 @@ import os
 
 from consts import *
 from db_utils import *
+from filter_utils import *
 
 sys.path.append('./httpagentparser-1.5.1')
 import httpagentparser
@@ -53,8 +54,10 @@ print """
                 display: none;
             }
         </style>
-        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js">
+        </script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js">
+        </script>
         <script>
             $(document).ready(function(){
                 $('#confirm_btn').live('click', function() {
@@ -89,6 +92,7 @@ gene_exp_pval = form.getvalue("gene_exp_pval")
 protein_exp_pval = form.getvalue("protein_exp_pval")
 trait_pval = form.getvalue("trait_pval")
 trait_names = form.getlist("trait_names")
+curated_terms = form.getlist("curated_terms")
 
 id_type = form.getvalue("id_type")
 user_genes = form.getvalue("user_genes")
@@ -98,24 +102,37 @@ search_scope = form.getvalue("search_scope")
 
 ############################## Cet Query Result ################################
 
+# get genes from database
 ewas_query_result = get_ewas_query_result(gene_exp_pval, protein_exp_pval,
     trait_pval, max_distance, trait_names, con, assoc_logic_sel)
 
+# get user genes
 gene_list = ewas_query_result[3]
-user_genes_list = user_genes.split()
 if(user_genes != None):
+    user_genes_list = user_genes.split()
+    # conver user gene to entrez id if it's gene symbol
+    if(id_type == 'GENE_SYM'):
+        sym_id_map = symbol2entrez(user_genes_list)
+        user_genes_list = list(sym_id_map.values())
     for gene in user_genes_list:
         gene_list.add(gene)
 gene_list = list(gene_list)
 
-user_terms_list = set()
-if(user_terms != None):
-    user_terms_list_tmp = user_terms.split('\n')
-    for term in user_terms_list_tmp:
-        term = term.strip()
-        user_terms_list.add(term)
-user_terms_list = list(user_terms_list)
+# get curated terms
+all_terms_list = set()
+if(curated_terms != None):
+    for term in curated_terms:
+        all_terms_list.add(term.strip())
 
+# get user terms
+if(user_terms != None):
+    user_terms_list = user_terms.split('\n')
+    for term in user_terms_list:
+        term = term.strip()
+        all_terms_list.add(term)
+all_terms_list = list(all_terms_list)
+
+# check user search scope
 if(search_scope == 'TIAB'):
     search_scope = 'Title and abstract'
 else:
@@ -135,7 +152,7 @@ print '<tr>'
 print '<td><b>Number of genes</b></td><td>%d</td>' % len(gene_list)
 print '</tr>'
 print '<tr>'
-print '<td><b>Number of terms</b></td><td>%d</td>' % len(user_terms_list)
+print '<td><b>Number of terms</b></td><td>%d</td>' % len(all_terms_list)
 print '</tr>'
 print '<tr>'
 print '<td><b>Search scope</b></td><td>%s</td>' % search_scope
@@ -156,9 +173,9 @@ for i in xrange(len(gene_list)):
         genes_form_str += '\n'
 
 terms_form_str =''
-for i in xrange(len(user_terms_list)):
-    terms_form_str += user_terms_list[i]
-    if(i < len(user_terms_list)-1):
+for i in xrange(len(all_terms_list)):
+    terms_form_str += all_terms_list[i].strip()
+    if(i < len(all_terms_list)-1):
             terms_form_str += '\n'
 
 print """

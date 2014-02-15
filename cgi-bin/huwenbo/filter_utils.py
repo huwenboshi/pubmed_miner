@@ -1,3 +1,5 @@
+from consts import *
+
 # display ewas query result
 def print_ewas_query_result(ewas_query_result):
     
