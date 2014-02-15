@@ -40,7 +40,7 @@ def search_nhgri_gwas_catalog(con, genesym):
         info_dict['study'] = content[6]
         info_dict['trait'] = content[7]
         info_dict['region'] = content[10]
-        info_dict['reported'] = content[13].replace('[','').replace(']','\n')
+        info_dict['reported'] = content[13].replace('[','').replace(']','<br/>')
         info_dict['mapped'] = content[14]
         info_dict['snp_allele'] = content[20]
         info_dict['pval'] = content[27]

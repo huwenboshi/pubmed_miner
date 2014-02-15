@@ -7,15 +7,19 @@ def print_ewas_query_result(ewas_query_result):
     gene_exp_result = ewas_query_result[0]
     print '<h3>Genes implicated by CG methylations '
     print 'associated with gene expression</h3>'
-    print '<table>'
-    print """<tr>
-                <th>mCG genome-wide<br/> position</th>
+    print '<table id="ewas_gene_exp_tbl" class="tablesorter" >'
+    print """
+            <thead>
+            <tr>
+                <th>mCG genome-wide position</th>
                 <th>1Mb-window</th>
-                <th>Implicated mouse<br/>gene probe ID</th>
+                <th>Implicated mouse gene probe ID</th>
                 <th>Gene position</th>
                 <th>p-value</th>
-                <th>Human ortholog<br/>entrez ID</th>
-            </tr>"""
+                <th>Human ortholog entrez ID</th>
+            </tr>
+            </thead>
+            <tbody>"""
     for result in gene_exp_result:
         print '<tr>'
         
@@ -41,7 +45,9 @@ def print_ewas_query_result(ewas_query_result):
         # p-value, human entrez gene id
         print '<td>%s</td><td>%s</td>' % (result[0], result[18])
         print '</tr>'
-    print '</table>'
+    print """
+        </tbody>
+        </table>"""
     
     print '<br/>'
     print '<hr/>'
@@ -50,15 +56,19 @@ def print_ewas_query_result(ewas_query_result):
     prot_exp_result = ewas_query_result[1]
     print '<h3>Genes implicated by CG methylations associated '
     print 'with protein expression</h3>'
-    print '<table>'
-    print """<tr>
+    print '<table id="ewas_prot_exp_tbl" class="tablesorter">'
+    print """
+            <thead>
+            <tr>
                 <th>mCG genome-wide<br/> position</th>
                 <th>1Mb-window</th>
                 <th>Implicated mouse<br/>gene entrez ID</th>
                 <th>Gene position</th>
                 <th>p-value</th>
                 <th>Human ortholog<br/>entrez ID</th>
-            </tr>"""
+            </tr>
+            </thead>
+            <tbody>"""
     for result in prot_exp_result:
         print '<tr>'
         # mCG 
@@ -83,7 +93,9 @@ def print_ewas_query_result(ewas_query_result):
         # p-value, human entrez gene id
         print '<td>%s</td><td>%s</td>' % (result[0], result[18])
         print '</tr>'
-    print '</table>'
+    print """
+        </tbody>
+        </table>"""
     
     print '<br/>'
     print '<hr/>'
@@ -92,8 +104,10 @@ def print_ewas_query_result(ewas_query_result):
     trait_exp_result = ewas_query_result[2]
     print '<h3>Genes implicated by CG methylations associated '
     print 'with clinical and metabolite trait</h3>'
-    print '<table>'
-    print """<tr>
+    print '<table id="ewas_trait_tbl" class="tablesorter">'
+    print """
+            <thead>
+            <tr>
                 <th>mCG genome-wide<br/>position</th>
                 <th>1-Mb window</th>
                 <th>Implicated mouse<br/>gene transcript ID</th>
@@ -102,7 +116,9 @@ def print_ewas_query_result(ewas_query_result):
                 <th>Phenotype class</th>
                 <th>p-value</th>
                 <th>Human ortholog<br/>entrez ID</th>
-            </tr>"""
+            </tr>
+            </thead>
+            <tbody>"""
     for result in trait_exp_result:
         print '<tr>'
         
@@ -128,4 +144,6 @@ def print_ewas_query_result(ewas_query_result):
         print '<td>%s</td><td>%s</td>' % (result[2], result[3])
         print '<td>%s</td><td>%s</td>' % (result[0], result[20])
         print '</tr>'
-    print '</table>'
+    print """
+        </tbody>
+        </table>"""
