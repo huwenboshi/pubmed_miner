@@ -19,7 +19,7 @@ import httpagentparser
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
-con = connect_db('/home/huwenbo/pubmed_miner_db/pubmed_miner.db')
+con = connect_db(db_loc)
 
 ########################### HTTP HTML HEADER ###################################
 
@@ -39,12 +39,12 @@ print """
             PubMed Miner - Gene Filter Result
         </title>
         <style type="text/css">
-            table {
+            #summary_tbl {
                 border-bottom: 1px Solid Black;         
                 border-right: 1px Solid Black;         
                 border-collapse : collapse;  
             }
-            table td, table th {    
+            #summary_tbl td, #summary_tbl th {    
                 border-left: 1px Solid Black;         
                 border-top: 1px Solid Black;              
                 border-bottom: 1px Solid Black;    
@@ -54,12 +54,75 @@ print """
                 display: none;
             }
         </style>
-        <script src="http://code.jquery.com/jquery-1.10.1.min.js">
+        <link rel="stylesheet" 
+            href="../../huwenbo/table_sorter/themes/blue/style.css" />
+        <script type="text/javascript"
+                src="../../huwenbo/table_sorter/jquery-latest.js">
         </script>
-        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js">
+        <script type="text/javascript"
+                src="../../huwenbo/table_sorter/jquery.tablesorter.js">
         </script>
-        <script>
+        <script type="text/javascript">
             $(document).ready(function(){
+            
+                ///////// table sorter for ewas gene /////////
+                $.tablesorter.addParser({
+                    id: 'ewas_gene_exp_pval',
+                    is: function(s) {
+                        return false;
+                    },
+                    format: function(text, table, cell) {
+                        return parseFloat(text);
+                    },
+                    type: 'numeric'
+                });
+                $('#ewas_gene_exp_tbl').tablesorter({
+                    headers: {
+                        4: {
+                            sorter: 'ewas_gene_exp_pval'
+                        }
+                    }
+                });
+                
+                ///////// table sorter for ewas prot /////////
+                $.tablesorter.addParser({
+                    id: 'ewas_prot_exp_pval',
+                    is: function(s) {
+                        return false;
+                    },
+                    format: function(text, table, cell) {
+                        return parseFloat(text);
+                    },
+                    type: 'numeric'
+                });
+                $('#ewas_prot_exp_tbl').tablesorter({
+                    headers: {
+                        4: {
+                            sorter: 'ewas_prot_exp_pval'
+                        }
+                    }
+                });
+                
+                ///////// table sorter for ewas trait /////////
+                $.tablesorter.addParser({
+                    id: 'ewas_trait_pval',
+                    is: function(s) {
+                        return false;
+                    },
+                    format: function(text, table, cell) {
+                        return parseFloat(text);
+                    },
+                    type: 'numeric'
+                });
+                $('#ewas_trait_tbl').tablesorter({
+                    headers: {
+                        4: {
+                            sorter: 'ewas_trait_pval'
+                        }
+                    }
+                });
+                
+                ///////// submit button /////////
                 $('#confirm_btn').live('click', function() {
                     $("#user_input_form").submit();
                 });
@@ -147,7 +210,7 @@ print """
     </h3>
 """
 
-print '<table>'
+print '<table id="summary_tbl">'
 print '<tr>'
 print '<td><b>Number of genes</b></td><td>%d</td>' % len(gene_list)
 print '</tr>'
@@ -179,25 +242,25 @@ for i in xrange(len(all_terms_list)):
             terms_form_str += '\n'
 
 print """
-        <form id="user_input_form" name="user_input" target="_blank"
+        <form id="user_input_form" name="user_input" target="_blank" 
             action="./search.cgi" method="post" style="display:none">
                 
-            <input type="radio" id="gene_entrez"
-                name="id_type" value="entrez_id" checked>Entrez ID
+            <input type="radio" id="gene_entrez" name="id_type" 
+                value="entrez_id" checked />Entrez ID
                    
-            <input type="radio" id="gene_sym"
-                name="id_type" value="gene_sym" >Gene symbol
+            <input type="radio" id="gene_sym" name="id_type" 
+                value="gene_sym" />Gene symbol
             
-            <textarea id="gene_txt" name="genes"
+            <textarea id="gene_txt" name="genes" 
                 rows="5" cols="20" >%s</textarea>
             
-            <input type="checkbox" name="expand_term">
+            <input type="checkbox" name="expand_term" />
             
-            <textarea id="terms_txt" name="terms"
+            <textarea id="terms_txt" name="terms" 
                 rows="5" cols="20">%s</textarea>
             
-            <input type="checkbox" name="tiab_only" checked="checked"> 
-    </form>
+            <input type="checkbox" name="tiab_only" checked="checked"/> 
+        </form>
 """ % (genes_form_str, terms_form_str)
 
 
