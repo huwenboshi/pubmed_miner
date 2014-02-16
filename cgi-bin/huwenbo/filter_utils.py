@@ -1,5 +1,45 @@
 from consts import *
 
+# get ewas query result supporing information summary
+def get_ewas_gene_supporting_info(ewas_query_result):
+    
+    gene_assoc_pos = dict()
+    
+    # for gene expression
+    gene_exp_result = ewas_query_result[0]
+    for result in gene_exp_result:
+        gene_id = result[18]
+        mcg_gw_pos = result[7]
+        if(gene_id not in gene_assoc_pos):
+            gene_assoc_pos[gene_id] = dict()
+        if('gene_exp' not in gene_assoc_pos[gene_id]):
+            gene_assoc_pos[gene_id]['gene_exp'] = set()
+        gene_assoc_pos[gene_id]['gene_exp'].add(mcg_gw_pos)
+    
+    # for protein expression
+    prot_exp_result = ewas_query_result[1]
+    for result in prot_exp_result:
+        gene_id = result[18]
+        mcg_gw_pos = result[7]
+        if(gene_id not in gene_assoc_pos):
+            gene_assoc_pos[gene_id] = dict()
+        if('prot_exp' not in gene_assoc_pos[gene_id]):
+            gene_assoc_pos[gene_id]['prot_exp'] = set()
+        gene_assoc_pos[gene_id]['prot_exp'].add(mcg_gw_pos)
+    
+    # for trait
+    trait_exp_result = ewas_query_result[2]
+    for result in trait_exp_result:
+        gene_id = result[20]
+        mcg_gw_pos = result[6]
+        if(gene_id not in gene_assoc_pos):
+            gene_assoc_pos[gene_id] = dict()
+        if('trait' not in gene_assoc_pos[gene_id]):
+            gene_assoc_pos[gene_id]['trait'] = set()
+        gene_assoc_pos[gene_id]['trait'].add(mcg_gw_pos)
+    
+    return gene_assoc_pos
+
 # display ewas query result
 def print_ewas_query_result(ewas_query_result):
     
@@ -7,7 +47,7 @@ def print_ewas_query_result(ewas_query_result):
     gene_exp_result = ewas_query_result[0]
     print '<h3>Genes implicated by CG methylations '
     print 'associated with gene expression</h3>'
-    print '<table id="ewas_gene_exp_tbl" class="tablesorter" >'
+    print '<table id="ewas_gene_exp_tbl" class="tablesorter">'
     print """
             <thead>
             <tr>

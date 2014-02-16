@@ -102,8 +102,15 @@
             <b>Distance between gene and mCG/SNP site</b>
             <br/>
             <a>Less than </a>
+            <!--
             <input name="max_distance" type="text" style="width: 100px"/>
-            <a>bp</a>
+            -->
+            <select name="max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
             <br/>
             <br/>
 
@@ -114,34 +121,74 @@
                 <option value="INTERSECTION">intersection</option>
                 <option value="UNION">union</option>
             </select>
-            <b> of the set of genes found by the following assciations.</b>
+            <b> of the set of genes found by the following 
+            selected assciations.</b>
             <br/>
             <br/>
 
 <!--///////////////////////// Gene Expression  //////////////////////////////-->
-
+            
+            <input type="checkbox" name="ewas_db" value="db_ewas_gene_exp"/>
             <b>Association with gene expression</b>
             <br/>
             <a>p-value less than 10^(-<a/>
+            <!--
             <input name="gene_exp_pval" style="width: 25px" type="text" />
+            -->
+            <select name="gene_exp_pval">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+            </select>
             <a>)</a>
             <br/><br/>
 
 <!--///////////////////////// Protein Expression ////////////////////////////-->
             
+            <input type="checkbox" name="ewas_db" value="db_ewas_prot_exp"/>
             <b>Association with protein expression</b>
             <br/>
             <a>p-value less than 10^(-<a/>
+            <!--
             <input name="protein_exp_pval" style="width: 25px" type="text" />
+            -->
+            <select name="protein_exp_pval">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+            </select>
             <a>)</a>
             <br/><br/>
 
 <!--////////////////////////// Clinical Trait ///////////////////////////////-->
             
+            <input type="checkbox" name="ewas_db" value="db_ewas_trait"/>
             <b>Association with clinical and metabolite traits</b>
             <br/>
             <a>p-value less than 10^(-<a/>
+            <!--
             <input name="trait_pval" style="width: 25px" type="text" />
+            -->
+            <select name="trait_pval">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+            </select>
             <a>)</a>
             <br/>
             <a>Please select a list of traits you are interested in: </a>
@@ -543,7 +590,8 @@
             <b>Please enter entrez gene IDs or HGNC gene symbols here</b>
             <br/>
             <input type="radio" id="gene_entrez"
-                   name="id_type" value="ENTREZ_ID" checked>Entrez ID
+                   name="id_type" value="ENTREZ_ID" checked>
+                   Entrez ID(recommended)
             <input type="radio" id="gene_sym"
                    name="id_type" value="GENE_SYM" >Gene symbol
             <br/>

@@ -12,6 +12,7 @@ import os
 from consts import *
 from db_utils import *
 from filter_utils import *
+from utils import *
 
 sys.path.append('./httpagentparser-1.5.1')
 import httpagentparser
@@ -39,17 +40,7 @@ print """
             PubMed Miner - Gene Filter Result
         </title>
         <style type="text/css">
-            #summary_tbl {
-                border-bottom: 1px Solid Black;         
-                border-right: 1px Solid Black;         
-                border-collapse : collapse;  
-            }
-            #summary_tbl td, #summary_tbl th {    
-                border-left: 1px Solid Black;         
-                border-top: 1px Solid Black;              
-                border-bottom: 1px Solid Black;    
-                border-right:none;  
-            }
+
             #user_input_form {
                 display: none;
             }
@@ -116,11 +107,14 @@ print """
                 });
                 $('#ewas_trait_tbl').tablesorter({
                     headers: {
-                        4: {
+                        6: {
                             sorter: 'ewas_trait_pval'
                         }
                     }
                 });
+                
+                ////////// table sorter for imp_summary_tbl /////////
+                $('#imp_summary_tbl').tablesorter();
                 
                 ///////// submit button /////////
                 $('#confirm_btn').live('click', function() {
@@ -147,16 +141,20 @@ form = cgi.FieldStorage()
 imp_types = form.getlist("imp_type")
 imp_type_logic_sel = form.getvalue("imp_type_logic_sel")
 
+# distance threshold between mCG site and implicated gene
 max_distance = form.getvalue("max_distance")
 
+# intersect of union the genes found by different associations
 assoc_logic_sel = form.getvalue("assoc_logic_sel")
 
+# get associations
 gene_exp_pval = form.getvalue("gene_exp_pval")
 protein_exp_pval = form.getvalue("protein_exp_pval")
 trait_pval = form.getvalue("trait_pval")
 trait_names = form.getlist("trait_names")
 curated_terms = form.getlist("curated_terms")
 
+# get user additional input
 id_type = form.getvalue("id_type")
 user_genes = form.getvalue("user_genes")
 user_terms = form.getvalue("user_terms")
@@ -168,6 +166,9 @@ search_scope = form.getvalue("search_scope")
 # get genes from database
 ewas_query_result = get_ewas_query_result(gene_exp_pval, protein_exp_pval,
     trait_pval, max_distance, trait_names, con, assoc_logic_sel)
+
+# get gene supporting loci information
+ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
 
 # get user genes
 gene_list = ewas_query_result[3]
@@ -223,6 +224,45 @@ print '</tr>'
 print '</table>'
 print '<br/>'
 print '<button id="confirm_btn">search</button>'
+print '<hr/>'
+
+# print gene implication summary
+print """
+    <h3>
+        Gene implication summary
+    </h3>
+"""
+
+print '<table id="imp_summary_tbl" class="tablesorter">'
+print '<thead>'
+print """<tr>
+            <th>Human gene Entrez ID</th>
+            <th>Number of EWAS loci<br/>associated with gene expression</th>
+            <th>Number of EWAS loci<br/>associated with protein expression</th>
+            <th>Number of EWAS loci<br/>associated with phenotypes</th>
+            <th>Total number of EWAS loci </th>
+         </tr>"""
+print '</thead>'
+print '<tbody>'
+
+for key in ewas_gene_support_info:
+    assoc_pos = ewas_gene_support_info[key]
+    num_ewas_gene_exp = safe_len(safe_getval(assoc_pos, 'gene_exp'))
+    num_ewas_prot_exp = safe_len(safe_getval(assoc_pos, 'prot_exp'))
+    num_ewas_trait = safe_len(safe_getval(assoc_pos, 'trait'))
+    num_ewas_tot = num_ewas_gene_exp + num_ewas_prot_exp + num_ewas_trait
+    print '<tr>'
+    print '<td>%d</td>' % key
+    print '<td>%d</td>' % num_ewas_gene_exp
+    print '<td>%d</td>' % num_ewas_prot_exp
+    print '<td>%d</td>' % num_ewas_trait
+    print '<td>%d</td>' % num_ewas_tot
+    
+    print '</tr>'
+    
+print '</tbody>'
+print '</table>'
+
 print '<hr/>'
 
 print_ewas_query_result(ewas_query_result)

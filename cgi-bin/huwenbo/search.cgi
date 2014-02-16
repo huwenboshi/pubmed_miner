@@ -58,9 +58,6 @@ if(id_type == 'gene_sym'):
 else:
     gene_ids = form['genes'].value
     gene_ids_list = sorted(gene_ids.split(), key=int)
-    id_sym = entrez2symbol(gene_ids_list)
-    for key in id_sym:
-        sym_id[id_sym[key]] = key
 
 terms = ''
 tiab_only = True
@@ -74,6 +71,10 @@ if('tiab_only' not in form):
 
 # download gene summary info
 genes_info_list = get_gene_info(gene_ids_list)
+
+# parse gene id gene symbol conversion
+for gene_info in genes_info_list:
+    id_sym[gene_info['id']] = gene_info['name']
 
 # get all gene related article count
 genes_pmids_cnt = get_genes_pmid_count(gene_ids_list)

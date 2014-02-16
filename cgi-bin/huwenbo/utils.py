@@ -2,6 +2,20 @@ import urllib
 import urllib2
 import xml.etree.ElementTree as ET
 
+########################### CONTAINER STUFF ####################################
+
+# get length safely
+def safe_len(container):
+    if(container == None):
+        return 0
+    return len(container)
+
+# get dictionary value safely
+def safe_getval(container, key):
+    if(key in container):
+        return container[key]
+    return None
+
 ########################### ID CONVERSION STUFF ################################
 
 # convert gene symbol to entrez id
@@ -31,9 +45,10 @@ def symbol2entrez(gene_symbols_list):
     for line in lines:
         if(len(line) > 0):
             cols = line.split('\t')
-            gene_sym = cols[0]
-            entrez_id = cols[1]
-            sym_id[gene_sym] = entrez_id
+            if(len(cols) > 1):
+                gene_sym = cols[0]
+                entrez_id = cols[1]
+                sym_id[gene_sym] = entrez_id
     
     return sym_id
 
@@ -64,8 +79,9 @@ def entrez2symbol(gene_ids_list):
     for line in lines:
         if(len(line) > 0):
             cols = line.split('\t')
-            entrez_id = cols[0]
-            gene_sym = cols[1]
-            id_sym[entrez_id] = gene_sym
+            if(len(cols) > 1):
+                entrez_id = cols[0]
+                gene_sym = cols[1]
+                id_sym[entrez_id] = gene_sym
     
     return id_sym
