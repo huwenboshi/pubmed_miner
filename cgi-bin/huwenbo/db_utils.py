@@ -227,7 +227,20 @@ def get_ewas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
 
 ############################### GWAS QUERY #####################################
 
+# remove query result if the human gene in the result is not in the gene set
+def filter_query_result(query_result, gene_set):
+    filtered_result = []
+    for result in query_result:
+        if(result[len(result)-1] in gene_set):
+            filtered_result.append(result)
+    return filtered_result
+
 # extract human entrez gene ids 
+def extract_human_entrez_id(query_result):
+    gene_id_set = set()
+    for result in query_result:
+        gene_id_set.add(result[len(result)-1])
+    return gene_id_set
 
 # get genes from single gene expression table
 def get_gwas_gene_exp_query_result_single(cursor, tbl_nm, pval, max_distance):
@@ -260,10 +273,63 @@ def get_gwas_gene_exp_query_result(con, pval, max_distance):
     
     return gwas_gene_exp_result_cis + gwas_gene_exp_result_trans
 
-# get gwas query result from all gwas tables
-def get_gwas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
-        max_distance, trait_names, con, assoc_logic_sel, tables):
+# get gwas genes associated with protein expression
+def get_gwas_prot_exp_query_result(con, pval, max_distance):
+
+    if(con == None):
+        return []
+    c = con.cursor()
     
-    # get gene expression result
-    gene_exp_human_entrez_set = set()
-    gene_exp_result_tmp = []
+    gwas_prot_exp_result = []
+    query_tmp = make_gwas_pval_dist_query('gwas_liver_protein_trans_eqtl',
+        pval, max_distance)
+    query = 'create temp table gwas_liver_protein_trans_eqtl_tmp '
+    query += ' as %s; ' % query_tmp
+    query_result = c.execute(query)
+    query = 'select * from gwas_liver_protein_trans_eqtl_tmp join '
+    query += ' mouse_sym_human_entrez '
+    query += ' on gene_symbol = mouse_gene_sym;'
+    query_result = c.execute(query)
+    
+    for result in query_result:
+        gwas_prot_exp_result.append(result)
+    
+    return gwas_prot_exp_result
+
+# get gwas query result from all gwas tables
+def get_gwas_query_result(gene_exp_pval, prot_exp_pval,
+        gene_exp_max_distance, prot_exp_max_distance, con,
+        assoc_logic_sel, tables):
+    
+    # get result from database
+    gene_exp_result_tmp = get_gwas_gene_exp_query_result(con, gene_exp_pval,
+        gene_exp_max_distance)
+    gene_exp_human_entrez_set = extract_human_entrez_id(gene_exp_result_tmp)
+    prot_exp_result_tmp = get_gwas_prot_exp_query_result(con, prot_exp_pval,
+        prot_exp_max_distance)
+    prot_exp_human_entrez_set = extract_human_entrez_id(prot_exp_result_tmp)
+    
+    # map between table name and gene set
+    tbl_nm_gene_set = dict()
+    tbl_nm_gene_set['tbl_gwas_gene_exp'] = gene_exp_human_entrez_set
+    tbl_nm_gene_set['tbl_gwas_prot_exp'] = prot_exp_human_entrez_set
+    
+    # intersect or union the gene ids based on the user input
+    final_entrez_set = set()
+    if(assoc_logic_sel == 'INTERSECTION'):
+        tables_list = list(tables)
+        if(len(tables_list) > 0):
+            final_entrez_set = tbl_nm_gene_set[tables_list[0]]
+        for i in xrange(1, len(tables_list)):
+            final_entrez_set = final_entrez_set.intersection(
+                tbl_nm_gene_set[tables_list[i]])
+    elif((assoc_logic_sel == 'UNION')):
+        for tbl in tables:
+            final_entrez_set = final_entrez_set.union(
+                tbl_nm_gene_set[tbl])
+    
+    # get final result
+    gene_exp_result = filter_query_result(gene_exp_result_tmp,final_entrez_set)
+    prot_exp_result = filter_query_result(prot_exp_result_tmp,final_entrez_set)
+    
+    return (gene_exp_result, prot_exp_result, final_entrez_set)

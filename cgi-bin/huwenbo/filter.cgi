@@ -183,11 +183,16 @@ ewas_query_result = get_ewas_query_result(ewas_gene_exp_pval,
     ewas_prot_exp_max_distance, ewas_trait_max_distance, trait_names, con,
     ewas_assoc_logic_sel, ewas_tables)
 
+# get genes from data base gwas
+gwas_query_result get_gwas_query_result(gwas_gene_exp_pval, gwas_protein_exp_pval,
+        gwas_gene_exp_max_distance, gwas_prot_exp_max_distance, con,
+        gwas_assoc_logic_sel, gwas_tables)
+
 # get gene supporting loci information ewas
 ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
 
 # get genes from database gwas
-# print get_gwas_gene_exp_query_result(con, gene_exp_pval, max_distance)
+
 
 # get user genes
 gene_list = ewas_query_result[3]
