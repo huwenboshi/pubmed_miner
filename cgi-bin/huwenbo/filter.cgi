@@ -137,8 +137,10 @@ print """
 # get form data
 form = cgi.FieldStorage()
 
-# get implication type and logic relation between selections
-imp_types = form.getlist("imp_type")
+# get selected implication types
+imp_types = form.getlist('imp_type')
+
+# get logic relation between implication types
 imp_type_logic_sel = form.getvalue("imp_type_logic_sel")
 
 # distance threshold between mCG site and implicated gene
@@ -178,24 +180,41 @@ search_scope = form.getvalue("search_scope")
 ############################## Cet Query Result ################################
 
 # get genes from database ewas
-ewas_query_result = get_ewas_query_result(ewas_gene_exp_pval, 
-    ewas_protein_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
-    ewas_prot_exp_max_distance, ewas_trait_max_distance, trait_names, con,
-    ewas_assoc_logic_sel, ewas_tables)
+ewas_query_result = ([],[],[],set())
+if('ewas_imp' in imp_types):
+    ewas_query_result = get_ewas_query_result(ewas_gene_exp_pval, 
+        ewas_protein_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
+        ewas_prot_exp_max_distance, ewas_trait_max_distance, trait_names, con,
+        ewas_assoc_logic_sel, ewas_tables)
 
 # get genes from data base gwas
-gwas_query_result get_gwas_query_result(gwas_gene_exp_pval, gwas_protein_exp_pval,
-        gwas_gene_exp_max_distance, gwas_prot_exp_max_distance, con,
-        gwas_assoc_logic_sel, gwas_tables)
+gwas_query_result = ([],[],set())
+if('gwas_imp' in imp_types):
+    gwas_query_result = get_gwas_query_result(gwas_gene_exp_pval,
+        gwas_protein_exp_pval, gwas_gene_exp_max_distance,
+        gwas_prot_exp_max_distance, con, gwas_assoc_logic_sel, gwas_tables)
+
+# combine gwas and ewas query result
+combined_query_result = dict()
+if(imp_type_logic_sel == 'INTERSECTION'):
+    combined_query_result = intersect_ewas_gwas_query_result(ewas_query_result, 
+        gwas_query_result, imp_types)
+elif(imp_type_logic_sel == 'UNION'):
+    combined_query_result = union_ewas_gwas_query_result(ewas_query_result, 
+        gwas_query_result)
+
+ewas_query_result = combined_query_result['ewas']
+gwas_query_result = combined_query_result['gwas']
+combined_entrez_id_set = combined_query_result['gene_set']
 
 # get gene supporting loci information ewas
 ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
 
-# get genes from database gwas
-
+# get gene supporting loci information gwas
+gwas_gene_support_info = get_gwas_gene_supporting_info(gwas_query_result)
 
 # get user genes
-gene_list = ewas_query_result[3]
+gene_list = combined_entrez_id_set
 if(user_genes != None):
     user_genes_list = user_genes.split()
     # conver user gene to entrez id if it's gene symbol
@@ -264,23 +283,43 @@ print """<tr>
             <th>Number of EWAS loci<br/>associated with gene expression</th>
             <th>Number of EWAS loci<br/>associated with protein expression</th>
             <th>Number of EWAS loci<br/>associated with phenotypes</th>
+            <th>Number of GWAS loci<br/>associated with gene expression</th>
+            <th>Number of GWAS loci<br/>associated with protein expression</th>
             <th>Total number of EWAS loci </th>
+            <th>Total number of GWAS loci </th>
+            <th>Total number of loci </th>
          </tr>"""
 print '</thead>'
 print '<tbody>'
 
-for key in ewas_gene_support_info:
-    assoc_pos = ewas_gene_support_info[key]
-    num_ewas_gene_exp = safe_len(safe_getval(assoc_pos, 'gene_exp'))
-    num_ewas_prot_exp = safe_len(safe_getval(assoc_pos, 'prot_exp'))
-    num_ewas_trait = safe_len(safe_getval(assoc_pos, 'trait'))
+for key in combined_entrez_id_set:
+    ewas_assoc_pos = dict()
+    if(key in ewas_gene_support_info):
+        ewas_assoc_pos = ewas_gene_support_info[key]
+    num_ewas_gene_exp = safe_len(safe_getval(ewas_assoc_pos, 'gene_exp'))
+    num_ewas_prot_exp = safe_len(safe_getval(ewas_assoc_pos, 'prot_exp'))
+    num_ewas_trait = safe_len(safe_getval(ewas_assoc_pos, 'trait'))
     num_ewas_tot = num_ewas_gene_exp + num_ewas_prot_exp + num_ewas_trait
+    
+    gwas_assoc_pos = dict()
+    if(key in gwas_gene_support_info):
+        gwas_assoc_pos = gwas_gene_support_info[key]
+    num_gwas_gene_exp = safe_len(safe_getval(gwas_assoc_pos, 'gene_exp'))
+    num_gwas_prot_exp = safe_len(safe_getval(gwas_assoc_pos, 'prot_exp'))
+    num_gwas_tot = num_gwas_gene_exp + num_gwas_prot_exp
+    
+    num_tot = num_ewas_tot + num_gwas_tot
+    
     print '<tr>'
     print '<td>%d</td>' % key
     print '<td>%d</td>' % num_ewas_gene_exp
     print '<td>%d</td>' % num_ewas_prot_exp
     print '<td>%d</td>' % num_ewas_trait
+    print '<td>%d</td>' % num_gwas_gene_exp
+    print '<td>%d</td>' % num_gwas_prot_exp
     print '<td>%d</td>' % num_ewas_tot
+    print '<td>%d</td>' % num_gwas_tot
+    print '<td>%d</td>' % num_tot
     
     print '</tr>'
     

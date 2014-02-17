@@ -1,4 +1,99 @@
 from consts import *
+from db_utils import *
+
+# take the intersection of ewas and gwas result
+def intersect_ewas_gwas_query_result(ewas_query_result,
+    gwas_query_result, implications):
+    
+    ewas_entrez_set = ewas_query_result[len(ewas_query_result)-1]
+    gwas_entrez_set = gwas_query_result[len(gwas_query_result)-1]
+
+    # map between implication type and gene set
+    imp_type_gene_set = dict()
+    imp_type_gene_set['ewas_imp'] = ewas_entrez_set
+    imp_type_gene_set['gwas_imp'] = gwas_entrez_set
+    
+    # intersect result
+    final_entrez_set = set()
+    implications_list = list(implications)
+    if(len(implications_list) > 0):
+        final_entrez_set = imp_type_gene_set[implications_list[0]]
+    for i in xrange(1, len(implications_list)):
+        final_entrez_set = final_entrez_set.intersection(
+            imp_type_gene_set[implications_list[i]])
+    
+    # filter query result ewas
+    ewas_gene_exp_result = filter_query_result(ewas_query_result[0],
+        final_entrez_set)
+    ewas_prot_exp_result = filter_query_result(ewas_query_result[1],
+        final_entrez_set)
+    ewas_trait_result = filter_query_result(ewas_query_result[2],
+        final_entrez_set)
+    
+    # filter query result gwas
+    gwas_gene_exp_result = filter_query_result(gwas_query_result[0],
+        final_entrez_set)
+    gwas_prot_exp_result = filter_query_result(gwas_query_result[1],
+        final_entrez_set)
+    
+    combined_result = dict()
+    combined_result['ewas'] = (ewas_gene_exp_result, ewas_prot_exp_result,
+        ewas_trait_result, final_entrez_set)
+    combined_result['gwas'] = (gwas_gene_exp_result, gwas_prot_exp_result,
+        final_entrez_set)
+    combined_result['gene_set'] = final_entrez_set
+    
+    return combined_result
+
+# take the union of ewas and gwas result
+def union_ewas_gwas_query_result(ewas_query_result, gwas_query_result):
+    
+    ewas_entrez_set = ewas_query_result[len(ewas_query_result)-1]
+    gwas_entrez_set = gwas_query_result[len(gwas_query_result)-1]
+
+    final_entrez_set = ewas_entrez_set.union(gwas_entrez_set)
+
+    combined_result = dict()
+    combined_result['ewas'] = ewas_query_result
+    combined_result['gwas'] = gwas_query_result
+    combined_result['gene_set'] = final_entrez_set
+    
+    return combined_result
+
+# get ewas query result supporing information summary
+def get_gwas_gene_supporting_info(gwas_query_result):
+    
+    gene_assoc_pos = dict()
+    
+    # for gene expression
+    gene_exp_result = gwas_query_result[0]
+    for result in gene_exp_result:
+        gene_id = None
+        snp_gw_pos = None
+        if(len(result) == 22):
+            snp_gw_pos = result[13]
+            gene_id = result[21]
+        elif(len(result) == 19):
+            snp_gw_pos = result[10]
+            gene_id = result[18]
+        if(gene_id not in gene_assoc_pos):
+            gene_assoc_pos[gene_id] = dict()
+        if('gene_exp' not in gene_assoc_pos[gene_id]):
+            gene_assoc_pos[gene_id]['gene_exp'] = set()
+        gene_assoc_pos[gene_id]['gene_exp'].add(snp_gw_pos)
+    
+    # for protein expression
+    prot_exp_result = gwas_query_result[1]
+    for result in prot_exp_result:
+        gene_id = result[19]
+        snp_gw_pos = result[14]
+        if(gene_id not in gene_assoc_pos):
+            gene_assoc_pos[gene_id] = dict()
+        if('prot_exp' not in gene_assoc_pos[gene_id]):
+            gene_assoc_pos[gene_id]['prot_exp'] = set()
+        gene_assoc_pos[gene_id]['prot_exp'].add(snp_gw_pos)
+    
+    return gene_assoc_pos
 
 # get ewas query result supporing information summary
 def get_ewas_gene_supporting_info(ewas_query_result):
