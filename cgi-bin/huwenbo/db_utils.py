@@ -128,7 +128,8 @@ def make_clinical_trait_ewas_query(table_name, pval, max_distance, trait_names):
 
 # make query for ewas
 def get_ewas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
-        max_distance, trait_names, con, assoc_logic_sel, tables):
+        ewas_gene_exp_max_distance, ewas_prot_exp_max_distance,
+        ewas_trait_max_distance, trait_names, con, assoc_logic_sel, tables):
         
     if(con == None):
         return ([],[],[],set())
@@ -141,7 +142,7 @@ def get_ewas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
     if('tbl_ewas_gene_exp' in tables):
         gene_exp_result_tmp = []
         query_gene_exp = make_ewas_pval_dist_query('liver_expression_ewas',
-            gene_exp_pval, max_distance)
+            gene_exp_pval, ewas_gene_exp_max_distance)
         query = ' create temp table gene_exp_tmp as %s; ' % query_gene_exp
         query_result = c.execute(query)
         query = 'select * from gene_exp_tmp join mouse_probe_human_entrez on '
@@ -158,7 +159,7 @@ def get_ewas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
     if('tbl_ewas_prot_exp' in tables):
         prot_exp_result_tmp = []
         query_prot_exp = make_ewas_pval_dist_query('liver_proteomics_ewas',
-            protein_exp_pval, max_distance)
+            protein_exp_pval, ewas_prot_exp_max_distance)
         query = ' create temp table prot_exp_tmp as %s; ' % query_prot_exp
         query_result = c.execute(query)
         query = 'select * from prot_exp_tmp join mouse_entrez_human_entrez on '
@@ -176,7 +177,7 @@ def get_ewas_query_result(gene_exp_pval, protein_exp_pval, trait_pval,
         trait_exp_result_tmp = []
         query_trait = make_clinical_trait_ewas_query(
             'clinical_metabolite_traits_ewas', trait_pval,
-            max_distance, trait_names)
+            ewas_trait_max_distance, trait_names)
         query = ' create temp table trait_tmp as %s; ' % query_trait
         query_result = c.execute(query)
         query = 'select * from trait_tmp join mouse_trans_human_entrez on '

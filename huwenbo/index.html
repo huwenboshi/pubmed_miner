@@ -23,6 +23,12 @@
             table {
                 border-collapse:collapse;
             }
+            #ewas_imp_form {
+                margin-left: 50px;
+            }
+            #gwas_imp_form {
+                margin-left: 50px;
+            }
         </style>
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
@@ -40,6 +46,18 @@
                         $(this).parent().parent().siblings(".trait_row")
                             .css({display:'table-row'});
                         $(this).html("hide traits");
+                    }
+                });
+                */
+                /*
+                $('#ewas_imp_form').css({display: 'none'});
+                $('#ewas_imp_checkbox').live('click', function() {
+                    status = $('#ewas_imp_checkbox').attr("checked");
+                    if(status == 'checked') {
+                        $('#ewas_imp_form').css({display: 'block'});
+                    }
+                    else {
+                        $('#ewas_imp_form').css({display: 'none'});
                     }
                 });
                 */
@@ -82,29 +100,23 @@
         
 <!--/////////////////////// Implication Type ////////////////////////////////-->
 
-            <b>Select implication type (at least one)</b>
-            <br/>
-            <input type="checkbox" name="imp_type" value="GWAS"/><a>SNP (GWAS)</a>
-            <br/>
-            <input type="checkbox" name="imp_type" value="EWAS"/><a>CG methylation (EWAS)</a>
-            <br/>
-            <a>If two implication types are selected, take </a>
+            <a>If more than one implication types are selected, take </a>
             <select name="imp_type_logic_sel">
                 <option value="INTERSECTION">intersection</option>
                 <option value="UNION">union</option>
             </select>
             <a> of the set of genes implicated.</a>
-            <br/>
-            <br/>
 
 <!--///////////////////////////// Proximity /////////////////////////////////-->
-            
+<!--            
             <b>Distance between gene and mCG/SNP site</b>
             <br/>
             <a>Less than </a>
+-->
             <!--
             <input name="max_distance" type="text" style="width: 100px"/>
             -->
+            <!--
             <select name="max_distance">
                 <option value="10000">10 Kb</option>
                 <option value="100000">100 Kb</option>
@@ -113,11 +125,20 @@
             </select>
             <br/>
             <br/>
+            -->
 
 <!--///////////////////////// Union or Intersectin //////////////////////////-->
 
+            <h4>
+                <input type="checkbox" name="imp_type" 
+                    id="ewas_imp_checkbox" value="ewas_imp" />
+                Implication by EWAS (mouse)
+            </h4>
+
+            <div id="ewas_imp_form">
+
             <b>Take </b>
-            <select name="assoc_logic_sel">
+            <select name="ewas_assoc_logic_sel">
                 <option value="INTERSECTION">intersection</option>
                 <option value="UNION">union</option>
             </select>
@@ -135,7 +156,7 @@
             <!--
             <input name="gene_exp_pval" style="width: 25px" type="text" />
             -->
-            <select name="gene_exp_pval">
+            <select name="ewas_gene_exp_pval">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -146,6 +167,14 @@
                 <option value="40">40</option>
             </select>
             <a>)</a>
+            <br/>
+            <a>Distance between gene and mCG/SNP site less than</a>
+            <select name="ewas_gene_exp_max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
             <br/><br/>
 
 <!--///////////////////////// Protein Expression ////////////////////////////-->
@@ -157,7 +186,7 @@
             <!--
             <input name="protein_exp_pval" style="width: 25px" type="text" />
             -->
-            <select name="protein_exp_pval">
+            <select name="ewas_protein_exp_pval">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -168,6 +197,14 @@
                 <option value="40">40</option>
             </select>
             <a>)</a>
+            <br/>
+            <a>Distance between gene and mCG/SNP site less than</a>
+            <select name="ewas_prot_exp_max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
             <br/><br/>
 
 <!--////////////////////////// Clinical Trait ///////////////////////////////-->
@@ -179,7 +216,7 @@
             <!--
             <input name="trait_pval" style="width: 25px" type="text" />
             -->
-            <select name="trait_pval">
+            <select name="ewas_trait_pval">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -190,6 +227,14 @@
                 <option value="40">40</option>
             </select>
             <a>)</a>
+            <br/>
+            <a>Distance between gene and mCG/SNP site less than</a>
+            <select name="ewas_trait_max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
             <br/>
             <a>Please select a list of traits you are interested in: </a>
             <br/>
@@ -580,6 +625,89 @@
         </td>
     </tr>
 </table>
+
+            </div>
+
+<!-- ////////////////////////////////////////////////////////////////////////-->
+<!-- /////////////////////////// GWAS PART //////////////////////////////////-->
+<!-- ////////////////////////////////////////////////////////////////////////-->
+
+            <h4>
+                <input type="checkbox" name="imp_type" value="gwas_imp" />
+                Implication by GWAS (mouse)
+            </h4>
+            <div id="gwas_imp_form">
+            <b>Take </b>
+            <select name="gwas_assoc_logic_sel">
+                <option value="INTERSECTION">intersection</option>
+                <option value="UNION">union</option>
+            </select>
+            <b> of the set of genes found by the following 
+            selected assciations.</b>
+            <br/>
+            <br/>
+
+<!--///////////////////////// Gene Expression  //////////////////////////////-->
+            
+            <input type="checkbox" name="gwas_tables" value="tbl_gwas_gene_exp"/>
+            <b>Association with gene expression</b>
+            <br/>
+            <a>p-value less than 10^(-<a/>
+            <!--
+            <input name="gene_exp_pval" style="width: 25px" type="text" />
+            -->
+            <select name="gwas_gene_exp_pval">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+            </select>
+            <a>)</a>
+            <br/>
+            <a>Distance between gene and mCG/SNP site less than</a>
+            <select name="gwas_gene_exp_max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
+            <br/><br/>
+
+<!--///////////////////////// Protein Expression ////////////////////////////-->
+            
+            <input type="checkbox" name="gwas_tables" value="tbl_gwas_prot_exp"/>
+            <b>Association with protein expression</b>
+            <br/>
+            <a>p-value less than 10^(-<a/>
+            <!--
+            <input name="protein_exp_pval" style="width: 25px" type="text" />
+            -->
+            <select name="gwas_protein_exp_pval">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+            </select>
+            <a>)</a>
+            <br/>
+            <a>Distance between gene and mCG/SNP site less than</a>
+            <select name="gwas_prot_exp_max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
+            <br/><br/>
+
+            </div>
 
 <!--/////////////////////////// User Genes //////////////////////////////////-->
 

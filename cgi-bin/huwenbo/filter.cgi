@@ -142,22 +142,35 @@ imp_types = form.getlist("imp_type")
 imp_type_logic_sel = form.getvalue("imp_type_logic_sel")
 
 # distance threshold between mCG site and implicated gene
-max_distance = form.getvalue("max_distance")
+ewas_gene_exp_max_distance = form.getvalue("ewas_gene_exp_max_distance")
+ewas_prot_exp_max_distance = form.getvalue("ewas_prot_exp_max_distance")
+ewas_trait_max_distance = form.getvalue("ewas_trait_max_distance")
+
+# distance threshold between snp site and implicated gene
+gwas_gene_exp_max_distance = form.getvalue("gwas_gene_exp_max_distance")
+gwas_prot_exp_max_distance = form.getvalue("gwas_prot_exp_max_distance")
 
 # intersect of union the genes found by different associations
-assoc_logic_sel = form.getvalue("assoc_logic_sel")
+ewas_assoc_logic_sel = form.getvalue("ewas_assoc_logic_sel")
+gwas_assoc_logic_sel = form.getvalue("gwas_assoc_logic_sel")
 
-# get associations
-gene_exp_pval = form.getvalue("gene_exp_pval")
-protein_exp_pval = form.getvalue("protein_exp_pval")
-trait_pval = form.getvalue("trait_pval")
+# get associations threshold ewas
+ewas_gene_exp_pval = form.getvalue("ewas_gene_exp_pval")
+ewas_protein_exp_pval = form.getvalue("ewas_protein_exp_pval")
+ewas_trait_pval = form.getvalue("ewas_trait_pval")
 trait_names = form.getlist("trait_names")
-curated_terms = form.getlist("curated_terms")
 ewas_tables = form.getlist("ewas_tables")
+
+# get associations threshold ewas
+gwas_gene_exp_pval = form.getvalue("gwas_gene_exp_pval")
+gwas_protein_exp_pval = form.getvalue("gwas_protein_exp_pval")
+gwas_trait_pval = form.getvalue("gwas_trait_pval")
+gwas_tables = form.getlist("gwas_tables")
 
 # get user additional input
 id_type = form.getvalue("id_type")
 user_genes = form.getvalue("user_genes")
+curated_terms = form.getlist("curated_terms")
 user_terms = form.getvalue("user_terms")
 expand_term = form.getvalue("expand_term")
 search_scope = form.getvalue("search_scope")
@@ -165,8 +178,10 @@ search_scope = form.getvalue("search_scope")
 ############################## Cet Query Result ################################
 
 # get genes from database ewas
-ewas_query_result = get_ewas_query_result(gene_exp_pval, protein_exp_pval,
-    trait_pval, max_distance, trait_names, con, assoc_logic_sel, ewas_tables)
+ewas_query_result = get_ewas_query_result(ewas_gene_exp_pval, 
+    ewas_protein_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
+    ewas_prot_exp_max_distance, ewas_trait_max_distance, trait_names, con,
+    ewas_assoc_logic_sel, ewas_tables)
 
 # get gene supporting loci information ewas
 ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
