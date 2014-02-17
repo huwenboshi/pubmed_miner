@@ -74,6 +74,13 @@ print """
                         }
                     }
                 });
+                $('#gwas_gene_exp_tbl').tablesorter({
+                    headers: {
+                        4: {
+                            sorter: 'ewas_gene_exp_pval'
+                        }
+                    }
+                });
                 
                 ///////// table sorter for ewas prot /////////
                 $.tablesorter.addParser({
@@ -87,6 +94,13 @@ print """
                     type: 'numeric'
                 });
                 $('#ewas_prot_exp_tbl').tablesorter({
+                    headers: {
+                        4: {
+                            sorter: 'ewas_prot_exp_pval'
+                        }
+                    }
+                });
+                $('#gwas_prot_exp_tbl').tablesorter({
                     headers: {
                         4: {
                             sorter: 'ewas_prot_exp_pval'
@@ -120,6 +134,18 @@ print """
                 $('#confirm_btn').live('click', function() {
                     $("#user_input_form").submit();
                 });
+                
+                ///////// show hide tables ///////
+                $('.show_hide').live('click', function() {
+                if ($(this).html() == "hide") {
+                    $(this).siblings("table").css({display:'none'});
+                    $(this).html("show");
+                }
+                else {
+                    $(this).siblings("table").css({display:'inline-table'});
+                    $(this).html("hide");
+                }
+            });
             });
         </script>
     </head>
@@ -271,11 +297,12 @@ print '<hr/>'
 
 # print gene implication summary
 print """
-    <h3>
-        Gene implication summary
-    </h3>
-"""
-
+        <div>
+            <b>Gene implication summary</b>
+            <button class="show_hide" type="button">hide</button>
+            <br/>
+            
+      """
 print '<table id="imp_summary_tbl" class="tablesorter">'
 print '<thead>'
 print """<tr>
@@ -325,10 +352,12 @@ for key in combined_entrez_id_set:
     
 print '</tbody>'
 print '</table>'
-
+print '</div>'
 print '<hr/>'
 
 print_ewas_query_result(ewas_query_result)
+print '<hr/>'
+print_gwas_query_result(gwas_query_result)
 
 ################################## Hidden Form #################################
 
