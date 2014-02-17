@@ -153,6 +153,7 @@ protein_exp_pval = form.getvalue("protein_exp_pval")
 trait_pval = form.getvalue("trait_pval")
 trait_names = form.getlist("trait_names")
 curated_terms = form.getlist("curated_terms")
+ewas_tables = form.getlist("ewas_tables")
 
 # get user additional input
 id_type = form.getvalue("id_type")
@@ -163,12 +164,15 @@ search_scope = form.getvalue("search_scope")
 
 ############################## Cet Query Result ################################
 
-# get genes from database
+# get genes from database ewas
 ewas_query_result = get_ewas_query_result(gene_exp_pval, protein_exp_pval,
-    trait_pval, max_distance, trait_names, con, assoc_logic_sel)
+    trait_pval, max_distance, trait_names, con, assoc_logic_sel, ewas_tables)
 
-# get gene supporting loci information
+# get gene supporting loci information ewas
 ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
+
+# get genes from database gwas
+# print get_gwas_gene_exp_query_result(con, gene_exp_pval, max_distance)
 
 # get user genes
 gene_list = ewas_query_result[3]
