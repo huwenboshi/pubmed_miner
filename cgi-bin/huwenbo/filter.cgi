@@ -248,7 +248,8 @@ if(user_genes != None):
         sym_id_map = symbol2entrez(user_genes_list)
         user_genes_list = list(sym_id_map.values())
     for gene in user_genes_list:
-        gene_list.add(gene)
+        if(gene.isdigit()):
+            gene_list.add(int(gene))
 gene_list = list(gene_list)
 
 # get curated terms
