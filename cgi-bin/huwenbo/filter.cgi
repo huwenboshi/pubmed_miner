@@ -209,55 +209,32 @@ search_scope = form.getvalue("search_scope")
 
 ############################## Cet Query Result ################################
 
-handle_gwas_query(con,
-                  gwas_tables,
-                  gwas_gene_exp_pval, 
-                  gwas_prot_exp_pval,
-                  gwas_trait_pval,
-                  gwas_gene_exp_max_distance,
-                  gwas_prot_exp_max_distance,
-                  gwas_trait_max_distance,
-                  gwas_trait_names,
-                  gwas_assoc_logic_sel)
+# get query result from database
+ewas_gwas_result = handle_query(con,
+                            imp_types,
+                            imp_type_logic_sel,
+                            ewas_tables,
+                            ewas_gene_exp_pval, 
+                            ewas_prot_exp_pval,
+                            ewas_trait_pval,
+                            ewas_gene_exp_max_distance,
+                            ewas_prot_exp_max_distance,
+                            ewas_trait_max_distance,
+                            ewas_trait_names,
+                            ewas_assoc_logic_sel,
+                            gwas_tables,
+                            gwas_gene_exp_pval, 
+                            gwas_prot_exp_pval,
+                            gwas_trait_pval,
+                            gwas_gene_exp_max_distance,
+                            gwas_prot_exp_max_distance,
+                            gwas_trait_max_distance,
+                            gwas_trait_names,
+                            gwas_assoc_logic_sel)
 
-handle_ewas_query(con,
-                  ewas_tables,
-                  ewas_gene_exp_pval, 
-                  ewas_prot_exp_pval,
-                  ewas_trait_pval,
-                  ewas_gene_exp_max_distance,
-                  ewas_prot_exp_max_distance,
-                  ewas_trait_max_distance,
-                  ewas_trait_names,
-                  ewas_assoc_logic_sel)
-
-# get genes from database ewas
-ewas_query_result = ([],[],[],set())
-if('ewas_imp' in imp_types):
-    ewas_query_result = get_ewas_query_result(ewas_gene_exp_pval, 
-        ewas_prot_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
-        ewas_prot_exp_max_distance, ewas_trait_max_distance, ewas_trait_names, con_lite,
-        ewas_assoc_logic_sel, ewas_tables)
-
-# get genes from data base gwas
-gwas_query_result = ([],[],set())
-if('gwas_imp' in imp_types):
-    gwas_query_result = get_gwas_query_result(gwas_gene_exp_pval,
-        gwas_prot_exp_pval, gwas_gene_exp_max_distance,
-        gwas_prot_exp_max_distance, con_lite, gwas_assoc_logic_sel, gwas_tables)
-
-# combine gwas and ewas query result
-combined_query_result = dict()
-if(imp_type_logic_sel == 'INTERSECTION'):
-    combined_query_result = intersect_ewas_gwas_query_result(ewas_query_result, 
-        gwas_query_result, imp_types)
-elif(imp_type_logic_sel == 'UNION'):
-    combined_query_result = union_ewas_gwas_query_result(ewas_query_result, 
-        gwas_query_result)
-
-ewas_query_result = combined_query_result['ewas']
-gwas_query_result = combined_query_result['gwas']
-combined_entrez_id_set = combined_query_result['gene_set']
+ewas_query_result = ewas_gwas_result['ewas_query_result']
+gwas_query_result = ewas_gwas_result['gwas_query_result']
+combined_entrez_id_set = ewas_gwas_result['human_gene_set']
 
 # get gene supporting loci information ewas
 ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
@@ -347,6 +324,7 @@ print '</thead>'
 print '<tbody>'
 
 for key in combined_entrez_id_set:
+    key = key[0]
     ewas_assoc_pos = dict()
     if(key in ewas_gene_support_info):
         ewas_assoc_pos = ewas_gene_support_info[key]
@@ -365,7 +343,7 @@ for key in combined_entrez_id_set:
     num_tot = num_ewas_tot + num_gwas_tot
     
     print '<tr>'
-    print '<td>%d</td>' % key
+    print '<td>%s</td>' % key
     print '<td>%d</td>' % num_ewas_gene_exp
     print '<td>%d</td>' % num_ewas_prot_exp
     print '<td>%d</td>' % num_ewas_trait

@@ -9,16 +9,36 @@ ewas_tbl_map = {'tbl_ewas_gene_exp': 'liver_expression_ewas',
                 'tbl_ewas_prot_exp': 'liver_proteomics_ewas',
                 'tbl_ewas_trait':    'clinical_metabolite_traits_ewas'}
 
+ewas_simp_map = {'tbl_ewas_gene_exp': 'gene_exp',
+                'tbl_ewas_prot_exp': 'prot_exp',
+                'tbl_ewas_trait':    'trait'}
+
 gwas_tbl_map = {'tbl_gwas_gene_exp': ['liver_expression_trans_eqtl_gwas', 
                                       'liver_expression_cis_eqtl_gwas'],
                 'tbl_gwas_prot_exp': ['liver_protein_trans_eqtl_gwas'],
                 'tbl_gwas_trait':    ['metabolites_gwas', 'phenotypes_gwas']}
 
 gwas_tbl_tmp_map = {'tbl_gwas_gene_exp': 'liver_expression_trans_cis_eqtl_gwas',
-                'tbl_gwas_prot_exp': 'liver_protein_trans_eqtl_gwas',
-                'tbl_gwas_trait':    'metabolites_phenotypes_gwas'}
+                    'tbl_gwas_prot_exp': 'liver_protein_trans_eqtl_gwas',
+                    'tbl_gwas_trait':    'metabolites_phenotypes_gwas'}
+
+gwas_simp_map = {'tbl_gwas_gene_exp': 'gene_exp',
+                 'tbl_gwas_prot_exp': 'prot_exp',
+                 'tbl_gwas_trait':    'trait'}
 
 ############################# DATABASE #########################################
+
+# get rows from database
+def fetch_from_db(cur):
+    table = []
+    for row in cur.fetchall():
+        col = []
+        for i in xrange(len(row)):
+            col.append(row[i])
+        table.append(col)
+    return table
+
+#------------------------------------------------------------------------------#
 
 # create temporary tables for handling gwas database query
 def handle_gwas_query(dbcon,
@@ -240,7 +260,6 @@ def handle_gwas_query(dbcon,
             on
                 met_phen_tbl.gene_symbol=mouse_sym_human_entrez.mouse_gene_sym
         """ % (query_met, query_phen)
-        print tmp_query
         query = """
             create temporary table metabolites_phenotypes_gwas_tmp as %s
         """ % tmp_query
@@ -300,6 +319,8 @@ def handle_gwas_query(dbcon,
             
     return
 
+#------------------------------------------------------------------------------#
+
 # create temporary tables for handling ewas database query
 def handle_ewas_query(dbcon,
                       ewas_tables,
@@ -345,36 +366,15 @@ def handle_ewas_query(dbcon,
         query = """
                 create temporary table %s_tmp as
                 select * from
-                    (
-                        select * from %s where 
-                            (
-                                pval < %s
-                            )
-                            and 
-                            (
-                                dist_gene_start_methylation_site <> 'NULL'
-                                and 
-                                dist_gene_end_methylation_site <> 'NULL'
-                            )
-                            and 
-                            (
-                                (
-                                    abs(dist_gene_start_methylation_site) < %s
-                                    or
-                                    abs(dist_gene_end_methylation_site) < %s 
-                                )
-                                or
-                                (
-                                    dist_gene_start_methylation_site < 0
-                                    and
-                                    dist_gene_end_methylation_site > 0
-                                )
-                            )
+                    (select * from %s where (pval < %s) and 
+                            (dist_gene_start_methylation_site <> 'NULL' and 
+                             dist_gene_end_methylation_site <> 'NULL') and 
+                            ((abs(dist_gene_start_methylation_site) < %s or
+                              abs(dist_gene_end_methylation_site) < %s) or
+                             (dist_gene_start_methylation_site < 0 and
+                              dist_gene_end_methylation_site > 0))
                             %s
-                    ) as A
-                    join
-                    mouse_sym_human_entrez
-                    on 
+                    ) as A join mouse_sym_human_entrez on 
                     A.gene_annot_gene_sym = mouse_gene_sym
         """ % (db_table, db_table, pval_str, max_distance,
                max_distance, ewas_trait_additional)
@@ -392,17 +392,13 @@ def handle_ewas_query(dbcon,
             db_table = ewas_tbl_map[tbl]
             if(i == 0):
                 sub_query = """
-                    (
-                        select distinct(human_entrez_id) from %s_tmp
-                    )
+                    (select distinct(human_entrez_id) from %s_tmp)
                     as %s_tmp_id
                 """ % (db_table, db_table)
             if(i > 0):
                 sub_query += """
                     join
-                    (
-                        select distinct(human_entrez_id) from %s_tmp
-                    )
+                    (select distinct(human_entrez_id) from %s_tmp)
                     as %s_tmp_id
                     on
                     %s_tmp_id.human_entrez_id = %s_tmp_id.human_entrez_id
@@ -436,66 +432,144 @@ def handle_ewas_query(dbcon,
         # execute query
         cur.execute(query)
 
-################################################################################
+#------------------------------------------------------------------------------#
 
-# take the intersection of ewas and gwas result
-def intersect_ewas_gwas_query_result(ewas_query_result,
-    gwas_query_result, implications):
+def handle_query(dbcon,
+                 imp_types,
+                 imp_type_logic_sel,
+                 ewas_tables,
+                 ewas_gene_exp_pval, 
+                 ewas_prot_exp_pval,
+                 ewas_trait_pval,
+                 ewas_gene_exp_max_distance,
+                 ewas_prot_exp_max_distance,
+                 ewas_trait_max_distance,
+                 ewas_trait_names,
+                 ewas_assoc_logic_sel,
+                 gwas_tables,
+                 gwas_gene_exp_pval, 
+                 gwas_prot_exp_pval,
+                 gwas_trait_pval,
+                 gwas_gene_exp_max_distance,
+                 gwas_prot_exp_max_distance,
+                 gwas_trait_max_distance,
+                 gwas_trait_names,
+                 gwas_assoc_logic_sel):
     
-    ewas_entrez_set = ewas_query_result[len(ewas_query_result)-1]
-    gwas_entrez_set = gwas_query_result[len(gwas_query_result)-1]
+    # initialization
+    cur = dbcon.cursor()
+    
+    human_entrez_gene_id_set = []
+    
+    ewas_result = {'gene_exp': [],
+                   'prot_exp': [],
+                   'trait':    []}
+                   
+    gwas_result = {'gene_exp': [],
+                   'prot_exp': [],
+                   'trait':    []}
 
-    # map between implication type and gene set
-    imp_type_gene_set = dict()
-    imp_type_gene_set['ewas_imp'] = ewas_entrez_set
-    imp_type_gene_set['gwas_imp'] = gwas_entrez_set
-    
-    # intersect result
-    final_entrez_set = set()
-    implications_list = list(implications)
-    if(len(implications_list) > 0):
-        final_entrez_set = imp_type_gene_set[implications_list[0]]
-    for i in xrange(1, len(implications_list)):
-        final_entrez_set = final_entrez_set.intersection(
-            imp_type_gene_set[implications_list[i]])
-    
-    # filter query result ewas
-    ewas_gene_exp_result = filter_query_result(ewas_query_result[0],
-        final_entrez_set)
-    ewas_prot_exp_result = filter_query_result(ewas_query_result[1],
-        final_entrez_set)
-    ewas_trait_result = filter_query_result(ewas_query_result[2],
-        final_entrez_set)
-    
-    # filter query result gwas
-    gwas_gene_exp_result = filter_query_result(gwas_query_result[0],
-        final_entrez_set)
-    gwas_prot_exp_result = filter_query_result(gwas_query_result[1],
-        final_entrez_set)
-    
-    combined_result = dict()
-    combined_result['ewas'] = (ewas_gene_exp_result, ewas_prot_exp_result,
-        ewas_trait_result, final_entrez_set)
-    combined_result['gwas'] = (gwas_gene_exp_result, gwas_prot_exp_result,
-        final_entrez_set)
-    combined_result['gene_set'] = final_entrez_set
-    
-    return combined_result
+    # human entrez id tables
+    human_entrez_id_tables = []
 
-# take the union of ewas and gwas result
-def union_ewas_gwas_query_result(ewas_query_result, gwas_query_result):
+    # handle ewas query
+    if('ewas_imp' in imp_types):
+        human_entrez_id_tables.append('human_entrez_id_ewas_tmp')
+        handle_ewas_query(dbcon,
+                          ewas_tables,
+                          ewas_gene_exp_pval, 
+                          ewas_prot_exp_pval,
+                          ewas_trait_pval,
+                          ewas_gene_exp_max_distance,
+                          ewas_prot_exp_max_distance,
+                          ewas_trait_max_distance,
+                          ewas_trait_names,
+                          ewas_assoc_logic_sel)
     
-    ewas_entrez_set = ewas_query_result[len(ewas_query_result)-1]
-    gwas_entrez_set = gwas_query_result[len(gwas_query_result)-1]
-
-    final_entrez_set = ewas_entrez_set.union(gwas_entrez_set)
-
-    combined_result = dict()
-    combined_result['ewas'] = ewas_query_result
-    combined_result['gwas'] = gwas_query_result
-    combined_result['gene_set'] = final_entrez_set
+    # handle gwas query
+    if('gwas_imp' in imp_types):
+        human_entrez_id_tables.append('human_entrez_id_gwas_tmp')
+        handle_gwas_query(dbcon,
+                          gwas_tables,
+                          gwas_gene_exp_pval, 
+                          gwas_prot_exp_pval,
+                          gwas_trait_pval,
+                          gwas_gene_exp_max_distance,
+                          gwas_prot_exp_max_distance,
+                          gwas_trait_max_distance,
+                          gwas_trait_names,
+                          gwas_assoc_logic_sel)
     
-    return combined_result
+    # apply intersectoin
+    if(imp_type_logic_sel == 'INTERSECTION'):
+    
+        # create query to get intersection of human entrez ids
+        sub_query = ''
+        for i in xrange(len(human_entrez_id_tables)):
+            tbl = human_entrez_id_tables[i]
+            if(i == 0):
+                sub_query = """
+                    (select distinct(human_entrez_id) from %s) as %s_sub
+                """ % (tbl, tbl)
+            if(i > 0):
+                sub_query += """
+                    join (select distinct(human_entrez_id) from %s) as %s_sub
+                    on
+                    %s_sub.human_entrez_id = %s_sub.human_entrez_id
+                """ % (tbl,tbl,human_entrez_id_tables[0],tbl)
+        query = """
+            create temporary table human_entrez_id_ewas_gwas_tmp as
+            select distinct(%s_sub.human_entrez_id) from (%s)
+        """ % (human_entrez_id_tables[0], sub_query)
+        
+        cur.execute(query)
+    
+    # apply union
+    elif(imp_type_logic_sel == 'UNION'):
+    
+        # create query to get union of human entrez ids
+        sub_query = ''
+        sub_query_list = []
+        for tbl in human_entrez_id_tables:
+            sub_query = """
+                (select distinct(human_entrez_id) from %s as %s_sub)
+            """ % (tbl, tbl)
+            sub_query_list.append(sub_query)
+        query = """
+            create temporary table human_entrez_id_ewas_gwas_tmp as
+            select distinct(human_entrez_id) from ((%s) as A)
+        """ % (' union '.join(sub_query_list))
+        
+        # execute query
+        cur.execute(query)
+
+    # parse out result
+    query = """select * from human_entrez_id_ewas_gwas_tmp"""
+    cur.execute(query)
+    human_entrez_gene_id_set = fetch_from_db(cur)
+    
+    for table in ewas_tables:
+        db_tbl = ewas_tbl_map[table]
+        query = """select * from %s_tmp where human_entrez_id in
+            (select * from human_entrez_id_ewas_gwas_tmp)""" % db_tbl
+        cur.execute(query)
+        ewas_result[ewas_simp_map[table]] = fetch_from_db(cur)
+    
+    for table in gwas_tables:
+        db_tbl = gwas_tbl_tmp_map[table]
+        query = """select * from %s_tmp where human_entrez_id in
+            (select * from human_entrez_id_ewas_gwas_tmp)""" % db_tbl
+        cur.execute(query)
+        gwas_result[gwas_simp_map[table]] = fetch_from_db(cur)
+    
+    # combine result
+    result = {'human_gene_set': human_entrez_gene_id_set,
+              'ewas_query_result': ewas_result,
+              'gwas_query_result': gwas_result}
+    
+    return result
+    
+############################## META ############################################
 
 # get ewas query result supporing information summary
 def get_gwas_gene_supporting_info(gwas_query_result):
@@ -503,16 +577,10 @@ def get_gwas_gene_supporting_info(gwas_query_result):
     gene_assoc_pos = dict()
     
     # for gene expression
-    gene_exp_result = gwas_query_result[0]
+    gene_exp_result = gwas_query_result['gene_exp']
     for result in gene_exp_result:
-        gene_id = None
-        snp_gw_pos = None
-        if(len(result) == 22):
-            snp_gw_pos = result[13]
-            gene_id = result[21]
-        elif(len(result) == 19):
-            snp_gw_pos = result[10]
-            gene_id = result[18]
+        snp_gw_pos = result[7]
+        gene_id = result[8]
         if(gene_id not in gene_assoc_pos):
             gene_assoc_pos[gene_id] = dict()
         if('gene_exp' not in gene_assoc_pos[gene_id]):
@@ -520,10 +588,10 @@ def get_gwas_gene_supporting_info(gwas_query_result):
         gene_assoc_pos[gene_id]['gene_exp'].add(snp_gw_pos)
     
     # for protein expression
-    prot_exp_result = gwas_query_result[1]
+    prot_exp_result = gwas_query_result['prot_exp']
     for result in prot_exp_result:
-        gene_id = result[19]
-        snp_gw_pos = result[14]
+        gene_id = result[8]
+        snp_gw_pos = result[3]
         if(gene_id not in gene_assoc_pos):
             gene_assoc_pos[gene_id] = dict()
         if('prot_exp' not in gene_assoc_pos[gene_id]):
@@ -532,13 +600,15 @@ def get_gwas_gene_supporting_info(gwas_query_result):
     
     return gene_assoc_pos
 
+#------------------------------------------------------------------------------#
+
 # get ewas query result supporing information summary
 def get_ewas_gene_supporting_info(ewas_query_result):
     
     gene_assoc_pos = dict()
     
     # for gene expression
-    gene_exp_result = ewas_query_result[0]
+    gene_exp_result = ewas_query_result['gene_exp']
     for result in gene_exp_result:
         gene_id = result[18]
         mcg_gw_pos = result[7]
@@ -549,7 +619,7 @@ def get_ewas_gene_supporting_info(ewas_query_result):
         gene_assoc_pos[gene_id]['gene_exp'].add(mcg_gw_pos)
     
     # for protein expression
-    prot_exp_result = ewas_query_result[1]
+    prot_exp_result = ewas_query_result['prot_exp']
     for result in prot_exp_result:
         gene_id = result[18]
         mcg_gw_pos = result[7]
@@ -560,7 +630,7 @@ def get_ewas_gene_supporting_info(ewas_query_result):
         gene_assoc_pos[gene_id]['prot_exp'].add(mcg_gw_pos)
     
     # for trait
-    trait_exp_result = ewas_query_result[2]
+    trait_exp_result = ewas_query_result['trait']
     for result in trait_exp_result:
         gene_id = result[20]
         mcg_gw_pos = result[6]
@@ -571,6 +641,8 @@ def get_ewas_gene_supporting_info(ewas_query_result):
         gene_assoc_pos[gene_id]['trait'].add(mcg_gw_pos)
     
     return gene_assoc_pos
+
+############################# DISPLAY ##########################################
 
 # display ewas query result
 def print_ewas_query_result(ewas_query_result):
@@ -584,7 +656,7 @@ def print_ewas_query_result(ewas_query_result):
             <br/>
             
     """
-    gene_exp_result = ewas_query_result[0]
+    gene_exp_result = ewas_query_result['gene_exp']
     print """
             <table id="ewas_gene_exp_tbl" class="tablesorter">
             <thead>
@@ -638,7 +710,7 @@ def print_ewas_query_result(ewas_query_result):
             <br/>
             
     """
-    prot_exp_result = ewas_query_result[1]
+    prot_exp_result = ewas_query_result['prot_exp']
     print """
             <table id="ewas_prot_exp_tbl" class="tablesorter">
             <thead>
@@ -691,7 +763,7 @@ def print_ewas_query_result(ewas_query_result):
             <br/>
             
     """
-    trait_exp_result = ewas_query_result[2]
+    trait_exp_result = ewas_query_result['trait']
     print """
             <table id="ewas_trait_tbl" class="tablesorter">
             <thead>
@@ -722,7 +794,7 @@ def print_ewas_query_result(ewas_query_result):
             window_str, window_str)
         
         # gene symbol
-        print '<td>%s</td>' % result[16]
+        print '<td>%s</td>' % result[18]
         
         # gene position
         gene_pos_str = 'chr%s:%s-%s' % (result[12], result[13], result[14])
@@ -737,7 +809,9 @@ def print_ewas_query_result(ewas_query_result):
         </table>
         </div>"""
 
-# display ewas query result
+#------------------------------------------------------------------------------#
+
+# display gwas query result
 def print_gwas_query_result(gwas_query_result):
     
     ########## gene table ##########
@@ -748,7 +822,7 @@ def print_gwas_query_result(gwas_query_result):
             <br/>
             
     """
-    gene_exp_result = gwas_query_result[0]
+    gene_exp_result = gwas_query_result['gene_exp']
     print '<table id="gwas_gene_exp_tbl" class="tablesorter">'
     print """
             <thead>
@@ -766,40 +840,26 @@ def print_gwas_query_result(gwas_query_result):
         print '<tr>'
         
         # SNP
-        snp_pos = None
-        if(len(result) == 22):
-            print '<td>%s</td>' % result[13]
-            snp_pos = int(result[12])
-        elif(len(result) == 19):
-            print '<td>%s</td>' % result[10]
-            snp_pos = int(result[9])       
+        print '<td>%s</td>' % result[5]
+        snp_pos = int(result[7])
         
         # snp window
         window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
         window_ed = snp_pos+500000
-        window_str = ''
-        if(len(result) == 22):
-            window_str = "chr%s:%s-%s" % (result[11], str(window_st),
-                str(window_ed))
-        elif(len(result) == 19):
-            window_str = "chr%s:%s-%s" % (result[8], str(window_st),
-                str(window_ed))
+        window_str = "chr%s:%s-%s"%(result[6],str(window_st), str(window_ed))
         print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
             window_str, window_str)
         
         # gene symbol
-        print '<td>%s</td>' % result[6]
+        print '<td>%s</td>' % result[8]
         
         # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[1], result[2], result[3])
+        gene_pos_str = 'chr%s:%s-%s' % (result[0], result[1], result[2])
         print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
             gene_pos_str, gene_pos_str)
         
         # p-value, human entrez gene id
-        if(len(result) == 22):
-            print '<td>%s</td><td>%s</td>' % (result[10], result[len(result)-1])
-        elif(len(result) == 19):
-            print '<td>%s</td><td>%s</td>' % (result[7], result[len(result)-1])
+        print '<td>%s</td><td>%s</td>' % (result[4], result[8])
         print '</tr>'
     print """
         </tbody>
@@ -815,7 +875,7 @@ def print_gwas_query_result(gwas_query_result):
             <br/>
             
     """
-    prot_exp_result = gwas_query_result[1]
+    prot_exp_result = gwas_query_result['prot_exp']
     print '<table id="gwas_prot_exp_tbl" class="tablesorter">'
     print """
             <thead>
@@ -832,27 +892,27 @@ def print_gwas_query_result(gwas_query_result):
     for result in prot_exp_result:
         print '<tr>'
         # snp 
-        print '<td>%s</td>' % result[14]
+        print '<td>%s</td>' % result[5]
         
         # snp window
-        snp_pos = int(result[13])
+        snp_pos = int(result[7])
         window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
         window_ed = snp_pos+500000
-        window_str = "chr%s:%s-%s" % (result[2], str(window_st),
+        window_str = "chr%s:%s-%s" % (result[6], str(window_st),
             str(window_ed))
         print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
             window_str, window_str)
         
         # gene symbol
-        print '<td>%s</td>' % result[7]
+        print '<td>%s</td>' % result[8]
         
         # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[2], result[3], result[4])
+        gene_pos_str = 'chr%s:%s-%s' % (result[0], result[1], result[2])
         print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
             gene_pos_str, gene_pos_str)
         
         # p-value, human entrez gene id
-        print '<td>%s</td><td>%s</td>' % (result[11], result[len(result)-1])
+        print '<td>%s</td><td>%s</td>' % (result[4], result[8])
         print '</tr>'
     print """
         </tbody>
