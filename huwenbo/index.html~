@@ -81,6 +81,25 @@
                         $('.mt_opt').attr("checked", false);
                     }
                 });
+                $('#check_all_ct_gwas').live('click', function() {
+                    status = $('#check_all_ct_gwas').attr("checked");
+                    if(status == 'checked') {
+                        $('.ct_opt_gwas').attr("checked", true);
+                    }
+                    else {
+                        $('.ct_opt_gwas').attr("checked", false);
+                    }
+                });
+                
+                $('#check_all_mt_gwas').live('click', function() {
+                    status = $('#check_all_mt_gwas').attr("checked");
+                    if(status == 'checked') {
+                        $('.mt_opt_gwas').attr("checked", true);
+                    }
+                    else {
+                        $('.mt_opt_gwas').attr("checked", false);
+                    }
+                });
             });
         </script>
     </head>
@@ -186,7 +205,7 @@
             <!--
             <input name="protein_exp_pval" style="width: 25px" type="text" />
             -->
-            <select name="ewas_protein_exp_pval">
+            <select name="ewas_prot_exp_pval">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -649,7 +668,7 @@
 
 <!--///////////////////////// Gene Expression  //////////////////////////////-->
             
-            <input type="checkbox" name="ewas_tables" value="tbl_ewas_gene_exp"/>
+            <input type="checkbox" name="gwas_tables" value="tbl_gwas_gene_exp"/>
             <b>Association with gene expression</b>
             <br/>
             <a>p-value less than 10^(-<a/>
@@ -679,14 +698,14 @@
 
 <!--///////////////////////// Protein Expression ////////////////////////////-->
             
-            <input type="checkbox" name="ewas_tables" value="tbl_ewas_prot_exp"/>
+            <input type="checkbox" name="gwas_tables" value="tbl_gwas_prot_exp"/>
             <b>Association with protein expression</b>
             <br/>
             <a>p-value less than 10^(-<a/>
             <!--
             <input name="protein_exp_pval" style="width: 25px" type="text" />
             -->
-            <select name="gwas_protein_exp_pval">
+            <select name="gwas_prot_exp_pval">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -706,7 +725,189 @@
                 <option value="10000000">10 Mb</option>
             </select>
             <br/><br/>
+            
+<!--////////////////////////////// TRAITS ///////////////////////////////////-->
 
+            <input type="checkbox" name="gwas_tables" value="tbl_gwas_trait"/>
+            <b>Association with clinical and metabolite traits</b>
+            <br/>
+            <a>p-value less than 10^(-<a/>
+            <!--
+            <input name="trait_pval" style="width: 25px" type="text" />
+            -->
+            <select name="gwas_trait_pval">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+            </select>
+            <a>)</a>
+            <br/>
+            <a>Distance between gene and mCG/SNP site less than</a>
+            <select name="gwas_trait_max_distance">
+                <option value="10000">10 Kb</option>
+                <option value="100000">100 Kb</option>
+                <option value="1000000">1 Mb</option>
+                <option value="10000000">10 Mb</option>
+            </select>
+            <br/>
+            <a>Please select a list of traits you are interested in: </a>
+            <br/>
+
+<table border="1">
+    <tr class="trait_header">
+        <td><input id="check_all_ct_gwas" type="checkbox">Phenotypes</td>
+        <td><input id="check_all_mt_gwas" type="checkbox">Metabolite Traits</td>
+    </tr>    
+
+    <tr class="trait_row">
+        <td>
+            <div class="trait_div">
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="AB1_2_IgM" type="checkbox">AB1_2_IgM<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="ApoA2" type="checkbox">ApoA2<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="ApoA4" type="checkbox">ApoA4<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="ApoB" type="checkbox">ApoB<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="ApoD" type="checkbox">ApoD<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="ApoE" type="checkbox">ApoE<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="FFA" type="checkbox">FFA<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="glucose_to_insulin" type="checkbox">glucose_to_insulin<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="GRAN" type="checkbox">GRAN<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="GRAN_percent" type="checkbox">GRAN_percent<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="HCT" type="checkbox">HCT<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="HDL" type="checkbox">HDL<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="HGB" type="checkbox">HGB<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="Insulin" type="checkbox">Insulin<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="IP-10" type="checkbox">IP-10<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="KC" type="checkbox">KC<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="LCAT_activity" type="checkbox">LCAT_activity<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="LDL_plus_VLDL" type="checkbox">LDL_plus_VLDL<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="Lean_mass" type="checkbox">Lean_mass<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="LpPLA2" type="checkbox">LpPLA2<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="LYMPH" type="checkbox">LYMPH<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="LYMPH_percent" type="checkbox">LYMPH_percent<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="MCHC" type="checkbox">MCHC<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="MCV" type="checkbox">MCV<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="MIP-2" type="checkbox">MIP-2<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="MONO" type="checkbox">MONO<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="MPV" type="checkbox">MPV<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="PLTPactivity" type="checkbox">PLTPactivity<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="RANTES" type="checkbox">RANTES<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="RBC" type="checkbox">RBC<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="RDW_percent" type="checkbox">RDW_percent<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="RDWa" type="checkbox">RDWa<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="RFP_percent" type="checkbox">RFP_percent<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="TC" type="checkbox">TC<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="TG" type="checkbox">TG<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="TNFa" type="checkbox">TNFa<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="UC" type="checkbox">UC<br/>
+            <input class="ct_opt_gwas" name="gwas_trait_names" value="WBC" type="checkbox">WBC<br/>
+            </div>
+        </td>
+        <td>
+            <div class="trait_div">
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="1-arachidonylglycerol" type="checkbox">1-arachidonylglycerol<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="1-docosahexaenoylglycerol (1-monodocosahexaenoin)" type="checkbox">1-docosahexaenoylglycerol (1-monodocosahexaenoin)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="1-heptadecanoylglycerophosphocholine" type="checkbox">1-heptadecanoylglycerophosphocholine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="1-myristoylglycerophosphocholine" type="checkbox">1-myristoylglycerophosphocholine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="1-oleoylglycerol (1-monoolein)" type="checkbox">1-oleoylglycerol (1-monoolein)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="1-palmitoylglycerol (1-monopalmitin)" type="checkbox">1-palmitoylglycerol (1-monopalmitin)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="12-HETE" type="checkbox">12-HETE<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-aminoadipate" type="checkbox">2-aminoadipate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-aminobutyrate" type="checkbox">2-aminobutyrate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-arachidonoylglycerophosphocholine" type="checkbox">2-arachidonoylglycerophosphocholine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-hydroxyadipate" type="checkbox">2-hydroxyadipate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-hydroxyglutarate" type="checkbox">2-hydroxyglutarate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-ketogulonate" type="checkbox">2-ketogulonate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-methylbutyroylcarnitine" type="checkbox">2-methylbutyroylcarnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="2-oleoylglycerophosphoethanolamine" type="checkbox">2-oleoylglycerophosphoethanolamine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="3-hydroxy-3-methylglutarate" type="checkbox">3-hydroxy-3-methylglutarate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="3-hydroxybutyrate (BHBA)" type="checkbox">3-hydroxybutyrate (BHBA)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="3-methylcrotonylglycine" type="checkbox">3-methylcrotonylglycine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="3-phosphoglycerate" type="checkbox">3-phosphoglycerate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="adenosine 2'-monophosphate (2'-AMP)" type="checkbox">adenosine 2'-monophosphate (2'-AMP)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="adenosine 5'-monophosphate (AMP)" type="checkbox">adenosine 5'-monophosphate (AMP)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="adrenate (22:4n6)" type="checkbox">adrenate (22:4n6)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="allantoin" type="checkbox">allantoin<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="arachidate (20:0)" type="checkbox">arachidate (20:0)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="arachidonate (20:4n6)" type="checkbox">arachidonate (20:4n6)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="ascorbate (Vitamin C)" type="checkbox">ascorbate (Vitamin C)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="asparagine" type="checkbox">asparagine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="butyrylglycine" type="checkbox">butyrylglycine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="campesterol" type="checkbox">campesterol<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="caprate (10:0)" type="checkbox">caprate (10:0)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="caproate (6:0)" type="checkbox">caproate (6:0)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="catechol sulfate" type="checkbox">catechol sulfate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="choline" type="checkbox">choline<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="creatine" type="checkbox">creatine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="cysteine" type="checkbox">cysteine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="cysteine-glutathione disulfide" type="checkbox">cysteine-glutathione disulfide<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="cytidine" type="checkbox">cytidine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="cytidine 5'-diphosphocholine" type="checkbox">cytidine 5'-diphosphocholine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="cytidine 5'-monophosphate (5'-CMP)" type="checkbox">cytidine 5'-monophosphate (5'-CMP)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="deoxycholate" type="checkbox">deoxycholate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="docosadienoate (22:2n6)" type="checkbox">docosadienoate (22:2n6)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="docosapentaenoate (n3 DPA; 22:5n3)" type="checkbox">docosapentaenoate (n3 DPA; 22:5n3)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="eicosenoate (20:1n9 or 11)" type="checkbox">eicosenoate (20:1n9 or 11)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="gamma-glutamylglutamate" type="checkbox">gamma-glutamylglutamate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="gamma-glutamylisoleucine" type="checkbox">gamma-glutamylisoleucine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="gamma-glutamylthreonine" type="checkbox">gamma-glutamylthreonine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="glucarate (saccharate)" type="checkbox">glucarate (saccharate)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="glutathione, oxidized (GSSG)" type="checkbox">glutathione, oxidized (GSSG)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="glycerol" type="checkbox">glycerol<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="glycerol 3-phosphate (G3P)" type="checkbox">glycerol 3-phosphate (G3P)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="glycerophosphorylcholine (GPC)" type="checkbox">glycerophosphorylcholine (GPC)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="glycocholate" type="checkbox">glycocholate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="gulono-1,4-lactone" type="checkbox">gulono-1,4-lactone<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="heme" type="checkbox">heme<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="hexadecanedioate" type="checkbox">hexadecanedioate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="homoserine" type="checkbox">homoserine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="homostachydrine" type="checkbox">homostachydrine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="hydroxyisovaleroyl carnitine" type="checkbox">hydroxyisovaleroyl carnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="hypotaurine" type="checkbox">hypotaurine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="hypoxanthine" type="checkbox">hypoxanthine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="isobutyrylcarnitine" type="checkbox">isobutyrylcarnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="isovalerylcarnitine" type="checkbox">isovalerylcarnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="isovalerylglycine" type="checkbox">isovalerylglycine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="kynurenate" type="checkbox">kynurenate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="malonate (propanedioate)" type="checkbox">malonate (propanedioate)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="malonylcarnitine" type="checkbox">malonylcarnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="margarate (17:0)" type="checkbox">margarate (17:0)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="methylmalonate (MMA)" type="checkbox">methylmalonate (MMA)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="N-acetylasparagine" type="checkbox">N-acetylasparagine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="N-acetylglutamate" type="checkbox">N-acetylglutamate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="N-acetylmethionine" type="checkbox">N-acetylmethionine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="N-acetylthreonine" type="checkbox">N-acetylthreonine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="naringenin" type="checkbox">naringenin<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="ophthalmate" type="checkbox">ophthalmate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="pelargonate (9:0)" type="checkbox">pelargonate (9:0)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="proline" type="checkbox">proline<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="pseudouridine" type="checkbox">pseudouridine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="pyridoxate" type="checkbox">pyridoxate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="pyruvate" type="checkbox">pyruvate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="riboflavin (Vitamin B2)" type="checkbox">riboflavin (Vitamin B2)<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="spermidine" type="checkbox">spermidine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="stachydrine" type="checkbox">stachydrine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="succinate" type="checkbox">succinate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="succinylcarnitine" type="checkbox">succinylcarnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="taurine" type="checkbox">taurine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="taurochenodeoxycholate" type="checkbox">taurochenodeoxycholate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="taurodeoxycholate" type="checkbox">taurodeoxycholate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="tetradecanedioate" type="checkbox">tetradecanedioate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="threonate" type="checkbox">threonate<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="thymidine" type="checkbox">thymidine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="tiglyl carnitine" type="checkbox">tiglyl carnitine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="trans-4-hydroxyproline" type="checkbox">trans-4-hydroxyproline<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="tyrosine" type="checkbox">tyrosine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="uridine" type="checkbox">uridine<br/>
+            <input class="mt_opt_gwas" name="gwas_trait_names" value="xylonate" type="checkbox">xylonate<br/>
+            </div>
+        </td>
+    </tr>
+</table>
             </div>
 
 <!--/////////////////////////// User Genes //////////////////////////////////-->

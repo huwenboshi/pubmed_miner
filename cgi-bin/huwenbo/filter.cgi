@@ -178,22 +178,25 @@ ewas_trait_max_distance = form.getvalue("ewas_trait_max_distance")
 # distance threshold between snp site and implicated gene
 gwas_gene_exp_max_distance = form.getvalue("gwas_gene_exp_max_distance")
 gwas_prot_exp_max_distance = form.getvalue("gwas_prot_exp_max_distance")
+gwas_trait_max_distance = form.getvalue("gwas_trait_max_distance")
 
-# intersect of union the genes found by different associations
+# intersect of union the genes found by different associations ewas
 ewas_assoc_logic_sel = form.getvalue("ewas_assoc_logic_sel")
+
+# intersect of union the genes found by different associations gwas
 gwas_assoc_logic_sel = form.getvalue("gwas_assoc_logic_sel")
 
 # get associations threshold ewas
 ewas_gene_exp_pval = form.getvalue("ewas_gene_exp_pval")
-ewas_protein_exp_pval = form.getvalue("ewas_protein_exp_pval")
+ewas_prot_exp_pval = form.getvalue("ewas_prot_exp_pval")
 ewas_trait_pval = form.getvalue("ewas_trait_pval")
-ewas_trait_names = form.getlist("trait_names")
+ewas_trait_names = form.getlist("ewas_trait_names")
 ewas_tables = form.getlist("ewas_tables")
 
-# get associations threshold ewas
 gwas_gene_exp_pval = form.getvalue("gwas_gene_exp_pval")
-gwas_protein_exp_pval = form.getvalue("gwas_protein_exp_pval")
+gwas_prot_exp_pval = form.getvalue("gwas_prot_exp_pval")
 gwas_trait_pval = form.getvalue("gwas_trait_pval")
+gwas_trait_names = form.getlist("gwas_trait_names")
 gwas_tables = form.getlist("gwas_tables")
 
 # get user additional input
@@ -206,10 +209,21 @@ search_scope = form.getvalue("search_scope")
 
 ############################## Cet Query Result ################################
 
+handle_gwas_query(con,
+                  gwas_tables,
+                  gwas_gene_exp_pval, 
+                  gwas_prot_exp_pval,
+                  gwas_trait_pval,
+                  gwas_gene_exp_max_distance,
+                  gwas_prot_exp_max_distance,
+                  gwas_trait_max_distance,
+                  gwas_trait_names,
+                  gwas_assoc_logic_sel)
+
 handle_ewas_query(con,
                   ewas_tables,
                   ewas_gene_exp_pval, 
-                  ewas_protein_exp_pval,
+                  ewas_prot_exp_pval,
                   ewas_trait_pval,
                   ewas_gene_exp_max_distance,
                   ewas_prot_exp_max_distance,
@@ -221,7 +235,7 @@ handle_ewas_query(con,
 ewas_query_result = ([],[],[],set())
 if('ewas_imp' in imp_types):
     ewas_query_result = get_ewas_query_result(ewas_gene_exp_pval, 
-        ewas_protein_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
+        ewas_prot_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
         ewas_prot_exp_max_distance, ewas_trait_max_distance, ewas_trait_names, con_lite,
         ewas_assoc_logic_sel, ewas_tables)
 
@@ -229,7 +243,7 @@ if('ewas_imp' in imp_types):
 gwas_query_result = ([],[],set())
 if('gwas_imp' in imp_types):
     gwas_query_result = get_gwas_query_result(gwas_gene_exp_pval,
-        gwas_protein_exp_pval, gwas_gene_exp_max_distance,
+        gwas_prot_exp_pval, gwas_gene_exp_max_distance,
         gwas_prot_exp_max_distance, con_lite, gwas_assoc_logic_sel, gwas_tables)
 
 # combine gwas and ewas query result

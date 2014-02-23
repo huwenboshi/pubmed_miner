@@ -77,7 +77,7 @@ def make_clinical_trait_ewas_query(table_name, pval, max_distance, trait_names):
         
     # add single quotes to trait names
     for i in xrange(len(trait_names)):
-        trait_names[i] = '\"'+trait_names[i]+'\"'
+        trait_names[i] = '\''+trait_names[i]+'\''
     trait_names_sql_list = '('+','.join(trait_names)+')'
     
     query = make_ewas_pval_dist_query(table_name, pval, max_distance)
@@ -277,13 +277,17 @@ def get_gwas_query_result(gene_exp_pval, prot_exp_pval,
     final_entrez_set = set()
     if(assoc_logic_sel == 'INTERSECTION'):
         tables_list = list(tables)
-        if(len(tables_list) > 0):
+        if(len(tables_list) > 0 and tables_list[0] != 'tbl_gwas_trait'):
             final_entrez_set = tbl_nm_gene_set[tables_list[0]]
         for i in xrange(1, len(tables_list)):
+            if(tables_list[i] == 'tbl_gwas_trait'):
+                continue
             final_entrez_set = final_entrez_set.intersection(
                 tbl_nm_gene_set[tables_list[i]])
     elif((assoc_logic_sel == 'UNION')):
         for tbl in tables:
+            if(tbl == 'tbl_gwas_trait'):
+                continue
             final_entrez_set = final_entrez_set.union(
                 tbl_nm_gene_set[tbl])
     

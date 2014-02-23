@@ -9,19 +9,308 @@ ewas_tbl_map = {'tbl_ewas_gene_exp': 'liver_expression_ewas',
                 'tbl_ewas_prot_exp': 'liver_proteomics_ewas',
                 'tbl_ewas_trait':    'clinical_metabolite_traits_ewas'}
 
+gwas_tbl_map = {'tbl_gwas_gene_exp': ['liver_expression_trans_eqtl_gwas', 
+                                      'liver_expression_cis_eqtl_gwas'],
+                'tbl_gwas_prot_exp': ['liver_protein_trans_eqtl_gwas'],
+                'tbl_gwas_trait':    ['metabolites_gwas', 'phenotypes_gwas']}
+
+gwas_tbl_tmp_map = {'tbl_gwas_gene_exp': 'liver_expression_trans_cis_eqtl_gwas',
+                'tbl_gwas_prot_exp': 'liver_protein_trans_eqtl_gwas',
+                'tbl_gwas_trait':    'metabolites_phenotypes_gwas'}
+
 ############################# DATABASE #########################################
+
+# create temporary tables for handling gwas database query
+def handle_gwas_query(dbcon,
+                      gwas_tables,
+                      gwas_gene_exp_pval, 
+                      gwas_prot_exp_pval,
+                      gwas_trait_pval,
+                      gwas_gene_exp_max_distance,
+                      gwas_prot_exp_max_distance,
+                      gwas_trait_max_distance,
+                      gwas_trait_names,
+                      gwas_assoc_logic_sel):
+                      
+    # get cursor, mapping between user input and data
+    cur = dbcon.cursor()
+    gwas_pval_map = {'tbl_gwas_gene_exp': gwas_gene_exp_pval,
+                     'tbl_gwas_prot_exp': gwas_prot_exp_pval,
+                     'tbl_gwas_trait':    gwas_trait_pval}
+    gwas_dist_map = {'tbl_gwas_gene_exp': gwas_gene_exp_max_distance,
+                     'tbl_gwas_prot_exp': gwas_prot_exp_max_distance,
+                     'tbl_gwas_trait':    gwas_trait_max_distance}
+    
+    # create temp tables for gwas result
+    for tbl in gwas_tables:
+    
+        # gwas trait table will be handled differently
+        if(tbl == 'tbl_gwas_trait'):
+            continue
+    
+        # convert numers to strings
+        pval = gwas_pval_map[tbl]
+        max_distance = str(gwas_dist_map[tbl])
+        pval_str = str(math.pow(10.0, -1.0*float(pval)))
+    
+        # convert from user input to database table name
+        db_tables = gwas_tbl_map[tbl]
+        
+        # iter through each table
+        for db_tbl in db_tables:
+        
+            # construct query
+            tmp_query = """
+                    select A.probe_chr, A.probe_start_bp, A.probe_end_bp,
+                           A.gene_symbol, A.pval, A.snp_name, A.snp_chr,
+                           A.snp_bp, mouse_sym_human_entrez.human_entrez_id
+                    from
+                        (select * from %s where (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                  abs(dist_gene_end_snp_site) < %s ) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))) as A
+                        join mouse_sym_human_entrez on 
+                        A.gene_symbol = mouse_gene_sym
+            """ % (db_tbl, pval_str, max_distance, max_distance)
+            query = """
+                    create temporary table %s_tmp as %s
+            """ % (db_tbl, tmp_query)
+            
+            # execute query
+            cur.execute(query)
+    
+    # union gene expression trans cis tables
+    query = """
+        create temporary table liver_expression_trans_cis_eqtl_gwas_tmp as
+        select * from liver_expression_trans_eqtl_gwas_tmp
+        union
+        select * from liver_expression_cis_eqtl_gwas_tmp
+    """
+    cur.execute(query)
+    
+    # handle trait query
+    if('tbl_gwas_trait' in gwas_tables):
+    
+        # convert numbers to strings
+        pval = gwas_pval_map[tbl]
+        max_distance = str(gwas_dist_map[tbl])
+        pval_str = str(math.pow(10.0, -1.0*float(pval)))
+        
+        # get trait names sql list string
+        gwas_trait_names_tmp = [];
+        for i in xrange(len(gwas_trait_names)):
+            gwas_trait_names_tmp.append('\''+
+                gwas_trait_names[i].replace('\'', '\'\'') + '\'')
+        gwas_trait_sql_str = ' (%s) ' % (','.join(gwas_trait_names_tmp))
+        
+        # query for getting genes from metabolites associatoin table
+        query_met = """
+                    select 
+                        metabolites_gwas.biochemical as trait,
+                        'Metabolite' as trait_type,
+                        metabolites_gwas.pval,
+                        metabolites_gwas.snp_chr,
+                        metabolites_gwas.snp_bp,
+                        metabolites_gwas.snp_name,
+                        gene_prot_sub.probe_chr,
+                        gene_prot_sub.probe_start_bp,
+                        gene_prot_sub.probe_end_bp,
+                        gene_prot_sub.gene_symbol
+                        from metabolites_gwas 
+                    join
+                        (
+                             select snp_abs_pos, probe_chr, probe_start_bp, 
+                                   probe_end_bp, gene_symbol
+                             from liver_expression_trans_eqtl_gwas where
+                                (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                   abs(dist_gene_end_snp_site) < %s) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))
+                                          
+                             union
+                             
+                             select snp_abs_pos, probe_chr, probe_start_bp,
+                                    probe_end_bp, gene_symbol
+                             from liver_expression_cis_eqtl_gwas where
+                                (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                   abs(dist_gene_end_snp_site) < %s) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))
+                              
+                             union
+                             
+                             select snp_abs_pos, probe_chr, probe_start_bp,
+                                    probe_end_bp, gene_symbol
+                             from liver_protein_trans_eqtl_gwas where
+                                (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                   abs(dist_gene_end_snp_site) < %s) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))
+                        )     
+                        as gene_prot_sub
+                    on
+                        metabolites_gwas.snp_abs_pos=gene_prot_sub.snp_abs_pos
+                    where
+                        pval < %s and biochemical in %s
+        """ % (pval_str, max_distance, max_distance,
+               pval_str, max_distance, max_distance,
+               pval_str, max_distance, max_distance,
+               pval_str, gwas_trait_sql_str)
+        
+        # query for getting genes from phenotype table
+        query_phen = """
+                    select 
+                        phenotypes_gwas.phenotype_name as trait,
+                        'Phenotype' as trait_type,
+                        phenotypes_gwas.pval,
+                        phenotypes_gwas.snp_chr,
+                        phenotypes_gwas.snp_bp,
+                        phenotypes_gwas.snp_name,
+                        gene_prot_sub.probe_chr,
+                        gene_prot_sub.probe_start_bp,
+                        gene_prot_sub.probe_end_bp,
+                        gene_prot_sub.gene_symbol
+                        from phenotypes_gwas
+                    join
+                        (
+                             select snp_abs_pos, probe_chr, probe_start_bp, 
+                                   probe_end_bp, gene_symbol
+                             from liver_expression_trans_eqtl_gwas where
+                                (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                   abs(dist_gene_end_snp_site) < %s) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))
+                                          
+                             union
+                             
+                             select snp_abs_pos, probe_chr, probe_start_bp,
+                                    probe_end_bp, gene_symbol
+                             from liver_expression_cis_eqtl_gwas where
+                                (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                   abs(dist_gene_end_snp_site) < %s) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))
+                              
+                             union
+                             
+                             select snp_abs_pos, probe_chr, probe_start_bp,
+                                    probe_end_bp, gene_symbol
+                             from liver_protein_trans_eqtl_gwas where
+                                (pval < %s) and
+                                (dist_gene_start_snp_site <> 'NULL' and 
+                                 dist_gene_end_snp_site <> 'NULL') and 
+                                ((abs(dist_gene_start_snp_site) < %s or
+                                   abs(dist_gene_end_snp_site) < %s) or
+                                 (dist_gene_start_snp_site < 0 and
+                                  dist_gene_end_snp_site > 0))
+                        )     
+                        as gene_prot_sub
+                    on
+                        phenotypes_gwas.snp_abs_pos=gene_prot_sub.snp_abs_pos
+                    where
+                        pval < %s and phenotype_name in %s
+        """ % (pval_str, max_distance, max_distance,
+               pval_str, max_distance, max_distance,
+               pval_str, max_distance, max_distance,
+               pval_str, gwas_trait_sql_str)
+        
+        tmp_query = """
+            select met_phen_tbl.*, mouse_sym_human_entrez.human_entrez_id from
+                (%s union %s) met_phen_tbl
+            join
+                mouse_sym_human_entrez
+            on
+                met_phen_tbl.gene_symbol=mouse_sym_human_entrez.mouse_gene_sym
+        """ % (query_met, query_phen)
+        print tmp_query
+        query = """
+            create temporary table metabolites_phenotypes_gwas_tmp as %s
+        """ % tmp_query
+        cur.execute(query)
+    
+    
+        # create temp human gene id table, ewas intersection case
+    if(gwas_assoc_logic_sel == 'INTERSECTION'):
+    
+        # create query to get intersection of human entrez ids
+        sub_query = ''
+        for i in xrange(len(gwas_tables)):
+            tbl = gwas_tables[i]
+            db_table = gwas_tbl_tmp_map[tbl]
+            if(i == 0):
+                sub_query = """
+                    (select distinct(human_entrez_id) from %s_tmp)
+                    as %s_tmp_id
+                """ % (db_table, db_table)
+            if(i > 0):
+                sub_query += """
+                    join
+                    (select distinct(human_entrez_id) from %s_tmp)
+                    as %s_tmp_id
+                    on
+                    %s_tmp_id.human_entrez_id = %s_tmp_id.human_entrez_id
+                """ % (db_table,db_table,
+                       gwas_tbl_tmp_map[gwas_tables[0]],db_table)
+        query = """
+            create temporary table human_entrez_id_gwas_tmp as
+            select distinct(%s_tmp_id.human_entrez_id) from (%s)
+        """ % (gwas_tbl_tmp_map[gwas_tables[0]], sub_query)
+        
+        # execute query
+        cur.execute(query)
+    
+    # create temp human gene id table, ewas union case
+    elif(gwas_assoc_logic_sel == 'UNION'):
+    
+        # create query to get union of human entrez ids
+        sub_query = ''
+        sub_query_list = []
+        for tbl in gwas_tables:
+            db_table = gwas_tbl_tmp_map[tbl]
+            sub_query = """
+                (select distinct(human_entrez_id) from %s_tmp 
+                as %s_tmp_id)
+            """ % (db_table, db_table)
+            sub_query_list.append(sub_query)
+        query = """
+            create temporary table human_entrez_id_gwas_tmp as
+            select distinct(human_entrez_id) from ((%s) as A)
+        """ % (' union '.join(sub_query_list))
+        
+        # execute query
+        cur.execute(query)
+            
+    return
 
 # create temporary tables for handling ewas database query
 def handle_ewas_query(dbcon,
-                 ewas_tables,
-                 ewas_gene_exp_pval, 
-                 ewas_prot_exp_pval,
-                 ewas_trait_pval,
-                 ewas_gene_exp_max_distance,
-                 ewas_prot_exp_max_distance,
-                 ewas_trait_max_distance,
-                 ewas_trait_names,
-                 ewas_assoc_logic_sel):
+                      ewas_tables,
+                      ewas_gene_exp_pval, 
+                      ewas_prot_exp_pval,
+                      ewas_trait_pval,
+                      ewas_gene_exp_max_distance,
+                      ewas_prot_exp_max_distance,
+                      ewas_trait_max_distance,
+                      ewas_trait_names,
+                      ewas_assoc_logic_sel):
 
     # get cursor, mapping between user input and data
     cur = dbcon.cursor()
@@ -41,10 +330,11 @@ def handle_ewas_query(dbcon,
         # add additional constraint for searching in trait table
         ewas_trait_additional = ''
         if(db_table == 'clinical_metabolite_traits_ewas'):
+            ewas_trait_names_tmp = [];
             for i in xrange(len(ewas_trait_names)):
-                ewas_trait_names[i] = '\''+ewas_trait_names[i]+'\''
+                ewas_trait_names_tmp.append('\''+ewas_trait_names[i]+'\'')
             ewas_trait_additional += ' and phenotype in '
-            ewas_trait_additional += ' (%s) ' % (','.join(ewas_trait_names))
+            ewas_trait_additional += ' (%s) ' % (','.join(ewas_trait_names_tmp))
         
         # convert numers to strings
         pval = ewas_pval_map[tbl]
@@ -145,6 +435,8 @@ def handle_ewas_query(dbcon,
         
         # execute query
         cur.execute(query)
+
+################################################################################
 
 # take the intersection of ewas and gwas result
 def intersect_ewas_gwas_query_result(ewas_query_result,
