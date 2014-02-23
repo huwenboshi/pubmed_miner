@@ -27,7 +27,7 @@ def safe_len(container):
 def safe_getval(container, key):
     if(key in container):
         return container[key]
-    return None
+    return 0
 
 ########################### ID CONVERSION STUFF ################################
 

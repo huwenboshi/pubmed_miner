@@ -102,13 +102,14 @@ def handle_gwas_query(dbcon,
             cur.execute(query)
     
     # union gene expression trans cis tables
-    query = """
-        create temporary table liver_expression_trans_cis_eqtl_gwas_tmp as
-        select * from liver_expression_trans_eqtl_gwas_tmp
-        union
-        select * from liver_expression_cis_eqtl_gwas_tmp
-    """
-    cur.execute(query)
+    if('tbl_gwas_gene_exp' in gwas_tables):
+        query = """
+            create temporary table liver_expression_trans_cis_eqtl_gwas_tmp as
+            select * from liver_expression_trans_eqtl_gwas_tmp
+            union
+            select * from liver_expression_cis_eqtl_gwas_tmp
+        """
+        cur.execute(query)
     
     # handle trait query
     if('tbl_gwas_trait' in gwas_tables):
@@ -498,7 +499,6 @@ def handle_query(dbcon,
                           gwas_trait_max_distance,
                           gwas_trait_names,
                           gwas_assoc_logic_sel)
-    
     # apply intersectoin
     if(imp_type_logic_sel == 'INTERSECTION'):
     
@@ -525,7 +525,7 @@ def handle_query(dbcon,
     
     # apply union
     elif(imp_type_logic_sel == 'UNION'):
-    
+
         # create query to get union of human entrez ids
         sub_query = ''
         sub_query_list = []
@@ -541,7 +541,7 @@ def handle_query(dbcon,
         
         # execute query
         cur.execute(query)
-
+    
     # parse out result
     query = """select * from human_entrez_id_ewas_gwas_tmp"""
     cur.execute(query)
@@ -549,15 +549,23 @@ def handle_query(dbcon,
     
     for table in ewas_tables:
         db_tbl = ewas_tbl_map[table]
-        query = """select * from %s_tmp where human_entrez_id in
+        tmp_query = """select * from %s_tmp where human_entrez_id in
             (select * from human_entrez_id_ewas_gwas_tmp)""" % db_tbl
+        query = """create temporary table %s_tmp_final 
+            as %s""" % (db_tbl, tmp_query)
+        cur.execute(query)
+        query = """select * from %s_tmp_final""" % db_tbl
         cur.execute(query)
         ewas_result[ewas_simp_map[table]] = fetch_from_db(cur)
     
     for table in gwas_tables:
         db_tbl = gwas_tbl_tmp_map[table]
-        query = """select * from %s_tmp where human_entrez_id in
+        tmp_query = """select * from %s_tmp where human_entrez_id in
             (select * from human_entrez_id_ewas_gwas_tmp)""" % db_tbl
+        query = """create temporary table %s_tmp_final 
+            as %s""" % (db_tbl, tmp_query)
+        cur.execute(query)
+        query = """select * from %s_tmp_final""" % db_tbl
         cur.execute(query)
         gwas_result[gwas_simp_map[table]] = fetch_from_db(cur)
     
@@ -565,355 +573,354 @@ def handle_query(dbcon,
     result = {'human_gene_set': human_entrez_gene_id_set,
               'ewas_query_result': ewas_result,
               'gwas_query_result': gwas_result}
-    
     return result
     
 ############################## META ############################################
 
-# get ewas query result supporing information summary
-def get_gwas_gene_supporting_info(gwas_query_result):
+# count the number of implicating sites for each gene
+def count_implicating_sites_gwas(dbcon, gwas_tables):
+
+    imp_count = {} 
     
-    gene_assoc_pos = dict()
+    cur = dbcon.cursor()
+    for table in gwas_tables:
+        db_tbl = gwas_tbl_tmp_map[table]
+        query = """
+            select human_entrez_id, count(distinct snp_chr, snp_bp) from 
+                %s_tmp_final 
+            group by human_entrez_id
+        """ % db_tbl
+        cur.execute(query)
+        result = fetch_from_db(cur)
+        for row in result:
+            human_gene_id = row[0]
+            count = row[1]
+            assoc_type = gwas_simp_map[table]
+            if(human_gene_id not in imp_count):
+                imp_count[human_gene_id] = dict()
+            if(assoc_type not in imp_count[human_gene_id]):
+                imp_count[human_gene_id][assoc_type] = dict()
+            imp_count[human_gene_id][assoc_type] = count
     
-    # for gene expression
-    gene_exp_result = gwas_query_result['gene_exp']
-    for result in gene_exp_result:
-        snp_gw_pos = result[7]
-        gene_id = result[8]
-        if(gene_id not in gene_assoc_pos):
-            gene_assoc_pos[gene_id] = dict()
-        if('gene_exp' not in gene_assoc_pos[gene_id]):
-            gene_assoc_pos[gene_id]['gene_exp'] = set()
-        gene_assoc_pos[gene_id]['gene_exp'].add(snp_gw_pos)
-    
-    # for protein expression
-    prot_exp_result = gwas_query_result['prot_exp']
-    for result in prot_exp_result:
-        gene_id = result[8]
-        snp_gw_pos = result[3]
-        if(gene_id not in gene_assoc_pos):
-            gene_assoc_pos[gene_id] = dict()
-        if('prot_exp' not in gene_assoc_pos[gene_id]):
-            gene_assoc_pos[gene_id]['prot_exp'] = set()
-        gene_assoc_pos[gene_id]['prot_exp'].add(snp_gw_pos)
-    
-    return gene_assoc_pos
+    return imp_count
 
 #------------------------------------------------------------------------------#
 
-# get ewas query result supporing information summary
-def get_ewas_gene_supporting_info(ewas_query_result):
+# count the number of implicating sites for each gene
+def count_implicating_sites_ewas(dbcon, ewas_tables):
+
+    imp_count = {}    
     
-    gene_assoc_pos = dict()
-    
-    # for gene expression
-    gene_exp_result = ewas_query_result['gene_exp']
-    for result in gene_exp_result:
-        gene_id = result[18]
-        mcg_gw_pos = result[7]
-        if(gene_id not in gene_assoc_pos):
-            gene_assoc_pos[gene_id] = dict()
-        if('gene_exp' not in gene_assoc_pos[gene_id]):
-            gene_assoc_pos[gene_id]['gene_exp'] = set()
-        gene_assoc_pos[gene_id]['gene_exp'].add(mcg_gw_pos)
-    
-    # for protein expression
-    prot_exp_result = ewas_query_result['prot_exp']
-    for result in prot_exp_result:
-        gene_id = result[18]
-        mcg_gw_pos = result[7]
-        if(gene_id not in gene_assoc_pos):
-            gene_assoc_pos[gene_id] = dict()
-        if('prot_exp' not in gene_assoc_pos[gene_id]):
-            gene_assoc_pos[gene_id]['prot_exp'] = set()
-        gene_assoc_pos[gene_id]['prot_exp'].add(mcg_gw_pos)
-    
-    # for trait
-    trait_exp_result = ewas_query_result['trait']
-    for result in trait_exp_result:
-        gene_id = result[20]
-        mcg_gw_pos = result[6]
-        if(gene_id not in gene_assoc_pos):
-            gene_assoc_pos[gene_id] = dict()
-        if('trait' not in gene_assoc_pos[gene_id]):
-            gene_assoc_pos[gene_id]['trait'] = set()
-        gene_assoc_pos[gene_id]['trait'].add(mcg_gw_pos)
-    
-    return gene_assoc_pos
+    cur = dbcon.cursor()
+    for table in ewas_tables:
+        db_tbl = ewas_tbl_map[table]
+        query = """
+            select human_entrez_id,count(distinct cg_annot_chr, cg_annot_bp_pos)
+            from 
+                %s_tmp_final 
+            group by human_entrez_id
+        """ % db_tbl
+        cur.execute(query)
+        result = fetch_from_db(cur)
+        for row in result:
+            human_gene_id = row[0]
+            count = row[1]
+            assoc_type = ewas_simp_map[table]
+            if(human_gene_id not in imp_count):
+                imp_count[human_gene_id] = dict()
+            if(assoc_type not in imp_count[human_gene_id]):
+                imp_count[human_gene_id][assoc_type] = dict()
+            imp_count[human_gene_id][assoc_type] = count
+
+    return imp_count
 
 ############################# DISPLAY ##########################################
 
 # display ewas query result
-def print_ewas_query_result(ewas_query_result):
+def print_ewas_query_result(ewas_query_result, ewas_tables):
     
     ########## gene table ##########
-    print """
-        <div>
-            <b>Genes implicated by CG methylations associated 
-            with gene expression</b>
-            <button class="show_hide" type="button">hide</button>
-            <br/>
+    if('tbl_ewas_gene_exp' in ewas_tables):
+        print """
+            <div>
+                <b>Genes implicated by CG methylations associated 
+                with gene expression</b>
+                <button class="show_hide" type="button">hide</button>
+                <br/>
+                
+        """
+        gene_exp_result = ewas_query_result['gene_exp']
+        print """
+                <table id="ewas_gene_exp_tbl" class="tablesorter">
+                <thead>
+                <tr>
+                    <th>mCG position</th>
+                    <th>1Mb-window</th>
+                    <th>Implicated mouse gene symbol</th>
+                    <th>Gene position</th>
+                    <th>p-value</th>
+                    <th>Human ortholog entrez ID</th>
+                </tr>
+                </thead>
+                <tbody>"""
+        for result in gene_exp_result:
+            print '<tr>'
             
-    """
-    gene_exp_result = ewas_query_result['gene_exp']
-    print """
-            <table id="ewas_gene_exp_tbl" class="tablesorter">
-            <thead>
-            <tr>
-                <th>mCG genome-wide position</th>
-                <th>1Mb-window</th>
-                <th>Implicated mouse gene symbol</th>
-                <th>Gene position</th>
-                <th>p-value</th>
-                <th>Human ortholog entrez ID</th>
-            </tr>
-            </thead>
-            <tbody>"""
-    for result in gene_exp_result:
-        print '<tr>'
-        
-        # mCG 
-        print '<td>%s</td>' % result[7]
-        
-        # mCG window
-        window_st = result[6]-500000 if(result[6]-500000 > 0) else 0
-        window_ed = result[6]+500000
-        window_str = "chr%s:%s-%s" % (result[5], str(window_st),
-            str(window_ed))
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            window_str, window_str)
-        
-        # gene symbol
-        print '<td>%s</td>' % result[16]
-        
-        # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[10], result[11], result[12])
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            gene_pos_str, gene_pos_str)
-        
-        # p-value, human entrez gene id
-        print '<td>%s</td><td>%s</td>' % (result[0], result[18])
-        print '</tr>'
-    print """
-        </tbody>
-        </table>
-        </div>
-        <hr/>"""
+            # mCG 
+            print '<td>chr%s:%s</td>' % (result[5], result[6])
+            
+            # mCG window
+            window_st = result[6]-500000 if(result[6]-500000 > 0) else 0
+            window_ed = result[6]+500000
+            window_str = "chr%s:%s-%s" % (result[5], str(window_st),
+                str(window_ed))
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                window_str, window_str)
+            
+            # gene symbol
+            print '<td>%s</td>' % result[16]
+            
+            # gene position
+            gene_pos_str = 'chr%s:%s-%s' % (result[10], result[11], result[12])
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                gene_pos_str, gene_pos_str)
+            
+            # p-value, human entrez gene id
+            print '<td>%s</td><td>%s</td>' % (result[0], result[18])
+            print '</tr>'
+        print """
+            </tbody>
+            </table>
+            </div>
+            <hr/>"""
     
     ########## protein table ##########
-    print """
-        <div>
-            <b>Genes implicated by CG methylations associated 
-            with protein expression</b>
-            <button class="show_hide" type="button">hide</button>
-            <br/>
+    if('tbl_ewas_prot_exp' in ewas_tables):
+        print """
+            <div>
+                <b>Genes implicated by CG methylations associated 
+                with protein expression</b>
+                <button class="show_hide" type="button">hide</button>
+                <br/>
+                
+        """
+        prot_exp_result = ewas_query_result['prot_exp']
+        print """
+                <table id="ewas_prot_exp_tbl" class="tablesorter">
+                <thead>
+                <tr>
+                    <th>mCG position</th>
+                    <th>1Mb-window</th>
+                    <th>Implicated mouse<br/>gene symbol</th>
+                    <th>Gene position</th>
+                    <th>p-value</th>
+                    <th>Human ortholog<br/>entrez ID</th>
+                </tr>
+                </thead>
+                <tbody>"""
+        for result in prot_exp_result:
+            print '<tr>'
+            # mCG 
+            print '<td>chr%s:%s</td>' % (result[5],result[6])
             
-    """
-    prot_exp_result = ewas_query_result['prot_exp']
-    print """
-            <table id="ewas_prot_exp_tbl" class="tablesorter">
-            <thead>
-            <tr>
-                <th>mCG genome-wide<br/> position</th>
-                <th>1Mb-window</th>
-                <th>Implicated mouse<br/>gene symbol</th>
-                <th>Gene position</th>
-                <th>p-value</th>
-                <th>Human ortholog<br/>entrez ID</th>
-            </tr>
-            </thead>
-            <tbody>"""
-    for result in prot_exp_result:
-        print '<tr>'
-        # mCG 
-        print '<td>%s</td>' % result[7]
-        
-        # mCG window
-        window_st = result[6]-500000 if(result[6]-500000 > 0) else 0
-        window_ed = result[6]+500000
-        window_str = "chr%s:%s-%s" % (result[5], str(window_st),
-            str(window_ed))
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            window_str, window_str)
-        
-        # gene symbol
-        print '<td>%s</td>' % result[16]
-        
-        # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[10], result[11], result[12])
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            gene_pos_str, gene_pos_str)
-        
-        # p-value, human entrez gene id
-        print '<td>%s</td><td>%s</td>' % (result[0], result[18])
-        print '</tr>'
-    print """
-        </tbody>
-        </table>
-        </div>
-        <hr/>"""
+            # mCG window
+            window_st = result[6]-500000 if(result[6]-500000 > 0) else 0
+            window_ed = result[6]+500000
+            window_str = "chr%s:%s-%s" % (result[5], str(window_st),
+                str(window_ed))
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                window_str, window_str)
+            
+            # gene symbol
+            print '<td>%s</td>' % result[16]
+            
+            # gene position
+            gene_pos_str = 'chr%s:%s-%s' % (result[10], result[11], result[12])
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                gene_pos_str, gene_pos_str)
+            
+            # p-value, human entrez gene id
+            print '<td>%s</td><td>%s</td>' % (result[0], result[18])
+            print '</tr>'
+        print """
+            </tbody>
+            </table>
+            </div>
+            <hr/>"""
     
     ########## trait table ##########
-    print """
-        <div>
-            <b>Genes implicated by CG methylations associated 
-            with clinical and metabolite trait</b>
-            <button class="show_hide" type="button">hide</button>
-            <br/>
+    if('tbl_ewas_trait' in ewas_tables):
+        print """
+            <div>
+                <b>Genes implicated by CG methylations associated 
+                with clinical and metabolite trait</b>
+                <button class="show_hide" type="button">hide</button>
+                <br/>
+                
+        """
+        trait_exp_result = ewas_query_result['trait']
+        print """
+                <table id="ewas_trait_tbl" class="tablesorter">
+                <thead>
+                <tr>
+                    <th>mCG position</th>
+                    <th>1-Mb window</th>
+                    <th>Implicated mouse<br/>gene symbol</th>
+                    <th>Gene position</th>
+                    <th>Phenotype</th>
+                    <th>Phenotype class</th>
+                    <th>p-value</th>
+                    <th>Human ortholog<br/>entrez ID</th>
+                </tr>
+                </thead>
+                <tbody>"""
+        for result in trait_exp_result:
+            print '<tr>'
             
-    """
-    trait_exp_result = ewas_query_result['trait']
-    print """
-            <table id="ewas_trait_tbl" class="tablesorter">
-            <thead>
-            <tr>
-                <th>mCG genome-wide<br/>position</th>
-                <th>1-Mb window</th>
-                <th>Implicated mouse<br/>gene symbol</th>
-                <th>Gene position</th>
-                <th>Phenotype</th>
-                <th>Phenotype class</th>
-                <th>p-value</th>
-                <th>Human ortholog<br/>entrez ID</th>
-            </tr>
-            </thead>
-            <tbody>"""
-    for result in trait_exp_result:
-        print '<tr>'
-        
-        # mCG position
-        print '<td>%s</td>' % result[6]
-        
-        # mCG window
-        window_st = result[5]-500000 if(result[5]-500000 > 0) else 0
-        window_ed = result[5]+500000
-        window_str = "chr%s:%s-%s" % (result[4], str(window_st),
-            str(window_ed))
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            window_str, window_str)
-        
-        # gene symbol
-        print '<td>%s</td>' % result[18]
-        
-        # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[12], result[13], result[14])
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            gene_pos_str, gene_pos_str)
-        
-        print '<td>%s</td><td>%s</td>' % (result[2], result[3])
-        print '<td>%s</td><td>%s</td>' % (result[0], result[20])
-        print '</tr>'
-    print """
-        </tbody>
-        </table>
-        </div>"""
+            # mCG position
+            print '<td>chr%s:%s</td>' % (result[4],result[5])
+            
+            # mCG window
+            window_st = result[5]-500000 if(result[5]-500000 > 0) else 0
+            window_ed = result[5]+500000
+            window_str = "chr%s:%s-%s" % (result[4], str(window_st),
+                str(window_ed))
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                window_str, window_str)
+            
+            # gene symbol
+            print '<td>%s</td>' % result[18]
+            
+            # gene position
+            gene_pos_str = 'chr%s:%s-%s' % (result[12], result[13], result[14])
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                gene_pos_str, gene_pos_str)
+            
+            print '<td>%s</td><td>%s</td>' % (result[2], result[3])
+            print '<td>%s</td><td>%s</td>' % (result[0], result[20])
+            print '</tr>'
+        print """
+            </tbody>
+            </table>
+            </div>"""
 
 #------------------------------------------------------------------------------#
 
 # display gwas query result
-def print_gwas_query_result(gwas_query_result):
+def print_gwas_query_result(gwas_query_result, gwas_tables):
     
     ########## gene table ##########
-    print """
-        <div>
-            <b>Genes implicated by SNPs associated with gene expression</b>
-            <button class="show_hide" type="button">hide</button>
-            <br/>
+    if('tbl_gwas_gene_exp' in gwas_tables):
+        print """
+            <div>
+                <b>Genes implicated by SNPs associated with gene expression</b>
+                <button class="show_hide" type="button">hide</button>
+                <br/>
+                
+        """
+        gene_exp_result = gwas_query_result['gene_exp']
+        print '<table id="gwas_gene_exp_tbl" class="tablesorter">'
+        print """
+                <thead>
+                <tr>
+                    <th>SNP name</th>
+                    <th>SNP position</th>
+                    <th>1Mb-window</th>
+                    <th>Implicated mouse gene symbol</th>
+                    <th>Gene position</th>
+                    <th>p-value</th>
+                    <th>Human ortholog entrez ID</th>
+                </tr>
+                </thead>
+                <tbody>"""
+        for result in gene_exp_result:
+            print '<tr>'
             
-    """
-    gene_exp_result = gwas_query_result['gene_exp']
-    print '<table id="gwas_gene_exp_tbl" class="tablesorter">'
-    print """
-            <thead>
-            <tr>
-                <th>SNP genome-wide position</th>
-                <th>1Mb-window</th>
-                <th>Implicated mouse gene symbol</th>
-                <th>Gene position</th>
-                <th>p-value</th>
-                <th>Human ortholog entrez ID</th>
-            </tr>
-            </thead>
-            <tbody>"""
-    for result in gene_exp_result:
-        print '<tr>'
-        
-        # SNP
-        print '<td>%s</td>' % result[5]
-        snp_pos = int(result[7])
-        
-        # snp window
-        window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
-        window_ed = snp_pos+500000
-        window_str = "chr%s:%s-%s"%(result[6],str(window_st), str(window_ed))
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            window_str, window_str)
-        
-        # gene symbol
-        print '<td>%s</td>' % result[8]
-        
-        # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[0], result[1], result[2])
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            gene_pos_str, gene_pos_str)
-        
-        # p-value, human entrez gene id
-        print '<td>%s</td><td>%s</td>' % (result[4], result[8])
-        print '</tr>'
-    print """
-        </tbody>
-        </table>
-        </div>
-        <hr/>"""
+            # snp name
+            print '<td>%s</td>' % result[5]
+            
+            # snp pos
+            print '<td>chr%s:%s</td>' % (result[6], result[7])
+            
+            # snp window
+            snp_pos = int(result[7])
+            window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
+            window_ed = snp_pos+500000
+            window_str = "chr%s:%s-%s"%(result[6],str(window_st), str(window_ed))
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                window_str, window_str)
+            
+            # gene symbol
+            print '<td>%s</td>' % result[3]
+            
+            # gene position
+            gene_pos_str = 'chr%s:%s-%s' % (result[0], result[1], result[2])
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                gene_pos_str, gene_pos_str)
+            
+            # p-value, human entrez gene id
+            print '<td>%s</td><td>%s</td>' % (result[4], result[8])
+            print '</tr>'
+        print """
+            </tbody>
+            </table>
+            </div>
+            <hr/>"""
     
     ########## protein table ##########
-    print """
-        <div>
-            <b>Genes implicated by SNPs associated with protein expression</b>
-            <button class="show_hide" type="button">hide</button>
-            <br/>
+    if('tbl_gwas_prot_exp' in gwas_tables):
+        print """
+            <div>
+                <b>Genes implicated by SNPs associated with protein expression</b>
+                <button class="show_hide" type="button">hide</button>
+                <br/>
+                
+        """
+        prot_exp_result = gwas_query_result['prot_exp']
+        print '<table id="gwas_prot_exp_tbl" class="tablesorter">'
+        print """
+                <thead>
+                <tr>
+                    <th>SNP name</th>
+                    <th>SNP position</th>
+                    <th>1Mb-window</th>
+                    <th>Implicated mouse<br/>gene symbol</th>
+                    <th>Gene position</th>
+                    <th>p-value</th>
+                    <th>Human ortholog<br/>entrez ID</th>
+                </tr>
+                </thead>
+                <tbody>"""
+        for result in prot_exp_result:
+            print '<tr>'
             
-    """
-    prot_exp_result = gwas_query_result['prot_exp']
-    print '<table id="gwas_prot_exp_tbl" class="tablesorter">'
-    print """
-            <thead>
-            <tr>
-                <th>SNP genome-wide<br/> position</th>
-                <th>1Mb-window</th>
-                <th>Implicated mouse<br/>gene symbol</th>
-                <th>Gene position</th>
-                <th>p-value</th>
-                <th>Human ortholog<br/>entrez ID</th>
-            </tr>
-            </thead>
-            <tbody>"""
-    for result in prot_exp_result:
-        print '<tr>'
-        # snp 
-        print '<td>%s</td>' % result[5]
-        
-        # snp window
-        snp_pos = int(result[7])
-        window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
-        window_ed = snp_pos+500000
-        window_str = "chr%s:%s-%s" % (result[6], str(window_st),
-            str(window_ed))
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            window_str, window_str)
-        
-        # gene symbol
-        print '<td>%s</td>' % result[8]
-        
-        # gene position
-        gene_pos_str = 'chr%s:%s-%s' % (result[0], result[1], result[2])
-        print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-            gene_pos_str, gene_pos_str)
-        
-        # p-value, human entrez gene id
-        print '<td>%s</td><td>%s</td>' % (result[4], result[8])
-        print '</tr>'
-    print """
-        </tbody>
-        </table>
-        </div>"""
+            # snp name
+            print '<td>%s</td>' % result[5]
+            
+            # snp position
+            print '<td>chr%s:%s</td>' % (result[6], result[7])
+            
+            # snp window
+            snp_pos = int(result[7])
+            window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
+            window_ed = snp_pos+500000
+            window_str = "chr%s:%s-%s" % (result[6], str(window_st),
+                str(window_ed))
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                window_str, window_str)
+            
+            # gene symbol
+            print '<td>%s</td>' % result[3]
+            
+            # gene position
+            gene_pos_str = 'chr%s:%s-%s' % (result[0], result[1], result[2])
+            print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                gene_pos_str, gene_pos_str)
+            
+            # p-value, human entrez gene id
+            print '<td>%s</td><td>%s</td>' % (result[4], result[8])
+            print '</tr>'
+        print """
+            </tbody>
+            </table>
+            </div>"""

@@ -229,16 +229,13 @@ ewas_gwas_result = handle_query(con,
                             gwas_trait_max_distance,
                             gwas_trait_names,
                             gwas_assoc_logic_sel)
-
 ewas_query_result = ewas_gwas_result['ewas_query_result']
 gwas_query_result = ewas_gwas_result['gwas_query_result']
 combined_entrez_id_set = ewas_gwas_result['human_gene_set']
 
-# get gene supporting loci information ewas
-ewas_gene_support_info = get_ewas_gene_supporting_info(ewas_query_result)
-
-# get gene supporting loci information gwas
-gwas_gene_support_info = get_gwas_gene_supporting_info(gwas_query_result)
+# count the number of implicating sites for each implicated gene
+ewas_gene_support_info = count_implicating_sites_ewas(con, ewas_tables)
+gwas_gene_support_info = count_implicating_sites_gwas(con, gwas_tables)
 
 # get user genes
 gene_list = combined_entrez_id_set
@@ -303,64 +300,89 @@ print """
             <b>Gene implication summary</b>
             <button class="show_hide" type="button">hide</button>
             <br/>
-            
+            <table id="imp_summary_tbl" class="tablesorter">
+            <thead>
+            <tr>
+                <th>Human gene Entrez ID</th>
       """
-print '<table id="imp_summary_tbl" class="tablesorter">'
-print '<thead>'
-print """<tr>
-            <th>Human gene Entrez ID</th>
-            <th>Number of EWAS loci<br/>associated with gene expression</th>
-            <th>Number of EWAS loci<br/>associated with protein expression</th>
-            <th>Number of EWAS loci<br/>associated with phenotypes</th>
-            <th>Number of GWAS loci<br/>associated with gene expression</th>
-            <th>Number of GWAS loci<br/>associated with protein expression</th>
-            <th>Total number of EWAS loci </th>
-            <th>Total number of GWAS loci </th>
-            <th>Total number of loci </th>
-         </tr>"""
-print '</thead>'
-print '<tbody>'
+if('tbl_ewas_gene_exp' in ewas_tables):
+    print '<th>Number of EWAS loci<br/>associated with gene expression</th>'
+if('tbl_ewas_prot_exp' in ewas_tables):
+    print '<th>Number of EWAS loci<br/>associated with protein expression</th>'
+if('tbl_ewas_trait' in ewas_tables):
+    print '<th>Number of EWAS loci<br/>associated with phenotypes</th>'
+
+if('tbl_gwas_gene_exp' in gwas_tables):
+    print '<th>Number of GWAS loci<br/>associated with gene expression</th>'
+if('tbl_gwas_prot_exp' in gwas_tables):
+    print '<th>Number of GWAS loci<br/>associated with protein expression</th>'
+if('tbl_gwas_prot_exp' in gwas_tables):
+    print '<th>Number of GWAS loci<br/>associated with phenotypes</th>'
+    
+if(len(ewas_tables) > 0):
+    print '<th>Total number of EWAS loci </th>'
+if(len(gwas_tables) > 0):
+    print '<th>Total number of GWAS loci </th>'
+print """
+              <th>Total number of loci </th>
+            </tr>
+            </thead>
+            <tbody>"""
 
 for key in combined_entrez_id_set:
     key = key[0]
     ewas_assoc_pos = dict()
     if(key in ewas_gene_support_info):
         ewas_assoc_pos = ewas_gene_support_info[key]
-    num_ewas_gene_exp = safe_len(safe_getval(ewas_assoc_pos, 'gene_exp'))
-    num_ewas_prot_exp = safe_len(safe_getval(ewas_assoc_pos, 'prot_exp'))
-    num_ewas_trait = safe_len(safe_getval(ewas_assoc_pos, 'trait'))
+    num_ewas_gene_exp = safe_getval(ewas_assoc_pos, 'gene_exp')
+    num_ewas_prot_exp = safe_getval(ewas_assoc_pos, 'prot_exp')
+    num_ewas_trait = safe_getval(ewas_assoc_pos, 'trait')
     num_ewas_tot = num_ewas_gene_exp + num_ewas_prot_exp + num_ewas_trait
     
     gwas_assoc_pos = dict()
     if(key in gwas_gene_support_info):
         gwas_assoc_pos = gwas_gene_support_info[key]
-    num_gwas_gene_exp = safe_len(safe_getval(gwas_assoc_pos, 'gene_exp'))
-    num_gwas_prot_exp = safe_len(safe_getval(gwas_assoc_pos, 'prot_exp'))
-    num_gwas_tot = num_gwas_gene_exp + num_gwas_prot_exp
+    num_gwas_gene_exp = safe_getval(gwas_assoc_pos, 'gene_exp')
+    num_gwas_prot_exp = safe_getval(gwas_assoc_pos, 'prot_exp')
+    num_gwas_trait = safe_getval(gwas_assoc_pos, 'trait')
+    num_gwas_tot = num_gwas_gene_exp + num_gwas_prot_exp + num_gwas_trait
     
     num_tot = num_ewas_tot + num_gwas_tot
     
     print '<tr>'
     print '<td>%s</td>' % key
-    print '<td>%d</td>' % num_ewas_gene_exp
-    print '<td>%d</td>' % num_ewas_prot_exp
-    print '<td>%d</td>' % num_ewas_trait
-    print '<td>%d</td>' % num_gwas_gene_exp
-    print '<td>%d</td>' % num_gwas_prot_exp
-    print '<td>%d</td>' % num_ewas_tot
-    print '<td>%d</td>' % num_gwas_tot
+    
+    if('tbl_ewas_gene_exp' in ewas_tables):
+        print '<td>%d</td>' % num_ewas_gene_exp
+    if('tbl_ewas_prot_exp' in ewas_tables):
+        print '<td>%d</td>' % num_ewas_prot_exp
+    if('tbl_ewas_trait' in ewas_tables):
+        print '<td>%d</td>' % num_ewas_trait
+    
+    if('tbl_gwas_gene_exp' in gwas_tables):
+        print '<td>%d</td>' % num_gwas_gene_exp
+    if('tbl_gwas_prot_exp' in gwas_tables):
+        print '<td>%d</td>' % num_gwas_prot_exp
+    if('tbl_gwas_trait' in gwas_tables):
+        print '<td>%d</td>' % num_gwas_trait
+    
+    if(len(ewas_tables) > 0):
+        print '<td>%d</td>' % num_ewas_tot
+    if(len(gwas_tables) > 0):
+        print '<td>%d</td>' % num_gwas_tot
+    
     print '<td>%d</td>' % num_tot
     
     print '</tr>'
     
-print '</tbody>'
-print '</table>'
-print '</div>'
-print '<hr/>'
+print """</tbody>
+        </table>
+        </div>
+      <hr/>"""
 
-print_ewas_query_result(ewas_query_result)
+print_ewas_query_result(ewas_query_result, ewas_tables)
 print '<hr/>'
-print_gwas_query_result(gwas_query_result)
+print_gwas_query_result(gwas_query_result, gwas_tables)
 
 ################################## Hidden Form #################################
 

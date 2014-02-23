@@ -100,6 +100,15 @@
                         $('.mt_opt_gwas').attr("checked", false);
                     }
                 });
+                $('#check_all_curated_terms').live('click', function() {
+                    status = $('#check_all_curated_terms').attr("checked");
+                    if(status == 'checked') {
+                        $('.curated_terms_opt').attr("checked", true);
+                    }
+                    else {
+                        $('.curated_terms_opt').attr("checked", false);
+                    }
+                });
             });
         </script>
     </head>
@@ -940,170 +949,170 @@
 
 <table border="1">
     <tr class="term_header">
-        <td>Curated terms for obesity</td>
+        <td><input id="check_all_curated_terms" type="checkbox">Curated terms for obesity</td>
     </tr>    
 
     <tr class="term_row">
         <td>
             <div class="terms_div">
-            <input name="curated_terms" value="abdominal fat" type="checkbox">abdominal fat<br/>
-            <input name="curated_terms" value="actb" type="checkbox">actb<br/>
-            <input name="curated_terms" value="adh5" type="checkbox">adh5<br/>
-            <input name="curated_terms" value="adipocyte" type="checkbox">adipocyte<br/>
-            <input name="curated_terms" value="adipogenesis" type="checkbox">adipogenesis<br/>
-            <input name="curated_terms" value="adiponectin" type="checkbox">adiponectin<br/>
-            <input name="curated_terms" value="adipose tissue" type="checkbox">adipose tissue<br/>
-            <input name="curated_terms" value="adiposity" type="checkbox">adiposity<br/>
-            <input name="curated_terms" value="alcohol consumption" type="checkbox">alcohol consumption<br/>
-            <input name="curated_terms" value="alcohol drinking" type="checkbox">alcohol drinking<br/>
-            <input name="curated_terms" value="alzheimer disease" type="checkbox">alzheimer disease<br/>
-            <input name="curated_terms" value="aneurysm" type="checkbox">aneurysm<br/>
-            <input name="curated_terms" value="apolipoprotein" type="checkbox">apolipoprotein<br/>
-            <input name="curated_terms" value="apolipoprotein a-i" type="checkbox">apolipoprotein a-i<br/>
-            <input name="curated_terms" value="apolipoprotein a-ii" type="checkbox">apolipoprotein a-ii<br/>
-            <input name="curated_terms" value="apolipoprotein b-100" type="checkbox">apolipoprotein b-100<br/>
-            <input name="curated_terms" value="apolipoproteins e" type="checkbox">apolipoproteins e<br/>
-            <input name="curated_terms" value="appetite" type="checkbox">appetite<br/>
-            <input name="curated_terms" value="arachidonic acid" type="checkbox">arachidonic acid<br/>
-            <input name="curated_terms" value="arteriosclerosis" type="checkbox">arteriosclerosis<br/>
-            <input name="curated_terms" value="asph" type="checkbox">asph<br/>
-            <input name="curated_terms" value="atherosclerosis" type="checkbox">atherosclerosis<br/>
-            <input name="curated_terms" value="bdnf" type="checkbox">bdnf<br/>
-            <input name="curated_terms" value="birth weight" type="checkbox">birth weight<br/>
-            <input name="curated_terms" value="blood glucose" type="checkbox">blood glucose<br/>
-            <input name="curated_terms" value="body fat" type="checkbox">body fat<br/>
-            <input name="curated_terms" value="body mass index" type="checkbox">body mass index<br/>
-            <input name="curated_terms" value="body surface area" type="checkbox">body surface area<br/>
-            <input name="curated_terms" value="body weight" type="checkbox">body weight<br/>
-            <input name="curated_terms" value="bone density" type="checkbox">bone density<br/>
-            <input name="curated_terms" value="calcium" type="checkbox">calcium<br/>
-            <input name="curated_terms" value="caloric intake" type="checkbox">caloric intake<br/>
-            <input name="curated_terms" value="cardiomyopathies" type="checkbox">cardiomyopathies<br/>
-            <input name="curated_terms" value="cardiovascular disease" type="checkbox">cardiovascular disease<br/>
-            <input name="curated_terms" value="carotid artery disease" type="checkbox">carotid artery disease<br/>
-            <input name="curated_terms" value="carotid stenosis" type="checkbox">carotid stenosis<br/>
-            <input name="curated_terms" value="casp1" type="checkbox">casp1<br/>
-            <input name="curated_terms" value="ceramides" type="checkbox">ceramides<br/>
-            <input name="curated_terms" value="cerebrovascular disorder" type="checkbox">cerebrovascular disorder<br/>
-            <input name="curated_terms" value="chemokine" type="checkbox">chemokine<br/>
-            <input name="curated_terms" value="cholesterol" type="checkbox">cholesterol<br/>
-            <input name="curated_terms" value="cholesterol hdl" type="checkbox">cholesterol hdl<br/>
-            <input name="curated_terms" value="cholesterol ldl" type="checkbox">cholesterol ldl<br/>
-            <input name="curated_terms" value="chromatin" type="checkbox">chromatin<br/>
-            <input name="curated_terms" value="coronary aneurysm" type="checkbox">coronary aneurysm<br/>
-            <input name="curated_terms" value="coronary arteriosclerosis" type="checkbox">coronary arteriosclerosis<br/>
-            <input name="curated_terms" value="coronary disease" type="checkbox">coronary disease<br/>
-            <input name="curated_terms" value="cox7a1" type="checkbox">cox7a1<br/>
-            <input name="curated_terms" value="cytokine" type="checkbox">cytokine<br/>
-            <input name="curated_terms" value="diabetes" type="checkbox">diabetes<br/>
-            <input name="curated_terms" value="diabetes mellitus" type="checkbox">diabetes mellitus<br/>
-            <input name="curated_terms" value="diabetes mellitus type 1" type="checkbox">diabetes mellitus type 1<br/>
-            <input name="curated_terms" value="diabetes mellitus type 2" type="checkbox">diabetes mellitus type 2<br/>
-            <input name="curated_terms" value="diabetic angiopathies" type="checkbox">diabetic angiopathies<br/>
-            <input name="curated_terms" value="diabetic nephropathies" type="checkbox">diabetic nephropathies<br/>
-            <input name="curated_terms" value="dietary fat" type="checkbox">dietary fat<br/>
-            <input name="curated_terms" value="dna methylation" type="checkbox">dna methylation<br/>
-            <input name="curated_terms" value="embolism" type="checkbox">embolism<br/>
-            <input name="curated_terms" value="endoplasmic reticulum" type="checkbox">endoplasmic reticulum<br/>
-            <input name="curated_terms" value="endothelial cell" type="checkbox">endothelial cell<br/>
-            <input name="curated_terms" value="energy expenditure" type="checkbox">energy expenditure<br/>
-            <input name="curated_terms" value="etv5" type="checkbox">etv5<br/>
-            <input name="curated_terms" value="exercise" type="checkbox">exercise<br/>
-            <input name="curated_terms" value="fast food" type="checkbox">fast food<br/>
-            <input name="curated_terms" value="fat mass" type="checkbox">fat mass<br/>
-            <input name="curated_terms" value="fats" type="checkbox">fats<br/>
-            <input name="curated_terms" value="fats unsaturated" type="checkbox">fats unsaturated<br/>
-            <input name="curated_terms" value="fatty acids" type="checkbox">fatty acids<br/>
-            <input name="curated_terms" value="fatty acids monounsaturated" type="checkbox">fatty acids monounsaturated<br/>
-            <input name="curated_terms" value="fatty acids omega-3" type="checkbox">fatty acids omega-3<br/>
-            <input name="curated_terms" value="fatty acids omega-6" type="checkbox">fatty acids omega-6<br/>
-            <input name="curated_terms" value="fatty acids unsaturated" type="checkbox">fatty acids unsaturated<br/>
-            <input name="curated_terms" value="fbxo15" type="checkbox">fbxo15<br/>
-            <input name="curated_terms" value="foam cell" type="checkbox">foam cell<br/>
-            <input name="curated_terms" value="food consumption" type="checkbox">food consumption<br/>
-            <input name="curated_terms" value="fto" type="checkbox">fto<br/>
-            <input name="curated_terms" value="gabpa" type="checkbox">gabpa<br/>
-            <input name="curated_terms" value="glucose" type="checkbox">glucose<br/>
-            <input name="curated_terms" value="glucose transporter type 1" type="checkbox">glucose transporter type 1<br/>
-            <input name="curated_terms" value="glucose-6-phosphate" type="checkbox">glucose-6-phosphate<br/>
-            <input name="curated_terms" value="glyceride" type="checkbox">glyceride<br/>
-            <input name="curated_terms" value="heart" type="checkbox">heart<br/>
-            <input name="curated_terms" value="hepatocyte" type="checkbox">hepatocyte<br/>
-            <input name="curated_terms" value="hypercholesterolemia" type="checkbox">hypercholesterolemia<br/>
-            <input name="curated_terms" value="hyperglycemia" type="checkbox">hyperglycemia<br/>
-            <input name="curated_terms" value="hyperlipidemia" type="checkbox">hyperlipidemia<br/>
-            <input name="curated_terms" value="hypertension" type="checkbox">hypertension<br/>
-            <input name="curated_terms" value="hypertriglyceridemia" type="checkbox">hypertriglyceridemia<br/>
-            <input name="curated_terms" value="hypoglycemia" type="checkbox">hypoglycemia<br/>
-            <input name="curated_terms" value="hypothalamus" type="checkbox">hypothalamus<br/>
-            <input name="curated_terms" value="inflammation" type="checkbox">inflammation<br/>
-            <input name="curated_terms" value="insulin" type="checkbox">insulin<br/>
-            <input name="curated_terms" value="insulin resistance" type="checkbox">insulin resistance<br/>
-            <input name="curated_terms" value="insulin-like growth factor i" type="checkbox">insulin-like growth factor i<br/>
-            <input name="curated_terms" value="insulin-like growth factor ii" type="checkbox">insulin-like growth factor ii<br/>
-            <input name="curated_terms" value="insulin-secreting cell" type="checkbox">insulin-secreting cell<br/>
-            <input name="curated_terms" value="insulinoma" type="checkbox">insulinoma<br/>
-            <input name="curated_terms" value="intra-abdominal fat" type="checkbox">intra-abdominal fat<br/>
-            <input name="curated_terms" value="ischemia" type="checkbox">ischemia<br/>
-            <input name="curated_terms" value="islet cell" type="checkbox">islet cell<br/>
-            <input name="curated_terms" value="jak1" type="checkbox">jak1<br/>
-            <input name="curated_terms" value="kpna3" type="checkbox">kpna3<br/>
-            <input name="curated_terms" value="kupffer cell" type="checkbox">kupffer cell<br/>
-            <input name="curated_terms" value="leptin" type="checkbox">leptin<br/>
-            <input name="curated_terms" value="leukotriene" type="checkbox">leukotriene<br/>
-            <input name="curated_terms" value="lipases" type="checkbox">lipases<br/>
-            <input name="curated_terms" value="lipid" type="checkbox">lipid<br/>
-            <input name="curated_terms" value="lipid metabolism" type="checkbox">lipid metabolism<br/>
-            <input name="curated_terms" value="lipid peroxidation" type="checkbox">lipid peroxidation<br/>
-            <input name="curated_terms" value="lipogenesis" type="checkbox">lipogenesis<br/>
-            <input name="curated_terms" value="lipolysis" type="checkbox">lipolysis<br/>
-            <input name="curated_terms" value="lipopolysaccharide" type="checkbox">lipopolysaccharide<br/>
-            <input name="curated_terms" value="lipoprotein" type="checkbox">lipoprotein<br/>
-            <input name="curated_terms" value="lipoproteins vldl" type="checkbox">lipoproteins vldl<br/>
-            <input name="curated_terms" value="liver" type="checkbox">liver<br/>
-            <input name="curated_terms" value="liver failure" type="checkbox">liver failure<br/>
-            <input name="curated_terms" value="lysophospholipid" type="checkbox">lysophospholipid<br/>
-            <input name="curated_terms" value="macrophage" type="checkbox">macrophage<br/>
-            <input name="curated_terms" value="maf" type="checkbox">maf<br/>
-            <input name="curated_terms" value="membrane lipid" type="checkbox">membrane lipid<br/>
-            <input name="curated_terms" value="metabolic rate" type="checkbox">metabolic rate<br/>
-            <input name="curated_terms" value="metabolic syndrome x" type="checkbox">metabolic syndrome x<br/>
-            <input name="curated_terms" value="metabolism" type="checkbox">metabolism<br/>
-            <input name="curated_terms" value="microbiome" type="checkbox">microbiome<br/>
-            <input name="curated_terms" value="mitochondria" type="checkbox">mitochondria<br/>
-            <input name="curated_terms" value="myocardial infarction" type="checkbox">myocardial infarction<br/>
-            <input name="curated_terms" value="obesity" type="checkbox">obesity<br/>
-            <input name="curated_terms" value="oil" type="checkbox">oil<br/>
-            <input name="curated_terms" value="oleic acid" type="checkbox">oleic acid<br/>
-            <input name="curated_terms" value="organ size" type="checkbox">organ size<br/>
-            <input name="curated_terms" value="osteoporosis" type="checkbox">osteoporosis<br/>
-            <input name="curated_terms" value="overweight" type="checkbox">overweight<br/>
-            <input name="curated_terms" value="palmitate" type="checkbox">palmitate<br/>
-            <input name="curated_terms" value="pancreas" type="checkbox">pancreas<br/>
-            <input name="curated_terms" value="parp1" type="checkbox">parp1<br/>
-            <input name="curated_terms" value="pdcd10" type="checkbox">pdcd10<br/>
-            <input name="curated_terms" value="phosphatidylinositol" type="checkbox">phosphatidylinositol<br/>
-            <input name="curated_terms" value="phospholipid" type="checkbox">phospholipid<br/>
-            <input name="curated_terms" value="physical activity" type="checkbox">physical activity<br/>
-            <input name="curated_terms" value="prl" type="checkbox">prl<br/>
-            <input name="curated_terms" value="prostaglandin" type="checkbox">prostaglandin<br/>
-            <input name="curated_terms" value="pter" type="checkbox">pter<br/>
-            <input name="curated_terms" value="purkinje cell" type="checkbox">purkinje cell<br/>
-            <input name="curated_terms" value="receptor insulin" type="checkbox">receptor insulin<br/>
-            <input name="curated_terms" value="sedentary lifestyle" type="checkbox">sedentary lifestyle<br/>
-            <input name="curated_terms" value="serotonin" type="checkbox">serotonin<br/>
-            <input name="curated_terms" value="skinfold thickness" type="checkbox">skinfold thickness<br/>
-            <input name="curated_terms" value="smoking" type="checkbox">smoking<br/>
-            <input name="curated_terms" value="sphingolipid" type="checkbox">sphingolipid<br/>
-            <input name="curated_terms" value="steatosis" type="checkbox">steatosis<br/>
-            <input name="curated_terms" value="subcutaneous fat" type="checkbox">subcutaneous fat<br/>
-            <input name="curated_terms" value="t lymphocytes" type="checkbox">t lymphocytes<br/>
-            <input name="curated_terms" value="thrombosis" type="checkbox">thrombosis<br/>
-            <input name="curated_terms" value="thromboxane a2" type="checkbox">thromboxane a2<br/>
-            <input name="curated_terms" value="triglyceride" type="checkbox">triglyceride<br/>
-            <input name="curated_terms" value="vasculitis" type="checkbox">vasculitis<br/>
-            <input name="curated_terms" value="weight gain" type="checkbox">weight gain<br/>
-            <input name="curated_terms" value="weight loss" type="checkbox">weight loss<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="abdominal fat" type="checkbox">abdominal fat<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="actb" type="checkbox">actb<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="adh5" type="checkbox">adh5<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="adipocyte" type="checkbox">adipocyte<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="adipogenesis" type="checkbox">adipogenesis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="adiponectin" type="checkbox">adiponectin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="adipose tissue" type="checkbox">adipose tissue<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="adiposity" type="checkbox">adiposity<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="alcohol consumption" type="checkbox">alcohol consumption<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="alcohol drinking" type="checkbox">alcohol drinking<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="alzheimer disease" type="checkbox">alzheimer disease<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="aneurysm" type="checkbox">aneurysm<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="apolipoprotein" type="checkbox">apolipoprotein<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="apolipoprotein a-i" type="checkbox">apolipoprotein a-i<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="apolipoprotein a-ii" type="checkbox">apolipoprotein a-ii<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="apolipoprotein b-100" type="checkbox">apolipoprotein b-100<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="apolipoproteins e" type="checkbox">apolipoproteins e<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="appetite" type="checkbox">appetite<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="arachidonic acid" type="checkbox">arachidonic acid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="arteriosclerosis" type="checkbox">arteriosclerosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="asph" type="checkbox">asph<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="atherosclerosis" type="checkbox">atherosclerosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="bdnf" type="checkbox">bdnf<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="birth weight" type="checkbox">birth weight<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="blood glucose" type="checkbox">blood glucose<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="body fat" type="checkbox">body fat<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="body mass index" type="checkbox">body mass index<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="body surface area" type="checkbox">body surface area<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="body weight" type="checkbox">body weight<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="bone density" type="checkbox">bone density<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="calcium" type="checkbox">calcium<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="caloric intake" type="checkbox">caloric intake<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cardiomyopathies" type="checkbox">cardiomyopathies<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cardiovascular disease" type="checkbox">cardiovascular disease<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="carotid artery disease" type="checkbox">carotid artery disease<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="carotid stenosis" type="checkbox">carotid stenosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="casp1" type="checkbox">casp1<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="ceramides" type="checkbox">ceramides<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cerebrovascular disorder" type="checkbox">cerebrovascular disorder<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="chemokine" type="checkbox">chemokine<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cholesterol" type="checkbox">cholesterol<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cholesterol hdl" type="checkbox">cholesterol hdl<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cholesterol ldl" type="checkbox">cholesterol ldl<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="chromatin" type="checkbox">chromatin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="coronary aneurysm" type="checkbox">coronary aneurysm<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="coronary arteriosclerosis" type="checkbox">coronary arteriosclerosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="coronary disease" type="checkbox">coronary disease<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cox7a1" type="checkbox">cox7a1<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="cytokine" type="checkbox">cytokine<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="diabetes" type="checkbox">diabetes<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="diabetes mellitus" type="checkbox">diabetes mellitus<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="diabetes mellitus type 1" type="checkbox">diabetes mellitus type 1<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="diabetes mellitus type 2" type="checkbox">diabetes mellitus type 2<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="diabetic angiopathies" type="checkbox">diabetic angiopathies<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="diabetic nephropathies" type="checkbox">diabetic nephropathies<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="dietary fat" type="checkbox">dietary fat<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="dna methylation" type="checkbox">dna methylation<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="embolism" type="checkbox">embolism<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="endoplasmic reticulum" type="checkbox">endoplasmic reticulum<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="endothelial cell" type="checkbox">endothelial cell<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="energy expenditure" type="checkbox">energy expenditure<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="etv5" type="checkbox">etv5<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="exercise" type="checkbox">exercise<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fast food" type="checkbox">fast food<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fat mass" type="checkbox">fat mass<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fats" type="checkbox">fats<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fats unsaturated" type="checkbox">fats unsaturated<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fatty acids" type="checkbox">fatty acids<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fatty acids monounsaturated" type="checkbox">fatty acids monounsaturated<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fatty acids omega-3" type="checkbox">fatty acids omega-3<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fatty acids omega-6" type="checkbox">fatty acids omega-6<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fatty acids unsaturated" type="checkbox">fatty acids unsaturated<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fbxo15" type="checkbox">fbxo15<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="foam cell" type="checkbox">foam cell<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="food consumption" type="checkbox">food consumption<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="fto" type="checkbox">fto<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="gabpa" type="checkbox">gabpa<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="glucose" type="checkbox">glucose<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="glucose transporter type 1" type="checkbox">glucose transporter type 1<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="glucose-6-phosphate" type="checkbox">glucose-6-phosphate<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="glyceride" type="checkbox">glyceride<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="heart" type="checkbox">heart<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hepatocyte" type="checkbox">hepatocyte<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hypercholesterolemia" type="checkbox">hypercholesterolemia<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hyperglycemia" type="checkbox">hyperglycemia<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hyperlipidemia" type="checkbox">hyperlipidemia<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hypertension" type="checkbox">hypertension<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hypertriglyceridemia" type="checkbox">hypertriglyceridemia<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hypoglycemia" type="checkbox">hypoglycemia<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="hypothalamus" type="checkbox">hypothalamus<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="inflammation" type="checkbox">inflammation<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="insulin" type="checkbox">insulin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="insulin resistance" type="checkbox">insulin resistance<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="insulin-like growth factor i" type="checkbox">insulin-like growth factor i<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="insulin-like growth factor ii" type="checkbox">insulin-like growth factor ii<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="insulin-secreting cell" type="checkbox">insulin-secreting cell<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="insulinoma" type="checkbox">insulinoma<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="intra-abdominal fat" type="checkbox">intra-abdominal fat<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="ischemia" type="checkbox">ischemia<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="islet cell" type="checkbox">islet cell<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="jak1" type="checkbox">jak1<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="kpna3" type="checkbox">kpna3<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="kupffer cell" type="checkbox">kupffer cell<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="leptin" type="checkbox">leptin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="leukotriene" type="checkbox">leukotriene<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipases" type="checkbox">lipases<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipid" type="checkbox">lipid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipid metabolism" type="checkbox">lipid metabolism<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipid peroxidation" type="checkbox">lipid peroxidation<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipogenesis" type="checkbox">lipogenesis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipolysis" type="checkbox">lipolysis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipopolysaccharide" type="checkbox">lipopolysaccharide<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipoprotein" type="checkbox">lipoprotein<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lipoproteins vldl" type="checkbox">lipoproteins vldl<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="liver" type="checkbox">liver<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="liver failure" type="checkbox">liver failure<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="lysophospholipid" type="checkbox">lysophospholipid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="macrophage" type="checkbox">macrophage<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="maf" type="checkbox">maf<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="membrane lipid" type="checkbox">membrane lipid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="metabolic rate" type="checkbox">metabolic rate<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="metabolic syndrome x" type="checkbox">metabolic syndrome x<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="metabolism" type="checkbox">metabolism<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="microbiome" type="checkbox">microbiome<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="mitochondria" type="checkbox">mitochondria<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="myocardial infarction" type="checkbox">myocardial infarction<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="obesity" type="checkbox">obesity<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="oil" type="checkbox">oil<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="oleic acid" type="checkbox">oleic acid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="organ size" type="checkbox">organ size<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="osteoporosis" type="checkbox">osteoporosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="overweight" type="checkbox">overweight<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="palmitate" type="checkbox">palmitate<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="pancreas" type="checkbox">pancreas<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="parp1" type="checkbox">parp1<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="pdcd10" type="checkbox">pdcd10<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="phosphatidylinositol" type="checkbox">phosphatidylinositol<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="phospholipid" type="checkbox">phospholipid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="physical activity" type="checkbox">physical activity<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="prl" type="checkbox">prl<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="prostaglandin" type="checkbox">prostaglandin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="pter" type="checkbox">pter<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="purkinje cell" type="checkbox">purkinje cell<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="receptor insulin" type="checkbox">receptor insulin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="sedentary lifestyle" type="checkbox">sedentary lifestyle<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="serotonin" type="checkbox">serotonin<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="skinfold thickness" type="checkbox">skinfold thickness<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="smoking" type="checkbox">smoking<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="sphingolipid" type="checkbox">sphingolipid<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="steatosis" type="checkbox">steatosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="subcutaneous fat" type="checkbox">subcutaneous fat<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="t lymphocytes" type="checkbox">t lymphocytes<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="thrombosis" type="checkbox">thrombosis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="thromboxane a2" type="checkbox">thromboxane a2<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="triglyceride" type="checkbox">triglyceride<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="vasculitis" type="checkbox">vasculitis<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="weight gain" type="checkbox">weight gain<br/>
+            <input class="curated_terms_opt" name="curated_terms" value="weight loss" type="checkbox">weight loss<br/>
             </div>
         </td>
     </tr>
