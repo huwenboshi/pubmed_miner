@@ -20,7 +20,7 @@ import httpagentparser
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
-con = connect_db()
+con = connect_db(db_loc)
 
 ########################### HTTP HTML HEADER ###################################
 

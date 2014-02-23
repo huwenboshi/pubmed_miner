@@ -77,7 +77,7 @@ def make_clinical_trait_ewas_query(table_name, pval, max_distance, trait_names):
         
     # add single quotes to trait names
     for i in xrange(len(trait_names)):
-        trait_names[i] = '\"'+trait_names[i]+'\"'
+        trait_names[i] = '\''+trait_names[i]+'\''
     trait_names_sql_list = '('+','.join(trait_names)+')'
     
     query = make_ewas_pval_dist_query(table_name, pval, max_distance)
