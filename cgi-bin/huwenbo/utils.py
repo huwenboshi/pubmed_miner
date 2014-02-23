@@ -2,7 +2,6 @@ import urllib
 import urllib2
 import xml.etree.ElementTree as ET
 import MySQLdb
-import sqlite3 as lite
 
 ################################# DB STUFF #####################################
 
@@ -12,16 +11,6 @@ def connect_db():
     try:
         con = MySQLdb.connect(host="localhost", user="huwenbo",
                               passwd="goldandblue", db="pubmed_miner")
-        return con
-    except lite.Error, e:
-        return None
-
-# connect to database
-def connect_db_lite(db_name):
-    con = None
-    try:
-        con = lite.connect(db_name)
-        con.text_factory = str
         return con
     except lite.Error, e:
         return None

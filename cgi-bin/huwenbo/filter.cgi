@@ -10,7 +10,6 @@ import codecs
 import os
 
 from consts import *
-from db_utils import *
 from filter_utils import *
 from utils import *
 
@@ -21,7 +20,6 @@ sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
 con = connect_db()
-con_lite = connect_db_lite(db_loc)
 
 ########################### HTTP HTML HEADER ###################################
 
@@ -408,4 +406,3 @@ print """
 </html>
 """
 con.close()
-con_lite.close()
