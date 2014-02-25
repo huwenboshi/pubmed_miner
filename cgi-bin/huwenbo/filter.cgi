@@ -205,6 +205,8 @@ user_terms = form.getvalue("user_terms")
 expand_term = form.getvalue("expand_term")
 search_scope = form.getvalue("search_scope")
 
+print imp_types
+
 ############################## Cet Query Result ################################
 
 # get query result from database

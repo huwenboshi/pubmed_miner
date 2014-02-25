@@ -846,7 +846,7 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
             snp_pos = int(result[7])
             window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
             window_ed = snp_pos+500000
-            window_str = "chr%s:%s-%s"%(result[6],str(window_st), str(window_ed))
+            window_str = "chr%s:%s-%s"%(result[6],str(window_st),str(window_ed))
             print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
                 window_str, window_str)
             
@@ -871,9 +871,9 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
     if('tbl_gwas_prot_exp' in gwas_tables):
         print """
             <div>
-                <b>Genes implicated by SNPs associated with protein expression</b>
-                <button class="show_hide" type="button">hide</button>
-                <br/>
+              <b>Genes implicated by SNPs associated with protein expression</b>
+              <button class="show_hide" type="button">hide</button>
+              <br/>
                 
         """
         prot_exp_result = gwas_query_result['prot_exp']
@@ -924,3 +924,69 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
             </tbody>
             </table>
             </div>"""
+            
+        ########## trait table ##########
+        if('tbl_gwas_trait' in gwas_tables):
+            print """
+                <div>
+                  <b>Genes implicated by SNPs associated with phenotypes</b>
+                  <button class="show_hide" type="button">hide</button>
+                  <br/>
+                    
+            """
+            trait_result = gwas_query_result['trait']
+            print '<table id="gwas_trait_tbl" class="tablesorter">'
+            print """
+                    <thead>
+                    <tr>
+                        <th>SNP name</th>
+                        <th>SNP position</th>
+                        <th>1Mb-window</th>
+                        <th>Trait</th>
+                        <th>Trait type</th>
+                        <th>Implicated mouse<br/>gene symbol</th>
+                        <th>Gene position</th>
+                        <th>p-value</th>
+                        <th>Human ortholog<br/>entrez ID</th>
+                    </tr>
+                    </thead>
+                    <tbody>"""
+            for result in trait_result:
+                print '<tr>'
+                
+                # snp name
+                print '<td>%s</td>' % result[5]
+                
+                # snp position
+                print '<td>chr%s:%s</td>' % (result[3], result[4])
+                
+                # snp window
+                snp_pos = int(result[4])
+                window_st = snp_pos-500000 if(snp_pos-500000 > 0) else 0
+                window_ed = snp_pos+500000
+                window_str = "chr%s:%s-%s" % (result[4], str(window_st),
+                    str(window_ed))
+                print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                    window_str, window_str)
+                
+                # trait
+                print '<td>%s</td>' % result[0]
+                
+                # trait type
+                print '<td>%s</td>' % result[1]
+                
+                # gene symbol
+                print '<td>%s</td>' % result[9]
+                
+                # gene position
+                gene_pos_str = 'chr%s:%s-%s' % (result[6], result[7], result[8])
+                print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
+                    gene_pos_str, gene_pos_str)
+                
+                # p-value, human entrez gene id
+                print '<td>%s</td><td>%s</td>' % (result[2], result[10])
+                print '</tr>'
+            print """
+                </tbody>
+                </table>
+                </div>"""
