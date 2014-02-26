@@ -55,7 +55,6 @@ print """
         <script type="text/javascript">
             $(document).ready(function(){
             
-                ///////// table sorter for ewas gene /////////
                 $.tablesorter.addParser({
                     id: 'ewas_gene_exp_pval',
                     is: function(s) {
@@ -66,6 +65,7 @@ print """
                     },
                     type: 'numeric'
                 });
+                
                 $('#ewas_gene_exp_tbl').tablesorter({
                     headers: {
                         4: {
@@ -73,6 +73,7 @@ print """
                         }
                     }
                 });
+                
                 $('#gwas_gene_exp_tbl').tablesorter({
                     headers: {
                         4: {
@@ -81,7 +82,6 @@ print """
                     }
                 });
                 
-                ///////// table sorter for ewas prot /////////
                 $.tablesorter.addParser({
                     id: 'ewas_prot_exp_pval',
                     is: function(s) {
@@ -92,6 +92,7 @@ print """
                     },
                     type: 'numeric'
                 });
+                
                 $('#ewas_prot_exp_tbl').tablesorter({
                     headers: {
                         4: {
@@ -99,6 +100,7 @@ print """
                         }
                     }
                 });
+                
                 $('#gwas_prot_exp_tbl').tablesorter({
                     headers: {
                         4: {
@@ -107,7 +109,6 @@ print """
                     }
                 });
                 
-                ///////// table sorter for ewas trait /////////
                 $.tablesorter.addParser({
                     id: 'ewas_trait_pval',
                     is: function(s) {
@@ -118,6 +119,7 @@ print """
                     },
                     type: 'numeric'
                 });
+                
                 $('#ewas_trait_tbl').tablesorter({
                     headers: {
                         6: {
@@ -126,25 +128,22 @@ print """
                     }
                 });
                 
-                ////////// table sorter for imp_summary_tbl /////////
                 $('#imp_summary_tbl').tablesorter();
                 
-                ///////// submit button /////////
                 $('#confirm_btn').live('click', function() {
                     $("#user_input_form").submit();
                 });
                 
-                ///////// show hide tables ///////
                 $('.show_hide').live('click', function() {
-                if ($(this).html() == "hide") {
-                    $(this).siblings("table").css({display:'none'});
-                    $(this).html("show");
-                }
-                else {
-                    $(this).siblings("table").css({display:'inline-table'});
-                    $(this).html("hide");
-                }
-            });
+                    if ($(this).html() == "hide") {
+                        $(this).siblings("table").css({display:'none'});
+                        $(this).html("show");
+                    }
+                    else {
+                        $(this).siblings("table").css({display:'inline-table'});
+                        $(this).html("hide");
+                    }
+                });
             });
         </script>
     </head>
@@ -205,8 +204,6 @@ user_terms = form.getvalue("user_terms")
 expand_term = form.getvalue("expand_term")
 search_scope = form.getvalue("search_scope")
 
-print imp_types
-
 ############################## Cet Query Result ################################
 
 # get query result from database
@@ -231,6 +228,7 @@ ewas_gwas_result = handle_query(con,
                             gwas_trait_max_distance,
                             gwas_trait_names,
                             gwas_assoc_logic_sel)
+                            
 ewas_query_result = ewas_gwas_result['ewas_query_result']
 gwas_query_result = ewas_gwas_result['gwas_query_result']
 combined_entrez_id_set = ewas_gwas_result['human_gene_set']
@@ -298,15 +296,15 @@ print '<hr/>'
 
 # print gene implication summary
 print """
-        <div>
-            <b>Gene implication summary</b>
-            <button class="show_hide" type="button">hide</button>
-            <br/>
-            <table id="imp_summary_tbl" class="tablesorter">
-            <thead>
-            <tr>
-                <th>Human gene Entrez ID</th>
-      """
+    <div>
+        <b>Gene implication summary</b>
+        <button class="show_hide" type="button">hide</button>
+        <br/>
+        <table id="imp_summary_tbl" class="tablesorter">
+        <thead>
+        <tr>
+        <th>Human gene Entrez ID</th>
+"""
 if('tbl_ewas_gene_exp' in ewas_tables):
     print '<th>Number of EWAS loci<br/>associated with gene expression</th>'
 if('tbl_ewas_prot_exp' in ewas_tables):
@@ -329,7 +327,8 @@ print """
               <th>Total number of loci </th>
             </tr>
             </thead>
-            <tbody>"""
+            <tbody>
+"""
 
 for key in combined_entrez_id_set:
     key = key[0]
@@ -377,13 +376,14 @@ for key in combined_entrez_id_set:
     
     print '</tr>'
     
-print """</tbody>
+print """
+            </tbody>
         </table>
-        </div>
-      <hr/>"""
+    </div>
+    <hr/>
+"""
 
 print_ewas_query_result(ewas_query_result, ewas_tables)
-print '<hr/>'
 print_gwas_query_result(gwas_query_result, gwas_tables)
 
 ################################## Hidden Form #################################
@@ -427,6 +427,6 @@ print """
 
 print """
     </body>
-</html>
+    </html>
 """
 con.close()

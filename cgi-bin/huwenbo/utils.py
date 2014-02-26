@@ -15,6 +15,16 @@ def connect_db():
     except lite.Error, e:
         return None
 
+# get rows from database
+def fetch_from_db(cur):
+    table = []
+    for row in cur.fetchall():
+        col = []
+        for i in xrange(len(row)):
+            col.append(row[i])
+        table.append(col)
+    return table
+
 ########################### CONTAINER STUFF ####################################
 
 # get length safely
