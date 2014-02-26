@@ -32,18 +32,17 @@ print """
             PubMed Miner - Gene Filter Result
         </title>
         <style type="text/css">
-
             #user_input_form {
                 display: none;
             }
         </style>
         <link rel="stylesheet" 
-            href="../../huwenbo/table_sorter/themes/blue/style.css" />
+            href="../javascripts/table_sorter/themes/blue/style.css" />
         <script type="text/javascript"
-                src="../../huwenbo/table_sorter/jquery-latest.js">
+                src="../javascripts/table_sorter/jquery-latest.js">
         </script>
         <script type="text/javascript"
-                src="../../huwenbo/table_sorter/jquery.tablesorter.js">
+                src="../javascripts/table_sorter/jquery.tablesorter.js">
         </script>
         <script type="text/javascript">
             $(document).ready(function(){
@@ -144,7 +143,7 @@ print """
         <h2>
             Filter Result
         </h2>
-        <a href="../../huwenbo/index.html">Make Another Search</a>
+        <a href="../index.html">Make Another Search</a>
         <br/>
         <hr/>
 """
@@ -310,7 +309,7 @@ if('tbl_gwas_gene_exp' in gwas_tables):
     print '<th>Number of GWAS loci<br/>associated with gene expression</th>'
 if('tbl_gwas_prot_exp' in gwas_tables):
     print '<th>Number of GWAS loci<br/>associated with protein expression</th>'
-if('tbl_gwas_prot_exp' in gwas_tables):
+if('tbl_gwas_trait_exp' in gwas_tables):
     print '<th>Number of GWAS loci<br/>associated with phenotypes</th>'
     
 if(len(ewas_tables) > 0):
@@ -385,7 +384,7 @@ print_gwas_query_result(gwas_query_result, gwas_tables)
 
 genes_form_str = ''
 for i in xrange(len(gene_list)):
-    genes_form_str += str(gene_list[i])
+    genes_form_str += str(gene_list[i][0])
     if(i < len(gene_list)-1):
         genes_form_str += '\n'
 

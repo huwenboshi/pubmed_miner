@@ -13,9 +13,6 @@ from utils import *
 from search_utils import *
 from consts import *
 
-sys.path.append('./httpagentparser-1.5.1')
-import httpagentparser
-
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
@@ -24,13 +21,7 @@ con = connect_db()
 ########################### HTTP HTML HEADER ###################################
 
 # print http_header and html header
-user_agent = os.environ.get("HTTP_USER_AGENT", "N/A")
-os_browser = httpagentparser.simple_detect(user_agent)
-browser = os_browser[1]
-if(browser.lower().find('safari') >= 0):
-    print http_header_mac
-else:
-    print http_header
+print http_header
 print html_header
 
 ################################# Get User Input ###############################
@@ -92,21 +83,14 @@ time.sleep(1)
 print """
 <body>
     <h2><a id="top">Search Result</a></h2>
-    <a href="../../huwenbo/index.html">Make Another Search</a><br/><br/>
+    <a href="../index.html">Make Another Search</a><br/><br/>
 """
-print '<a id="nav"><b>Navigation by Gene</b></a><br/>'
-for gene_id in gene_ids_list:
-    gene_sym = id_sym[gene_id]
-    print '<a href="#gene_id_%s">%s(%s)</a>' % (gene_id, gene_sym, gene_id)
-print '<br/><br/><hr/>'
-
 
 sys.stdout.flush()
 
 # create overview
 print """
 <div>
-    <a href="#top">Return to Top</a><br/><br/>
     <b>Overview (choose terms to sort by the sum of number of abstracts
         containing these terms)
     </b>

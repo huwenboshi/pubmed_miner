@@ -21,10 +21,7 @@ genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='
 ucsc_url = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position='
 
 # http header
-http_header = 'Content-Type: text/html\nConnection: keep-alive'
-
-# database
-db_loc = '/home/huwenbo/pubmed_miner_db/pubmed_miner.db'
+http_header = 'Content-Type: text/html Connection: keep-alive'
 
 # html header
 html_header = """
@@ -36,7 +33,7 @@ html_header = """
     <title>Search Result</title>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script src="../../huwenbo/sorttable.js"></script>
+    <script src="../javascripts/sorttable.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             $('.local_opt').live('change', function() {
