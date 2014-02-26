@@ -21,8 +21,7 @@ genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='
 ucsc_url = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position='
 
 # http header
-http_header = 'Content-Type: text/html Connection: keep-alive'
-http_header_mac = 'HTTP/1.1 Content-Type: text/html Connection: keep-alive'
+http_header = 'Content-Type: text/html\nConnection: keep-alive'
 
 # database
 db_loc = '/home/huwenbo/pubmed_miner_db/pubmed_miner.db'

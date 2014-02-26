@@ -13,9 +13,6 @@ from consts import *
 from filter_utils import *
 from utils import *
 
-sys.path.append('./httpagentparser-1.5.1')
-import httpagentparser
-
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 cgitb.enable()
 
@@ -24,13 +21,9 @@ con = connect_db()
 ########################### HTTP HTML HEADER ###################################
 
 # print http_header and html header
-user_agent = os.environ.get("HTTP_USER_AGENT", "N/A")
-os_browser = httpagentparser.simple_detect(user_agent)
-browser = os_browser[1]
-if(browser.lower().find('safari') >= 0):
-    print http_header_mac
-else:
-    print http_header
+print http_header
+print '\n\n'
+
 print """
 <!DOCTYPE html>
 <html>
@@ -275,7 +268,7 @@ else:
 # print query summary
 print """
     <h3>
-        Query summary
+    Query summary
     </h3>
 """
 
@@ -297,14 +290,15 @@ print '<hr/>'
 # print gene implication summary
 print """
     <div>
-        <b>Gene implication summary</b>
-        <button class="show_hide" type="button">hide</button>
-        <br/>
-        <table id="imp_summary_tbl" class="tablesorter">
-        <thead>
-        <tr>
-        <th>Human gene Entrez ID</th>
+    <b>Gene implication summary</b>
+    <button class="show_hide" type="button">hide</button>
+    <br/>
+    <table id="imp_summary_tbl" class="tablesorter">
+    <thead>
+    <tr>
+    <th>Human gene Entrez ID</th>
 """
+
 if('tbl_ewas_gene_exp' in ewas_tables):
     print '<th>Number of EWAS loci<br/>associated with gene expression</th>'
 if('tbl_ewas_prot_exp' in ewas_tables):
@@ -323,11 +317,12 @@ if(len(ewas_tables) > 0):
     print '<th>Total number of EWAS loci </th>'
 if(len(gwas_tables) > 0):
     print '<th>Total number of GWAS loci </th>'
+
 print """
-              <th>Total number of loci </th>
-            </tr>
-            </thead>
-            <tbody>
+    <th>Total number of loci </th>
+    </tr>
+    </thead>
+    <tbody>
 """
 
 for key in combined_entrez_id_set:
@@ -377,8 +372,8 @@ for key in combined_entrez_id_set:
     print '</tr>'
     
 print """
-            </tbody>
-        </table>
+    </tbody>
+    </table>
     </div>
     <hr/>
 """
