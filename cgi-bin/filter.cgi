@@ -188,6 +188,14 @@ gwas_trait_pval = form.getvalue("gwas_trait_pval")
 gwas_trait_names = form.getlist("gwas_trait_names")
 gwas_tables = form.getlist("gwas_tables")
 
+# get clinical trial threshold
+gwas_gene_exp_cnt = form.getvalue("gwas_gene_exp_trial")
+gwas_prot_exp_cnt = form.getvalue("gwas_prot_exp_trial")
+gwas_trait_cnt = form.getvalue("gwas_trait_trial")
+ewas_gene_exp_cnt = form.getvalue("ewas_gene_exp_trial")
+ewas_prot_exp_cnt = form.getvalue("ewas_prot_exp_trial")
+ewas_trait_cnt = form.getvalue("ewas_trait_trial")
+
 # get user additional input
 id_type = form.getvalue("id_type")
 user_genes = form.getvalue("user_genes")
@@ -209,6 +217,9 @@ ewas_gwas_result = handle_query(con,
                             ewas_gene_exp_max_distance,
                             ewas_prot_exp_max_distance,
                             ewas_trait_max_distance,
+                            ewas_gene_exp_cnt, 
+                            ewas_prot_exp_cnt,
+                            ewas_trait_cnt,
                             ewas_trait_names,
                             ewas_assoc_logic_sel,
                             gwas_tables,
@@ -218,6 +229,9 @@ ewas_gwas_result = handle_query(con,
                             gwas_gene_exp_max_distance,
                             gwas_prot_exp_max_distance,
                             gwas_trait_max_distance,
+                            gwas_gene_exp_cnt, 
+                            gwas_prot_exp_cnt,
+                            gwas_trait_cnt,
                             gwas_trait_names,
                             gwas_assoc_logic_sel)
                             
@@ -296,6 +310,7 @@ print """
     <thead>
     <tr>
     <th>Human gene Entrez ID</th>
+    <th>Human gene symbol</th>
 """
 
 if('tbl_ewas_gene_exp' in ewas_tables):
@@ -326,6 +341,7 @@ print """
 
 for key in combined_entrez_id_set:
     key = key[0]
+    gene_sym = ''
     ewas_assoc_pos = dict()
     if(key in ewas_gene_support_info):
         ewas_assoc_pos = ewas_gene_support_info[key]
@@ -333,6 +349,9 @@ for key in combined_entrez_id_set:
     num_ewas_prot_exp = safe_getval(ewas_assoc_pos, 'prot_exp')
     num_ewas_trait = safe_getval(ewas_assoc_pos, 'trait')
     num_ewas_tot = num_ewas_gene_exp + num_ewas_prot_exp + num_ewas_trait
+    ewas_gene_sym = safe_getval(ewas_assoc_pos, 'gene_sym')
+    if(ewas_gene_sym != 0):
+        gene_sym = ewas_gene_sym
     
     gwas_assoc_pos = dict()
     if(key in gwas_gene_support_info):
@@ -341,11 +360,15 @@ for key in combined_entrez_id_set:
     num_gwas_prot_exp = safe_getval(gwas_assoc_pos, 'prot_exp')
     num_gwas_trait = safe_getval(gwas_assoc_pos, 'trait')
     num_gwas_tot = num_gwas_gene_exp + num_gwas_prot_exp + num_gwas_trait
+    gwas_gene_sym = safe_getval(ewas_assoc_pos, 'gene_sym')
+    if(len(gene_sym) == 0):
+        gene_sym = gwas_gene_sym
     
     num_tot = num_ewas_tot + num_gwas_tot
     
     print '<tr>'
     print '<td>%s</td>' % key
+    print '<td>%s</td>' % gene_sym
     
     if('tbl_ewas_gene_exp' in ewas_tables):
         print '<td>%d</td>' % num_ewas_gene_exp

@@ -30,6 +30,7 @@ def handle_ewas_gwas_query_general(dbcon,
                                    tbl_map,
                                    pval_map,
                                    dist_map,
+                                   cnt_map,
                                    trait_names,
                                    assoc_logic_sel):
 
@@ -55,12 +56,14 @@ def handle_ewas_gwas_query_general(dbcon,
         # convert numers to strings
         pval = pval_map[tbl]
         max_distance = str(dist_map[tbl])
+        citeline_cnt = str(cnt_map[tbl])
         pval_str = str(math.pow(10.0, -1.0*float(pval)))
         
         # construct query
         query = """
                 create temporary table %s_tmp as
-                select * from %s join mouse_sym_human_entrez on 
+                select A.*, symbol, citeline_count from
+                (select * from %s join mouse_sym_human_entrez on 
                     gene_annot_gene_sym = mouse_gene_sym
                     where (pval < %s) and 
                     (dist_gene_start_site <> 'NULL' and 
@@ -69,10 +72,12 @@ def handle_ewas_gwas_query_general(dbcon,
                       abs(dist_gene_end_site) < %s) or
                      (dist_gene_start_site < 0 and
                       dist_gene_end_site > 0))
-                    %s
+                    %s) as A join clinical_trial on
+                    human_entrez_id = gene_id
+                    where citeline_count > %s
         """ % (db_table, db_table, pval_str, max_distance,
-               max_distance, trait_additional)
- 
+               max_distance, trait_additional, citeline_cnt)
+
         # execute query
         cur.execute(query)
 
@@ -135,6 +140,9 @@ def handle_ewas_query(dbcon,
                       ewas_gene_exp_max_distance,
                       ewas_prot_exp_max_distance,
                       ewas_trait_max_distance,
+                      ewas_gene_exp_cnt, 
+                      ewas_prot_exp_cnt,
+                      ewas_trait_cnt,
                       ewas_trait_names,
                       ewas_assoc_logic_sel):
 
@@ -144,12 +152,16 @@ def handle_ewas_query(dbcon,
     ewas_dist_map = {'tbl_ewas_gene_exp': ewas_gene_exp_max_distance,
                      'tbl_ewas_prot_exp': ewas_prot_exp_max_distance,
                      'tbl_ewas_trait':    ewas_trait_max_distance}
+    ewas_cnt_map =  {'tbl_ewas_gene_exp': ewas_gene_exp_cnt,
+                     'tbl_ewas_prot_exp': ewas_prot_exp_cnt,
+                     'tbl_ewas_trait':    ewas_trait_cnt}
     
     handle_ewas_gwas_query_general(dbcon,
                                    ewas_tables,
                                    ewas_tbl_map,
                                    ewas_pval_map,
                                    ewas_dist_map,
+                                   ewas_cnt_map,
                                    ewas_trait_names,
                                    ewas_assoc_logic_sel)
     
@@ -164,6 +176,9 @@ def handle_gwas_query(dbcon,
                       gwas_gene_exp_max_distance,
                       gwas_prot_exp_max_distance,
                       gwas_trait_max_distance,
+                      gwas_gene_exp_cnt, 
+                      gwas_prot_exp_cnt,
+                      gwas_trait_cnt,
                       gwas_trait_names,
                       gwas_assoc_logic_sel):
                       
@@ -173,12 +188,16 @@ def handle_gwas_query(dbcon,
     gwas_dist_map = {'tbl_gwas_gene_exp': gwas_gene_exp_max_distance,
                      'tbl_gwas_prot_exp': gwas_prot_exp_max_distance,
                      'tbl_gwas_trait':    gwas_trait_max_distance}
+    gwas_cnt_map =  {'tbl_gwas_gene_exp': gwas_gene_exp_cnt,
+                     'tbl_gwas_prot_exp': gwas_prot_exp_cnt,
+                     'tbl_gwas_trait':    gwas_trait_cnt}
     
     handle_ewas_gwas_query_general(dbcon,
                                    gwas_tables,
                                    gwas_tbl_map,
                                    gwas_pval_map,
                                    gwas_dist_map,
+                                   gwas_cnt_map,
                                    gwas_trait_names,
                                    gwas_assoc_logic_sel)
 
@@ -195,6 +214,9 @@ def handle_query(dbcon,
                  ewas_gene_exp_max_distance,
                  ewas_prot_exp_max_distance,
                  ewas_trait_max_distance,
+                 ewas_gene_exp_cnt, 
+                 ewas_prot_exp_cnt,
+                 ewas_trait_cnt,
                  ewas_trait_names,
                  ewas_assoc_logic_sel,
                  gwas_tables,
@@ -204,6 +226,9 @@ def handle_query(dbcon,
                  gwas_gene_exp_max_distance,
                  gwas_prot_exp_max_distance,
                  gwas_trait_max_distance,
+                 gwas_gene_exp_cnt, 
+                 gwas_prot_exp_cnt,
+                 gwas_trait_cnt,
                  gwas_trait_names,
                  gwas_assoc_logic_sel):
     
@@ -234,6 +259,9 @@ def handle_query(dbcon,
                           ewas_gene_exp_max_distance,
                           ewas_prot_exp_max_distance,
                           ewas_trait_max_distance,
+                          ewas_gene_exp_cnt, 
+                          ewas_prot_exp_cnt,
+                          ewas_trait_cnt,
                           ewas_trait_names,
                           ewas_assoc_logic_sel)
     
@@ -248,6 +276,9 @@ def handle_query(dbcon,
                           gwas_gene_exp_max_distance,
                           gwas_prot_exp_max_distance,
                           gwas_trait_max_distance,
+                          gwas_gene_exp_cnt, 
+                          gwas_prot_exp_cnt,
+                          gwas_trait_cnt,
                           gwas_trait_names,
                           gwas_assoc_logic_sel)
     # apply intersectoin
@@ -336,21 +367,23 @@ def count_implicating_sites_ewas_gwas_general(dbcon, tables, tbl_map, simp_map):
     for table in tables:
         db_tbl = tbl_map[table]
         query = """
-            select human_entrez_id, count(distinct site_chr, site_bp) from 
-                %s_tmp_final 
+            select human_entrez_id, symbol, count(distinct site_chr, site_bp)
+                from %s_tmp_final 
             group by human_entrez_id
         """ % db_tbl
         cur.execute(query)
         result = fetch_from_db(cur)
         for row in result:
             human_gene_id = row[0]
-            count = row[1]
+            symbol = row[1]
+            count = row[2]
             assoc_type = simp_map[table]
             if(human_gene_id not in imp_count):
                 imp_count[human_gene_id] = dict()
             if(assoc_type not in imp_count[human_gene_id]):
                 imp_count[human_gene_id][assoc_type] = dict()
             imp_count[human_gene_id][assoc_type] = count
+            imp_count[human_gene_id]['gene_sym'] = symbol
     
     return imp_count
 
