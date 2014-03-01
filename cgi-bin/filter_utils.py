@@ -69,17 +69,16 @@ def handle_gwas_query(dbcon,
         # construct query
         query = """
                 create temporary table %s_tmp as
-                select * from
-                    (select * from %s where (pval < %s) and 
-                            (dist_gene_start_snp_site <> 'NULL' and 
-                             dist_gene_end_snp_site <> 'NULL') and 
-                            ((abs(dist_gene_start_snp_site) < %s or
-                              abs(dist_gene_end_snp_site) < %s) or
-                             (dist_gene_start_snp_site < 0 and
-                              dist_gene_end_snp_site > 0))
-                            %s
-                    ) as A join mouse_sym_human_entrez on 
-                    A.gene_symbol = mouse_gene_sym
+                select * from %s join mouse_sym_human_entrez on 
+                        gene_symbol = mouse_gene_sym
+                        where (pval < %s) and 
+                        (dist_gene_start_snp_site <> 'NULL' and 
+                         dist_gene_end_snp_site <> 'NULL') and 
+                        ((abs(dist_gene_start_snp_site) < %s or
+                          abs(dist_gene_end_snp_site) < %s) or
+                         (dist_gene_start_snp_site < 0 and
+                          dist_gene_end_snp_site > 0))
+                        %s
         """ % (db_table, db_table, pval_str, max_distance,
                max_distance, gwas_trait_additional)
         
@@ -96,22 +95,18 @@ def handle_gwas_query(dbcon,
             db_table = gwas_tbl_map[tbl]
             if(i == 0):
                 sub_query = """
-                    (select distinct(human_entrez_id) from %s_tmp)
-                    as %s_tmp_id
+                    select distinct(%s_tmp.human_entrez_id) from %s_tmp
                 """ % (db_table, db_table)
             if(i > 0):
                 sub_query += """
                     join
-                    (select distinct(human_entrez_id) from %s_tmp)
-                    as %s_tmp_id
+                    (select distinct(human_entrez_id) from %s_tmp) as %s_tmp_id
                     on
-                    %s_tmp_id.human_entrez_id = %s_tmp_id.human_entrez_id
+                    %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id 
                 """ % (db_table,db_table,gwas_tbl_map[gwas_tables[0]],db_table)
         query = """
-            create temporary table human_entrez_id_gwas_tmp as
-            select distinct(%s_tmp_id.human_entrez_id) from (%s)
-        """ % (gwas_tbl_map[gwas_tables[0]], sub_query)
-        
+            create temporary table human_entrez_id_gwas_tmp as %s
+        """ % (sub_query)
         # execute query
         cur.execute(query)
 
@@ -185,20 +180,19 @@ def handle_ewas_query(dbcon,
         # construct query
         query = """
                 create temporary table %s_tmp as
-                select * from
-                    (select * from %s where (pval < %s) and 
-                            (dist_gene_start_methylation_site <> 'NULL' and 
-                             dist_gene_end_methylation_site <> 'NULL') and 
-                            ((abs(dist_gene_start_methylation_site) < %s or
-                              abs(dist_gene_end_methylation_site) < %s) or
-                             (dist_gene_start_methylation_site < 0 and
-                              dist_gene_end_methylation_site > 0))
-                            %s
-                    ) as A join mouse_sym_human_entrez on 
-                    A.gene_annot_gene_sym = mouse_gene_sym
+                select * from %s join mouse_sym_human_entrez on 
+                    gene_annot_gene_sym = mouse_gene_sym
+                    where (pval < %s) and 
+                    (dist_gene_start_methylation_site <> 'NULL' and 
+                     dist_gene_end_methylation_site <> 'NULL') and 
+                    ((abs(dist_gene_start_methylation_site) < %s or
+                      abs(dist_gene_end_methylation_site) < %s) or
+                     (dist_gene_start_methylation_site < 0 and
+                      dist_gene_end_methylation_site > 0))
+                    %s
         """ % (db_table, db_table, pval_str, max_distance,
                max_distance, ewas_trait_additional)
-        
+ 
         # execute query
         cur.execute(query)
 
@@ -212,8 +206,7 @@ def handle_ewas_query(dbcon,
             db_table = ewas_tbl_map[tbl]
             if(i == 0):
                 sub_query = """
-                    (select distinct(human_entrez_id) from %s_tmp)
-                    as %s_tmp_id
+                    select distinct(%s_tmp.human_entrez_id) from %s_tmp
                 """ % (db_table, db_table)
             if(i > 0):
                 sub_query += """
@@ -221,12 +214,11 @@ def handle_ewas_query(dbcon,
                     (select distinct(human_entrez_id) from %s_tmp)
                     as %s_tmp_id
                     on
-                    %s_tmp_id.human_entrez_id = %s_tmp_id.human_entrez_id
+                    %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id
                 """ % (db_table,db_table,ewas_tbl_map[ewas_tables[0]],db_table)
         query = """
-            create temporary table human_entrez_id_ewas_tmp as
-            select distinct(%s_tmp_id.human_entrez_id) from (%s)
-        """ % (ewas_tbl_map[ewas_tables[0]], sub_query)
+            create temporary table human_entrez_id_ewas_tmp as %s
+        """ % (sub_query)
         
         # execute query
         cur.execute(query)
@@ -328,18 +320,17 @@ def handle_query(dbcon,
             tbl = human_entrez_id_tables[i]
             if(i == 0):
                 sub_query = """
-                    (select distinct(human_entrez_id) from %s) as %s_sub
+                    select distinct(%s.human_entrez_id) from %s
                 """ % (tbl, tbl)
             if(i > 0):
                 sub_query += """
                     join (select distinct(human_entrez_id) from %s) as %s_sub
                     on
-                    %s_sub.human_entrez_id = %s_sub.human_entrez_id
+                    %s.human_entrez_id = %s_sub.human_entrez_id
                 """ % (tbl,tbl,human_entrez_id_tables[0],tbl)
         query = """
-            create temporary table human_entrez_id_ewas_gwas_tmp as
-            select distinct(%s_sub.human_entrez_id) from (%s)
-        """ % (human_entrez_id_tables[0], sub_query)
+            create temporary table human_entrez_id_ewas_gwas_tmp as %s
+        """ % (sub_query)
         
         cur.execute(query)
     
