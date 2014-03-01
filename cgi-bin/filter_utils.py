@@ -24,75 +24,66 @@ gwas_simp_map = {'tbl_gwas_gene_exp': 'gene_exp',
 
 ############################# DATABASE #########################################
 
-# create temporary tables for handling gwas database query
-def handle_gwas_query(dbcon,
-                      gwas_tables,
-                      gwas_gene_exp_pval, 
-                      gwas_prot_exp_pval,
-                      gwas_trait_pval,
-                      gwas_gene_exp_max_distance,
-                      gwas_prot_exp_max_distance,
-                      gwas_trait_max_distance,
-                      gwas_trait_names,
-                      gwas_assoc_logic_sel):
-                      
+# create temporary tables for handling ewas database query
+def handle_ewas_gwas_query_general(dbcon,
+                                   tables,
+                                   tbl_map,
+                                   pval_map,
+                                   dist_map,
+                                   trait_names,
+                                   assoc_logic_sel):
+
     # get cursor, mapping between user input and data
     cur = dbcon.cursor()
-    gwas_pval_map = {'tbl_gwas_gene_exp': gwas_gene_exp_pval,
-                     'tbl_gwas_prot_exp': gwas_prot_exp_pval,
-                     'tbl_gwas_trait':    gwas_trait_pval}
-    gwas_dist_map = {'tbl_gwas_gene_exp': gwas_gene_exp_max_distance,
-                     'tbl_gwas_prot_exp': gwas_prot_exp_max_distance,
-                     'tbl_gwas_trait':    gwas_trait_max_distance}
     
-    # create temp tables for gwas tables
-    for tbl in gwas_tables:
+    # create temp tables for ewas tables
+    for tbl in tables:
     
         # convert from user input to database table name
-        db_table = gwas_tbl_map[tbl]
+        db_table = tbl_map[tbl]
         
         # add additional constraint for searching in trait table
-        gwas_trait_additional = ''
-        if(db_table == 'clinical_metabolite_traits_gwas'):
-            gwas_trait_names_tmp = [];
-            for i in xrange(len(gwas_trait_names)):
-                clean_trait_name = gwas_trait_names[i].replace('\'','\'\'')
-                gwas_trait_names_tmp.append('\''+clean_trait_name+'\'')
-            gwas_trait_additional += ' and phenotype_name in '
-            gwas_trait_additional += ' (%s) ' % (','.join(gwas_trait_names_tmp))
+        trait_additional = ''
+        if(db_table.find('clinical_metabolite') >= 0):
+            trait_names_tmp = [];
+            for i in xrange(len(trait_names)):
+                clean_trait_name = trait_names[i].replace('\'','\'\'')
+                trait_names_tmp.append('\''+clean_trait_name+'\'')
+            trait_additional += ' and phenotype in '
+            trait_additional += ' (%s) ' % (','.join(trait_names_tmp))
         
         # convert numers to strings
-        pval = gwas_pval_map[tbl]
-        max_distance = str(gwas_dist_map[tbl])
+        pval = pval_map[tbl]
+        max_distance = str(dist_map[tbl])
         pval_str = str(math.pow(10.0, -1.0*float(pval)))
         
         # construct query
         query = """
                 create temporary table %s_tmp as
                 select * from %s join mouse_sym_human_entrez on 
-                        gene_symbol = mouse_gene_sym
-                        where (pval < %s) and 
-                        (dist_gene_start_snp_site <> 'NULL' and 
-                         dist_gene_end_snp_site <> 'NULL') and 
-                        ((abs(dist_gene_start_snp_site) < %s or
-                          abs(dist_gene_end_snp_site) < %s) or
-                         (dist_gene_start_snp_site < 0 and
-                          dist_gene_end_snp_site > 0))
-                        %s
+                    gene_annot_gene_sym = mouse_gene_sym
+                    where (pval < %s) and 
+                    (dist_gene_start_site <> 'NULL' and 
+                     dist_gene_end_site <> 'NULL') and 
+                    ((abs(dist_gene_start_site) < %s or
+                      abs(dist_gene_end_site) < %s) or
+                     (dist_gene_start_site < 0 and
+                      dist_gene_end_site > 0))
+                    %s
         """ % (db_table, db_table, pval_str, max_distance,
-               max_distance, gwas_trait_additional)
-        
+               max_distance, trait_additional)
+ 
         # execute query
         cur.execute(query)
 
-    # create temp human gene id table, gwas intersection case
-    if(gwas_assoc_logic_sel == 'INTERSECTION'):
+    # create temp human gene id table, ewas intersection case
+    if(assoc_logic_sel == 'INTERSECTION'):
     
         # create query to get intersection of human entrez ids
         sub_query = ''
-        for i in xrange(len(gwas_tables)):
-            tbl = gwas_tables[i]
-            db_table = gwas_tbl_map[tbl]
+        for i in xrange(len(tables)):
+            tbl = tables[i]
+            db_table = tbl_map[tbl]
             if(i == 0):
                 sub_query = """
                     select distinct(%s_tmp.human_entrez_id) from %s_tmp
@@ -100,40 +91,40 @@ def handle_gwas_query(dbcon,
             if(i > 0):
                 sub_query += """
                     join
-                    (select distinct(human_entrez_id) from %s_tmp) as %s_tmp_id
+                    (select distinct(human_entrez_id) from %s_tmp)
+                    as %s_tmp_id
                     on
-                    %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id 
-                """ % (db_table,db_table,gwas_tbl_map[gwas_tables[0]],db_table)
+                    %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id
+                """ % (db_table,db_table,tbl_map[tables[0]],db_table)
         query = """
-            create temporary table human_entrez_id_gwas_tmp as %s
+            create temporary table human_entrez_id_ewas_tmp as %s
         """ % (sub_query)
+        
         # execute query
         cur.execute(query)
 
-    # create temp human gene id table, gwas union case
-    elif(gwas_assoc_logic_sel == 'UNION'):
+    # create temp human gene id table, ewas union case
+    elif(assoc_logic_sel == 'UNION'):
     
         # create query to get union of human entrez ids
         sub_query = ''
         sub_query_list = []
-        for tbl in gwas_tables:
-            db_table = gwas_tbl_map[tbl]
+        for tbl in tables:
+            db_table = tbl_map[tbl]
             sub_query = """
                 (select distinct(human_entrez_id) from %s_tmp 
                 as %s_tmp_id)
             """ % (db_table, db_table)
             sub_query_list.append(sub_query)
         query = """
-            create temporary table human_entrez_id_gwas_tmp as
+            create temporary table human_entrez_id_ewas_tmp as
             select distinct(human_entrez_id) from ((%s) as A)
         """ % (' union '.join(sub_query_list))
         
         # execute query
         cur.execute(query)
-
+    
     return
-
-#------------------------------------------------------------------------------#
 
 # create temporary tables for handling ewas database query
 def handle_ewas_query(dbcon,
@@ -147,8 +138,6 @@ def handle_ewas_query(dbcon,
                       ewas_trait_names,
                       ewas_assoc_logic_sel):
 
-    # get cursor, mapping between user input and data
-    cur = dbcon.cursor()
     ewas_pval_map = {'tbl_ewas_gene_exp': ewas_gene_exp_pval,
                      'tbl_ewas_prot_exp': ewas_prot_exp_pval,
                      'tbl_ewas_trait':    ewas_trait_pval}
@@ -156,96 +145,46 @@ def handle_ewas_query(dbcon,
                      'tbl_ewas_prot_exp': ewas_prot_exp_max_distance,
                      'tbl_ewas_trait':    ewas_trait_max_distance}
     
-    # create temp tables for ewas tables
-    for tbl in ewas_tables:
+    handle_ewas_gwas_query_general(dbcon,
+                                   ewas_tables,
+                                   ewas_tbl_map,
+                                   ewas_pval_map,
+                                   ewas_dist_map,
+                                   ewas_trait_names,
+                                   ewas_assoc_logic_sel)
     
-        # convert from user input to database table name
-        db_table = ewas_tbl_map[tbl]
-        
-        # add additional constraint for searching in trait table
-        ewas_trait_additional = ''
-        if(db_table == 'clinical_metabolite_traits_ewas'):
-            ewas_trait_names_tmp = [];
-            for i in xrange(len(ewas_trait_names)):
-                clean_trait_name = ewas_trait_names[i].replace('\'','\'\'')
-                ewas_trait_names_tmp.append('\''+clean_trait_name+'\'')
-            ewas_trait_additional += ' and phenotype in '
-            ewas_trait_additional += ' (%s) ' % (','.join(ewas_trait_names_tmp))
-        
-        # convert numers to strings
-        pval = ewas_pval_map[tbl]
-        max_distance = str(ewas_dist_map[tbl])
-        pval_str = str(math.pow(10.0, -1.0*float(pval)))
-        
-        # construct query
-        query = """
-                create temporary table %s_tmp as
-                select * from %s join mouse_sym_human_entrez on 
-                    gene_annot_gene_sym = mouse_gene_sym
-                    where (pval < %s) and 
-                    (dist_gene_start_methylation_site <> 'NULL' and 
-                     dist_gene_end_methylation_site <> 'NULL') and 
-                    ((abs(dist_gene_start_methylation_site) < %s or
-                      abs(dist_gene_end_methylation_site) < %s) or
-                     (dist_gene_start_methylation_site < 0 and
-                      dist_gene_end_methylation_site > 0))
-                    %s
-        """ % (db_table, db_table, pval_str, max_distance,
-               max_distance, ewas_trait_additional)
- 
-        # execute query
-        cur.execute(query)
+    return
 
-    # create temp human gene id table, ewas intersection case
-    if(ewas_assoc_logic_sel == 'INTERSECTION'):
+# create temporary tables for handling gwas database query
+def handle_gwas_query(dbcon,
+                      gwas_tables,
+                      gwas_gene_exp_pval, 
+                      gwas_prot_exp_pval,
+                      gwas_trait_pval,
+                      gwas_gene_exp_max_distance,
+                      gwas_prot_exp_max_distance,
+                      gwas_trait_max_distance,
+                      gwas_trait_names,
+                      gwas_assoc_logic_sel):
+                      
+    gwas_pval_map = {'tbl_gwas_gene_exp': gwas_gene_exp_pval,
+                     'tbl_gwas_prot_exp': gwas_prot_exp_pval,
+                     'tbl_gwas_trait':    gwas_trait_pval}
+    gwas_dist_map = {'tbl_gwas_gene_exp': gwas_gene_exp_max_distance,
+                     'tbl_gwas_prot_exp': gwas_prot_exp_max_distance,
+                     'tbl_gwas_trait':    gwas_trait_max_distance}
     
-        # create query to get intersection of human entrez ids
-        sub_query = ''
-        for i in xrange(len(ewas_tables)):
-            tbl = ewas_tables[i]
-            db_table = ewas_tbl_map[tbl]
-            if(i == 0):
-                sub_query = """
-                    select distinct(%s_tmp.human_entrez_id) from %s_tmp
-                """ % (db_table, db_table)
-            if(i > 0):
-                sub_query += """
-                    join
-                    (select distinct(human_entrez_id) from %s_tmp)
-                    as %s_tmp_id
-                    on
-                    %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id
-                """ % (db_table,db_table,ewas_tbl_map[ewas_tables[0]],db_table)
-        query = """
-            create temporary table human_entrez_id_ewas_tmp as %s
-        """ % (sub_query)
-        
-        # execute query
-        cur.execute(query)
+    handle_ewas_gwas_query_general(dbcon,
+                                   gwas_tables,
+                                   gwas_tbl_map,
+                                   gwas_pval_map,
+                                   gwas_dist_map,
+                                   gwas_trait_names,
+                                   gwas_assoc_logic_sel)
 
-    # create temp human gene id table, ewas union case
-    elif(ewas_assoc_logic_sel == 'UNION'):
-    
-        # create query to get union of human entrez ids
-        sub_query = ''
-        sub_query_list = []
-        for tbl in ewas_tables:
-            db_table = ewas_tbl_map[tbl]
-            sub_query = """
-                (select distinct(human_entrez_id) from %s_tmp 
-                as %s_tmp_id)
-            """ % (db_table, db_table)
-            sub_query_list.append(sub_query)
-        query = """
-            create temporary table human_entrez_id_ewas_tmp as
-            select distinct(human_entrez_id) from ((%s) as A)
-        """ % (' union '.join(sub_query_list))
-        
-        # execute query
-        cur.execute(query)
+    return
 
-#------------------------------------------------------------------------------#
-
+# handle ewas query and gwas query
 def handle_query(dbcon,
                  imp_types,
                  imp_type_logic_sel,
@@ -389,15 +328,15 @@ def handle_query(dbcon,
 ############################## META ############################################
 
 # count the number of implicating sites for each gene
-def count_implicating_sites_gwas(dbcon, gwas_tables):
-
+def count_implicating_sites_ewas_gwas_general(dbcon, tables, tbl_map, simp_map):
+    
     imp_count = {} 
     
     cur = dbcon.cursor()
-    for table in gwas_tables:
-        db_tbl = gwas_tbl_map[table]
+    for table in tables:
+        db_tbl = tbl_map[table]
         query = """
-            select human_entrez_id, count(distinct snp_chr, snp_bp) from 
+            select human_entrez_id, count(distinct site_chr, site_bp) from 
                 %s_tmp_final 
             group by human_entrez_id
         """ % db_tbl
@@ -406,7 +345,7 @@ def count_implicating_sites_gwas(dbcon, gwas_tables):
         for row in result:
             human_gene_id = row[0]
             count = row[1]
-            assoc_type = gwas_simp_map[table]
+            assoc_type = simp_map[table]
             if(human_gene_id not in imp_count):
                 imp_count[human_gene_id] = dict()
             if(assoc_type not in imp_count[human_gene_id]):
@@ -415,34 +354,20 @@ def count_implicating_sites_gwas(dbcon, gwas_tables):
     
     return imp_count
 
-#------------------------------------------------------------------------------#
+# count the number of implicating sites for each gene
+def count_implicating_sites_gwas(dbcon, gwas_tables):
+
+    imp_count = count_implicating_sites_ewas_gwas_general(dbcon, gwas_tables,
+        gwas_tbl_map, gwas_simp_map)
+    
+    return imp_count
 
 # count the number of implicating sites for each gene
 def count_implicating_sites_ewas(dbcon, ewas_tables):
 
-    imp_count = {}    
+    imp_count = count_implicating_sites_ewas_gwas_general(dbcon, ewas_tables,
+        ewas_tbl_map, ewas_simp_map)    
     
-    cur = dbcon.cursor()
-    for table in ewas_tables:
-        db_tbl = ewas_tbl_map[table]
-        query = """
-            select human_entrez_id,count(distinct cg_annot_chr, cg_annot_bp_pos)
-            from 
-                %s_tmp_final 
-            group by human_entrez_id
-        """ % db_tbl
-        cur.execute(query)
-        result = fetch_from_db(cur)
-        for row in result:
-            human_gene_id = row[0]
-            count = row[1]
-            assoc_type = ewas_simp_map[table]
-            if(human_gene_id not in imp_count):
-                imp_count[human_gene_id] = dict()
-            if(assoc_type not in imp_count[human_gene_id]):
-                imp_count[human_gene_id][assoc_type] = dict()
-            imp_count[human_gene_id][assoc_type] = count
-
     return imp_count
 
 ############################# DISPLAY ##########################################
