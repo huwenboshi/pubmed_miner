@@ -95,7 +95,7 @@ function sorttable(table_id) {
 function sortoverview(table_id) {
     // find which checkboxes are checked
     var checkboxes_status = new Array();
-    var checkboxes = $("#"+table_id+" input[type='checkbox']");
+    var checkboxes = $("#"+table_id+" input[type='radio']");
     var num_checkboxes = checkboxes.length;
     var num_checked = 0;
     for(var i = 0; i < num_checkboxes; i++) {
@@ -111,26 +111,28 @@ function sortoverview(table_id) {
     var num_rows = table.rows.length;
     var num_cols = table.rows[0].cells.length;
     
-    for (var i = 1; i < num_rows; i++) {
-        row_content = new Object();
-        row_content["sort_key"] = 0;
-        // skip index column
-        for (var j = 0; j < num_cols; j++) {
+    for(var i = 1; i < num_cols; i++) {
+        col_content = new Object();
+        col_content["sort_key"] = 0;
+        for(var j = 0; j < num_rows; j++) {
             // add up sort key
             if (j == 0) {
-                row_content["gene_id"] = table.rows[i].cells[j].innerHTML;
+                col_content["gene_id"] = table.rows[j].cells[i].innerHTML;
             }
             else {
-                row_content[j-1] = table.rows[i].cells[j].innerHTML;
+                col_content[j-1] = new Object();
+                col_content[j-1]["content"] = table.rows[j].cells[i].innerHTML;
+                col_content[j-1]["bg_color"] = 
+                    table.rows[j].cells[i].style.backgroundColor
                 if (checkboxes_status[j-1] == true) {
-                    var term_count_str = table.rows[i].cells[j].
+                    var term_count_str = table.rows[j].cells[i].
                         getElementsByClassName("abstract_count")[0].innerHTML;
                     var term_count = parseInt(term_count_str);
-                    row_content["sort_key"] += term_count;
+                    col_content["sort_key"] += term_count;
                 }
             }
         }
-        table_content[i-1] = row_content;
+        table_content[i-1] = col_content;
     }
     
     // apply the sort
@@ -141,19 +143,22 @@ function sortoverview(table_id) {
     }
     
     // rerender the table, skip header row
-    for (var i = 1; i < num_rows; i++) {
+    for (var i = 1; i < num_cols; i++) {
         // skip index column
-        for (var j = 0; j < num_cols; j++) {
+        for (var j = 0; j < num_rows; j++) {
             if (j == 0) {
-                table.rows[i].cells[j].innerHTML=table_content[i-1]["gene_id"];
+                table.rows[j].cells[i].innerHTML=table_content[i-1]["gene_id"];
             }
             else {
-                table.rows[i].cells[j].innerHTML = table_content[i-1][j-1];
+                table.rows[j].cells[i].innerHTML = 
+                    table_content[i-1][j-1]["content"];
+                table.rows[j].cells[i].style.backgroundColor = 
+                    table_content[i-1][j-1]["bg_color"];
                 if (checkboxes_status[j-1] == true) {
-                    table.rows[i].cells[j].style.fontWeight = "bold";
+                    table.rows[j].cells[i].style.fontWeight = "bold";
                 }
                 else {
-                    table.rows[i].cells[j].style.fontWeight = "normal";
+                    table.rows[j].cells[i].style.fontWeight = "normal";
                 }
             }
         }

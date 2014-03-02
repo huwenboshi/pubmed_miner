@@ -278,8 +278,10 @@ if(user_terms != None):
 all_terms_list = list(all_terms_list)
 
 # check user search scope
+tiab_txt = ''
 if(search_scope == 'TIAB'):
     search_scope = 'Title and abstract'
+    tiab_txt = 'checked="checked"'
 else:
     search_scope = 'Full-text'
 
@@ -444,9 +446,9 @@ print """
             <textarea id="terms_txt" name="terms" 
                 rows="5" cols="20">%s</textarea>
             
-            <input type="checkbox" name="tiab_only" checked="checked"/> 
+            <input type="checkbox" name="tiab_only" %s/> 
         </form>
-""" % (genes_form_str, terms_form_str)
+""" % (genes_form_str, terms_form_str, tiab_txt)
 
 
 ################################### Ending #####################################

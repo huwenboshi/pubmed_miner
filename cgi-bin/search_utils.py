@@ -1,3 +1,4 @@
+from utils import *
 from consts import *
 import urllib
 import urllib2
@@ -23,9 +24,13 @@ def get_abstract_text(text_elements):
 # count number of occurence of terms in text
 def get_term_count(term_list, text):
     text = text.lower()
+    chars = """ '";:.>,<?/}]{[|\\+=_-!@#$%^&*()"""
     term_count = dict()
     for term in term_list:
-        term_count[term] = text.count(term)
+        term_count_list = []
+        for char in chars:
+            term_count_list.append(text.count(term+char))
+        term_count[term] = sum(term_count_list)
     return term_count
 
 # initialize gene term count
@@ -180,19 +185,22 @@ def group_abstract_by_term(abstract_efetch_root, terms_list):
         if(term not in term_abstract):
             term_abstract[term] = []
         for j in xrange(len(abstract_efetch_root)):
-            pmid = abstract_efetch_root[j].find('.//PMID').text
-            article_url = pubmed_url+'/'+pmid
-            title = abstract_efetch_root[j].find('.//ArticleTitle').text
-            text_elements = abstract_efetch_root[j].findall('.//AbstractText')
-            text = get_abstract_text(text_elements)
-            title_and_text = title + text
-            if(title_and_text.lower().find(term) >= 0):
-                article_obj = {'url':article_url, 'title':title, 'text':text}
-                term_abstract[term].append(article_obj)
+            try:
+                pmid = abstract_efetch_root[j].find('.//PMID').text
+                article_url = pubmed_url+'/'+pmid
+                title = abstract_efetch_root[j].find('.//ArticleTitle').text
+                text_elements=abstract_efetch_root[j].findall('.//AbstractText')
+                text = get_abstract_text(text_elements)
+                title_and_text = title + text
+                if(title_and_text.lower().find(term) >= 0):
+                    article_obj = {'url':article_url,'title':title,'text':text}
+                    term_abstract[term].append(article_obj)
+            except:
+                continue
     return term_abstract
 
 # print abstract table for tiab search
-def print_abstract_by_term_tiab(term_abstract, terms_list, gene_id):
+def print_abstract_by_term_tiab(term_abstract, terms_list, gene_id, id_sym):
     print '<table id="articles_by_term_gene_id_%s"' % gene_id
     print 'class="info_table">'
     print """
@@ -200,18 +208,23 @@ def print_abstract_by_term_tiab(term_abstract, terms_list, gene_id):
         Containing the Term</td></tr>
     """
     for term in terms_list:
+        td_id = term+"_"+gene_id
         in_total = len(term_abstract[term])
         if(in_total > 0):
             print '<tr>'
-            print '<td valign="top" rowspan="%d">%s<br/>' % (in_total, term)
-            print '(%d in total)</td>' % in_total
-        else:
-            print '<tr><td>%s<br/>(%d in total)</td>' % (term, in_total)
-            print '<td>0</td><td>N/A</td></tr>'
+            print """<td id="%s" valign="top" rowspan="%d">
+                        %s<br/>
+                        (%d in total)<br/><br/>
+                        <a href="#gene_id_%s">%s(%s)</a><br/><br/>
+                        <a href="#top">Return to Top</a>
+                     </td>""" % (td_id, in_total, term, in_total,
+                        gene_id, id_sym[gene_id], gene_id)
+
         for j in xrange(in_total):
             if(j != 0):
                 print '<tr>'
-            print '<td>%d</td>' % (j+1)
+            print '<td>%d<br/><a href="#%s">back</a></td>'%((j+1),
+                term+"_"+gene_id)
             print '<td>'
             url = term_abstract[term][j]['url']
             title = term_abstract[term][j]['title']
@@ -262,7 +275,7 @@ def print_abstract_with_sort(abstract_efetch_root, terms_list, gene_id):
 
 # print tiab search result
 def print_tiab_search_result(terms_list, gene_id, 
-gene_webenv_querykey, gene_term_count):
+    gene_webenv_querykey, gene_term_count, id_sym):
     abstract_efetch_root = fetch_abstract_tiab(gene_webenv_querykey[gene_id])
     term_abstract = group_abstract_by_term(abstract_efetch_root, terms_list)
     for term in terms_list:
@@ -273,7 +286,7 @@ gene_webenv_querykey, gene_term_count):
             <button class="show_hide" type="button">hide</button>
             <br/>
     """
-    print_abstract_by_term_tiab(term_abstract, terms_list, gene_id)
+    print_abstract_by_term_tiab(term_abstract, terms_list, gene_id, id_sym)
     #print """
     #    </div>
     #    <br/>
@@ -308,7 +321,7 @@ def get_webenv_querykey_full_text(gene_id, term):
     return (webenv, query_key)
 
 # print full text search result
-def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
+def print_fulltext_search_result(terms_list, gene_id, gene_term_count, id_sym):
 
     print """
         <div>
@@ -326,7 +339,9 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
     """
     
     # iterate through terms
-    for term in terms_list:
+    for i in xrange(len(terms_list)):
+        term = terms_list[i]
+        
         # get WebEnv and QueryKey
         webenv_querykey = get_webenv_querykey_full_text(gene_id, term)
         webenv = webenv_querykey[0]
@@ -347,14 +362,15 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
         # display result in table
         in_total = len(efetch_root)
         gene_term_count[gene_id][term] += in_total
-        
+        td_id = term+"_"+gene_id
         if(in_total > 0):
-            print '<tr>'
-            print '<td valign="top" rowspan="%d">%s<br/>' % (in_total, term)
-            print '(%d in total)</td>' % in_total
-        else:
-            print '<tr><td>%s<br/>(%d in total)</td>' % (term, in_total)
-            print '<td>0</td><td>N/A</td></tr>'
+            print """<td id="%s" valign="top" rowspan="%d">
+                        %s<br/>
+                        (%d in total)<br/><br/>
+                        <a href="#gene_id_%s">%s(%s)</a><br/><br/>
+                        <a href="#top">Return to Top</a>
+                     </td>""" % (td_id, in_total, term, in_total,
+                        gene_id, id_sym[gene_id], gene_id)
         
         # print table body
         for j in xrange(in_total):
@@ -365,7 +381,8 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
             text = get_abstract_text(text_elements)
             if(j != 0):
                     print '<tr>'
-            print '<td>%d</td>' % (j+1)
+            print '<td>%d<br/><a href="#%s">back</a></td>'%((j+1),
+                term+"_"+gene_id)
             print '<td>'
             print '<a href="%s" target="_blank">%s</a>' % (url, title)
             print '<div class="abstract_txt"><button class="show_more_less"'
@@ -414,7 +431,7 @@ def search_nhgri_gwas_catalog(con, genesym):
 def print_nhgri_gwas_info_list(info_list):
     print """
         <div>
-            <b>Gene GWAS Catalog Info</b>
+            <b>Gene NHGRI GWAS Catalog Info</b>
             <button class="show_hide" type="button">hide</button>
             <br/>
     """
@@ -454,3 +471,63 @@ def print_nhgri_gwas_info_list(info_list):
         </div>
         <br/>
     """
+########################### CLINICAL TRIAL STUFF ###############################
+
+# search database by gene id
+def search_clinical_trial(con, gene_id):
+    if(con == None):
+        return []
+    cur = con.cursor()
+    query = """select * from clinical_trial 
+        where gene_id = %s""" % gene_id
+    cur.execute(query)
+    return fetch_from_db(cur)
+
+# print clinical trial result
+def print_clinical_trial_result(result):
+    print """
+        <div>
+            <b>Gene Clinical Trial Info</b>
+            <button class="show_hide" type="button">hide</button>
+            <br/>
+    """
+
+    # print table header
+    if(len(result) > 0):
+        row = result[0]
+        print '<table class="info_table">'
+        print '<tr><td>Gene ID</td><td>%d</td></tr>' % row[0]
+        print '<tr><td>Gene symbol</td><td>%s</td></tr>' % row[1]
+        print '<tr><td>Citeline count<td>%s</td></tr>' % row[2]
+        print '<tr><td>Small molecule count<td>%s</td></tr>' % row[3]
+        print '<tr><td>Small molecule launched count<td>%s</td></tr>' % row[4]
+        print '<tr><td>Small molecule registered count<td>%s</td></tr>'%row[5]
+        print '<tr><td>Small molecule pre-registered count<td>%s</td></tr>'%row[6]
+        print '<tr><td>Small molecule phase 3 count<td>%s</td></tr>'%row[7]
+        print '<tr><td>Small molecule phase 2 count<td>%s</td></tr>'%row[8]
+        print '<tr><td>Small molecule phase 1 count<td>%s</td></tr>'%row[9]
+        print '<tr><td>Small molecule pre-clinical count<td>%s</td></tr>'%row[10]
+        print '<tr><td>Small molecule no development count<td>%s</td></tr>'%row[11]
+        print '<tr><td>Small molecule discontinued count<td>%s</td></tr>'%row[12]
+        print '<tr><td>Small molecule suspended count<td>%s</td></tr>'%row[13]
+        print '<tr><td>Small molecule withdrawn count<td>%s</td></tr>'%row[14]
+        print '<tr><td>Antibody count<td>%s</td></tr>' % row[15]
+        print '<tr><td>Antibody launched count<td>%s</td></tr>' % row[16]
+        print '<tr><td>Antibody registered count<td>%s</td></tr>'%row[17]
+        print '<tr><td>Antibody pre-registered count<td>%s</td></tr>'%row[18]
+        print '<tr><td>Antibody phase 3 count<td>%s</td></tr>'%row[19]
+        print '<tr><td>Antibody phase 2 count<td>%s</td></tr>'%row[20]
+        print '<tr><td>Antibody phase 1 count<td>%s</td></tr>'%row[21]
+        print '<tr><td>Antibody pre-clinical count<td>%s</td></tr>'%row[22]
+        print '<tr><td>Antibody no development count<td>%s</td></tr>'%row[23]
+        print '<tr><td>Antibody discontinued count<td>%s</td></tr>'%row[24]
+        print '<tr><td>Antibody suspended count<td>%s</td></tr>'%row[25]
+        print '<tr><td>Antibody withdrawn count<td>%s</td></tr>'%row[26]
+        print """
+            </table>
+        """
+    
+    print """
+            </div>
+            <br/>
+          """

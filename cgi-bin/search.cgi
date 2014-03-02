@@ -92,15 +92,8 @@ sys.stdout.flush()
 # create overview
 print """
 <div>
-    <b>Overview (choose terms to sort by the sum of number of abstracts
-        containing these terms)
-    </b>
+    <b>Overview</b>
     <button class="show_hide" type="button">hide</button><br/>
-    <a>each cell shows the number of abstracts related to the gene 
-        (left-most column) and term (top-most row)
-    </a>
-    <br/>
-    <br/>
     <a id="loading">Loading...</a>
     <table id="overview_top" class="heat-map">
     </table>
@@ -139,14 +132,19 @@ for i in xrange(len(gene_ids_list)):
     # print gene gwas info table
     gwas_info_list = search_nhgri_gwas_catalog(con, id_sym[gene_id])
     print_nhgri_gwas_info_list(gwas_info_list)
+    
+    # print clinical trial table
+    clinical_trial_result = search_clinical_trial(con, gene_id)
+    print_clinical_trial_result(clinical_trial_result)
      
     # search result for tiab search
     if(len(terms_list) > 0):
         if(tiab_only):
             gene_term_count = print_tiab_search_result(terms_list, gene_id,
-                gene_webenv_querykey, gene_term_count)
+                gene_webenv_querykey, gene_term_count, id_sym)
         else:
-            print_fulltext_search_result(terms_list, gene_id, gene_term_count)
+            print_fulltext_search_result(terms_list, gene_id,
+                gene_term_count, id_sym)
     else:
         time.sleep(1)
         
@@ -157,44 +155,33 @@ print """<table id="overview_bottom" cellpadding="0"
           cellspacing="0" border="0">
          <thead>
          <tr>"""
-print '<th class="first">Term\Gene</th>'
+print '<td class="first">Term\Gene</t>'
 for i in xrange(len(gene_ids_list)):
     gene_id = gene_ids_list[i]
     gene_sym = id_sym[gene_id]
     if(i == len(gene_ids_list)-1):
-        print """<th class="last">
+        print """<td class="last">
                  <a href="#gene_id_%s">%s(%s)</a>
-                 </th>"""%(gene_id, gene_sym, gene_id)
+                 </td>"""%(gene_id, gene_sym, gene_id)
     else:
-        print '<th><a href="#gene_id_%s">%s(%s)</a></th>'%(gene_id,
+        print '<td><a href="#gene_id_%s">%s(%s)</a></td>'%(gene_id,
             gene_sym, gene_id)
 print """</tr>
          </thead>
          <tbody>"""
 for term in terms_list:
     print '<tr class="stats-row">'
-    print '<td class="stats-title">%s</td>' % term
+    print '<td class="stats-title"><input type="radio" name="sort_choice"'
+    print ' class="overview_opt" id="overview_%s">%s</td>' % (term, term)
     for gene_id in gene_ids_list:
-        print '<td>%d</td>' % gene_term_count[gene_id][term]
+        print '<td><a class="abstract_count"'
+        if(gene_term_count[gene_id][term]):
+            print 'href="#%s"' % (term+"_"+gene_id)
+        print '>%d</a></td>' % gene_term_count[gene_id][term]
     print '</tr>'
 print """</tbody>
          </table>"""
 
-"""
-for term in terms_list:
-    print '<td><input type="checkbox" '
-    print 'id="overview_%s" class="overview_opt">%s</td>' % (term, term)
-print '</tr>'
-for gene_id in gene_ids_list:
-    print '<tr>'
-    gene_sym = id_sym[gene_id]
-    print '<td><a href="#gene_id_%s">%s(%s)</a></td>'%(gene_id,gene_sym,gene_id)
-    for term in terms_list:
-        print '<td><a class="abstract_count">'
-        print '%d</a></td>' % gene_term_count[gene_id][term]
-    print '</tr>'
-"""
-    
 #################################### HTML END ##################################
 
 # print body end
