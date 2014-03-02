@@ -286,8 +286,8 @@ gene_webenv_querykey, gene_term_count):
     #print_abstract_with_sort(abstract_efetch_root, terms_list, gene_id)
     print """
         </div>
-        <hr/>
     """
+    time.sleep(1)
     return gene_term_count
 
 ############################# FULL-TEXT STUFF ##################################
@@ -378,7 +378,6 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count):
     print """
         </table>
         </div>
-        <hr/>
     """
     
     return gene_term_count

@@ -33,6 +33,7 @@ html_header = """
     <title>Search Result</title>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script src="../javascripts/sorttable.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
@@ -73,6 +74,43 @@ html_header = """
             $("#overview_top").html($("#overview_bottom").html());
             $("#overview_bottom").html("");
             $("#loading").css({display: 'none'});
+            
+            // Function to get the max value in an Array
+            Array.max = function(array){
+                return Math.max.apply(Math,array);
+            };
+         
+            // Get all data values from our table cells making sure to ignore the first column of text
+            // Use the parseInt function to convert the text string to a number
+         
+            var counts= $('.heat-map tbody td').not('.stats-title').map(function() {
+                return parseInt($(this).text());
+            }).get();
+            
+            // run max value function and store in variable
+            var max = Array.max(counts);
+            n = 100; // Declare the number of groups
+         
+            // Define the ending colour, which is white
+            xr = 255; // Red value
+            xg = 255; // Green value
+            xb = 255; // Blue value
+         
+            // Define the starting colour #f32075
+            yr = 52; // Red value
+            yg = 119; // Green value
+            yb = 220; // Blue value
+            
+            // Loop through each data point and calculate its % value
+            $('.heat-map tbody td').not('.stats-title').each(function(){
+                var val = parseInt($(this).text());
+                var pos = parseInt((Math.round((val/max)*100)).toFixed(0));
+                red = parseInt((xr + (( pos * (yr - xr)) / (n-1))).toFixed(0));
+                green = parseInt((xg + (( pos * (yg - xg)) / (n-1))).toFixed(0));
+                blue = parseInt((xb + (( pos * (yb - xb)) / (n-1))).toFixed(0));
+                clr = 'rgb('+red+','+green+','+blue+')';
+                $(this).css({backgroundColor:clr});
+            });
         });
     </script>
     <style>

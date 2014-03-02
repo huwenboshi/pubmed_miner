@@ -383,13 +383,11 @@ def count_implicating_sites_ewas_gwas_general(dbcon, tables, tbl_map, simp_map):
             if(assoc_type not in imp_count[human_gene_id]):
                 imp_count[human_gene_id][assoc_type] = dict()
             imp_count[human_gene_id][assoc_type] = count
-            imp_count[human_gene_id]['gene_sym'] = symbol
     
     return imp_count
 
 # count the number of implicating sites for each gene
 def count_implicating_sites_gwas(dbcon, gwas_tables):
-
     imp_count = count_implicating_sites_ewas_gwas_general(dbcon, gwas_tables,
         gwas_tbl_map, gwas_simp_map)
     
@@ -397,11 +395,27 @@ def count_implicating_sites_gwas(dbcon, gwas_tables):
 
 # count the number of implicating sites for each gene
 def count_implicating_sites_ewas(dbcon, ewas_tables):
-
     imp_count = count_implicating_sites_ewas_gwas_general(dbcon, ewas_tables,
         ewas_tbl_map, ewas_simp_map)    
     
     return imp_count
+
+# get gene symbol citeline count data
+def get_symbol_citeline_count(dbcon):
+    cur = dbcon.cursor()
+    id_sym_trial = dict()
+    query = """select gene_id, symbol, citeline_count from clinical_trial where
+               gene_id in (select * from human_entrez_id_ewas_gwas_tmp)"""
+    cur.execute(query)
+    result = fetch_from_db(cur)
+    for row in result:
+        gene_id = row[0]
+        gene_sym = row[1]
+        citeline_cnt = row[2]
+        id_sym_trial[str(gene_id)] = dict()
+        id_sym_trial[str(gene_id)]['gene_sym'] = gene_sym
+        id_sym_trial[str(gene_id)]['citeline_cnt'] = citeline_cnt
+    return id_sym_trial
 
 ############################# DISPLAY ##########################################
 
@@ -428,7 +442,7 @@ def print_ewas_query_result(ewas_query_result, ewas_tables):
                     <th>Implicated mouse gene symbol</th>
                     <th>Gene position</th>
                     <th>p-value</th>
-                    <th>Human ortholog entrez ID</th>
+                    <th>Human homolog entrez ID</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -489,7 +503,7 @@ def print_ewas_query_result(ewas_query_result, ewas_tables):
                     <th>Implicated mouse<br/>gene symbol</th>
                     <th>Gene position</th>
                     <th>p-value</th>
-                    <th>Human ortholog<br/>entrez ID</th>
+                    <th>Human homolog<br/>entrez ID</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -552,7 +566,7 @@ def print_ewas_query_result(ewas_query_result, ewas_tables):
                     <th>Phenotype</th>
                     <th>Phenotype class</th>
                     <th>p-value</th>
-                    <th>Human ortholog<br/>entrez ID</th>
+                    <th>Human homolog<br/>entrez ID</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -624,7 +638,7 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
                     <th>Implicated mouse gene symbol</th>
                     <th>Gene position</th>
                     <th>p-value</th>
-                    <th>Human ortholog entrez ID</th>
+                    <th>Human homolog entrez ID</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -688,7 +702,7 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
                     <th>Implicated mouse<br/>gene symbol</th>
                     <th>Gene position</th>
                     <th>p-value</th>
-                    <th>Human ortholog<br/>entrez ID</th>
+                    <th>Human homolog<br/>entrez ID</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -755,7 +769,7 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
                         <th>Implicated mouse<br/>gene symbol</th>
                         <th>Gene position</th>
                         <th>p-value</th>
-                        <th>Human ortholog<br/>entrez ID</th>
+                        <th>Human homolog<br/>entrez ID</th>
                     </tr>
                     </thead>
                     <tbody>

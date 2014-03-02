@@ -242,6 +242,7 @@ combined_entrez_id_set = ewas_gwas_result['human_gene_set']
 # count the number of implicating sites for each implicated gene
 ewas_gene_support_info = count_implicating_sites_ewas(con, ewas_tables)
 gwas_gene_support_info = count_implicating_sites_gwas(con, gwas_tables)
+id_sym_trial = get_symbol_citeline_count(con)
 
 # get user genes
 gene_list = combined_entrez_id_set
@@ -256,8 +257,14 @@ if(user_genes != None):
             gene_list.add(int(gene))
 gene_list = list(gene_list)
 
-# get curated terms
+# get terms - add traits first
 all_terms_list = set()
+if('ewas_imp' in imp_types):
+    all_terms_list = all_terms_list.union(set(ewas_trait_names))
+if('gwas_imp' in imp_types):
+    all_terms_list = all_terms_list.union(set(gwas_trait_names))
+
+# get curated terms
 if(curated_terms != None):
     for term in curated_terms:
         all_terms_list.add(term.strip())
@@ -297,7 +304,7 @@ print '<td><b>Search scope</b></td><td>%s</td>' % search_scope
 print '</tr>'
 print '</table>'
 print '<br/>'
-print '<button id="confirm_btn">search</button>'
+print '<button id="confirm_btn">search in literature</button>'
 print '<hr/>'
 
 # print gene implication summary
@@ -311,6 +318,7 @@ print """
     <tr>
     <th>Human gene Entrez ID</th>
     <th>Human gene symbol</th>
+    <th>Citeline count</th>
 """
 
 if('tbl_ewas_gene_exp' in ewas_tables):
@@ -341,7 +349,13 @@ print """
 
 for key in combined_entrez_id_set:
     key = key[0]
+    
     gene_sym = ''
+    citeline_cnt = 0
+    if(key in id_sym_trial):
+        gene_sym = id_sym_trial[key]['gene_sym']
+        citeline_cnt = id_sym_trial[key]['citeline_cnt']
+    
     ewas_assoc_pos = dict()
     if(key in ewas_gene_support_info):
         ewas_assoc_pos = ewas_gene_support_info[key]
@@ -349,9 +363,6 @@ for key in combined_entrez_id_set:
     num_ewas_prot_exp = safe_getval(ewas_assoc_pos, 'prot_exp')
     num_ewas_trait = safe_getval(ewas_assoc_pos, 'trait')
     num_ewas_tot = num_ewas_gene_exp + num_ewas_prot_exp + num_ewas_trait
-    ewas_gene_sym = safe_getval(ewas_assoc_pos, 'gene_sym')
-    if(ewas_gene_sym != 0):
-        gene_sym = ewas_gene_sym
     
     gwas_assoc_pos = dict()
     if(key in gwas_gene_support_info):
@@ -360,15 +371,13 @@ for key in combined_entrez_id_set:
     num_gwas_prot_exp = safe_getval(gwas_assoc_pos, 'prot_exp')
     num_gwas_trait = safe_getval(gwas_assoc_pos, 'trait')
     num_gwas_tot = num_gwas_gene_exp + num_gwas_prot_exp + num_gwas_trait
-    gwas_gene_sym = safe_getval(ewas_assoc_pos, 'gene_sym')
-    if(len(gene_sym) == 0):
-        gene_sym = gwas_gene_sym
     
     num_tot = num_ewas_tot + num_gwas_tot
     
     print '<tr>'
     print '<td>%s</td>' % key
     print '<td>%s</td>' % gene_sym
+    print '<td>%d</td>' % citeline_cnt
     
     if('tbl_ewas_gene_exp' in ewas_tables):
         print '<td>%d</td>' % num_ewas_gene_exp

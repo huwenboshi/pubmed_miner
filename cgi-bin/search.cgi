@@ -53,7 +53,7 @@ terms = ''
 tiab_only = True
 if('terms' in form):
     terms = form['terms'].value
-terms_list = sorted(list(set([term.strip() for term in terms.split()])))
+terms_list = sorted(list(set([term.strip() for term in terms.split('\n')])))
 if('tiab_only' not in form):
     tiab_only = False
 
@@ -83,7 +83,8 @@ time.sleep(1)
 print """
 <body>
     <h2><a id="top">Search Result</a></h2>
-    <a href="../index.html">Make Another Search</a><br/><br/>
+    <a href="../index.html">Make Another Search</a><br/>
+    <hr/>
 """
 
 sys.stdout.flush()
@@ -101,7 +102,7 @@ print """
     <br/>
     <br/>
     <a id="loading">Loading...</a>
-    <table id="overview_top">
+    <table id="overview_top" class="heat-map">
     </table>
 </div>
 <br/>
@@ -140,18 +141,46 @@ for i in xrange(len(gene_ids_list)):
     print_nhgri_gwas_info_list(gwas_info_list)
      
     # search result for tiab search
-    if(tiab_only):
-        gene_term_count = print_tiab_search_result(terms_list, gene_id,
-            gene_webenv_querykey, gene_term_count)
-        time.sleep(1)
+    if(len(terms_list) > 0):
+        if(tiab_only):
+            gene_term_count = print_tiab_search_result(terms_list, gene_id,
+                gene_webenv_querykey, gene_term_count)
+        else:
+            print_fulltext_search_result(terms_list, gene_id, gene_term_count)
     else:
-        print_fulltext_search_result(terms_list, gene_id, gene_term_count)
+        time.sleep(1)
+        
+    print '<hr/>'
     
-
 # print overview bottom, this is a dummy and will not be displayed
-print '<table id="overview_bottom">'
-print '<tr>'
-print '<td>Gene ID\Term</td>'
+print """<table id="overview_bottom" cellpadding="0"
+          cellspacing="0" border="0">
+         <thead>
+         <tr>"""
+print '<th class="first">Term\Gene</th>'
+for i in xrange(len(gene_ids_list)):
+    gene_id = gene_ids_list[i]
+    gene_sym = id_sym[gene_id]
+    if(i == len(gene_ids_list)-1):
+        print """<th class="last">
+                 <a href="#gene_id_%s">%s(%s)</a>
+                 </th>"""%(gene_id, gene_sym, gene_id)
+    else:
+        print '<th><a href="#gene_id_%s">%s(%s)</a></th>'%(gene_id,
+            gene_sym, gene_id)
+print """</tr>
+         </thead>
+         <tbody>"""
+for term in terms_list:
+    print '<tr class="stats-row">'
+    print '<td class="stats-title">%s</td>' % term
+    for gene_id in gene_ids_list:
+        print '<td>%d</td>' % gene_term_count[gene_id][term]
+    print '</tr>'
+print """</tbody>
+         </table>"""
+
+"""
 for term in terms_list:
     print '<td><input type="checkbox" '
     print 'id="overview_%s" class="overview_opt">%s</td>' % (term, term)
@@ -164,7 +193,7 @@ for gene_id in gene_ids_list:
         print '<td><a class="abstract_count">'
         print '%d</a></td>' % gene_term_count[gene_id][term]
     print '</tr>'
-print '</table>'
+"""
     
 #################################### HTML END ##################################
 
