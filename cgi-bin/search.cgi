@@ -101,13 +101,25 @@ print """
 <hr/>
 """
 
-# create network
+# create gene term network
 print """
 <div>
-    <b>Term Network</b>
+    <b>Gene-Term Network</b>
     <button class="show_hide" type="button">hide</button><br/>
     <a id="loading_gene_term_network">Loading...</a>
     <table id="gene_term_network_top">
+    </table>
+</div>
+<hr/>
+"""
+
+# create term term network
+print """
+<div>
+    <b>Term-Term Network</b>
+    <button class="show_hide" type="button">hide</button><br/>
+    <a id="loading_term_term_network">Loading...</a>
+    <table id="term_term_network_top">
     </table>
 </div>
 <hr/>
@@ -199,10 +211,17 @@ for term in terms_list:
 print """</tbody>
          </table>"""
 
-# create the term network
+# create the gene term network
 print '<table id="gene_term_network_bottom">'
 print '<tr><td>'
 create_gene_term_network(gene_term_count, gene_ids_list, terms_list, id_sym)
+print '</td></tr>'
+print '</table>'
+
+# create the term term network
+print '<table id="term_term_network_bottom">'
+print '<tr><td>'
+create_term_term_network(gene_term_count, gene_ids_list, terms_list, id_sym)
 print '</td></tr>'
 print '</table>'
 

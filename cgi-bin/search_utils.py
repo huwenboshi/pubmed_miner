@@ -616,7 +616,7 @@ def print_hypervariable_count(result):
 ############################## GENE TERM NETWORK ###############################
 
 def draw_gene_term_graph(graph, filename, node_size=400, node_alpha=0.5,
-               node_text_size=6, edge_color='blue', edge_alpha=0.3,
+               node_text_size=8, edge_color='blue', edge_alpha=0.3,
                edge_tickness=1, edge_text_pos=0.3,text_font='sans-serif'):
 
     # set figure size
@@ -689,16 +689,72 @@ def create_gene_term_network(gene_term_count, gene_ids_list,
 
 ############################## TERM TERM NETWORK ###############################
 
+def draw_term_term_graph(graph, filename, node_size=400, node_alpha=0.5,
+               node_text_size=8, edge_color='blue', edge_alpha=0.3,
+               edge_tickness=1, edge_text_pos=0.3,text_font='sans-serif'):
+
+    # set figure size
+    plt.figure(figsize=(30,30)) 
+    
+    # create networkx graph
+    G=nx.Graph()
+
+    labels = dict()
+    
+    # term node
+    term_nodes = set()
+    for edge in graph:
+        term_nodes.add(edge[0])
+        term_nodes.add(edge[1])
+        labels[edge[0]] = edge[0]
+        labels[edge[1]] = edge[1]
+    G.add_nodes_from(term_nodes)
+
+    # add edge
+    G.add_edges_from(set(graph))
+
+    # set style
+    graph_pos=nx.spring_layout(G)
+
+    # draw nodes
+    nx.draw_networkx_nodes(G,graph_pos,nodelist=term_nodes,
+        node_color='b', node_size=node_size, alpha=node_alpha)
+    
+    # draw edges
+    nx.draw_networkx_edges(G,graph_pos,width=edge_tickness,
+        alpha=edge_alpha,edge_color=edge_color)
+    
+    # draw labels                       
+    nx.draw_networkx_labels(G,graph_pos,labels,font_size=node_text_size,
+        font_family=text_font)
+
+    # save graph
+    plt.axis('off')
+    plt.savefig(filename)
+
+# create term term network
 def create_term_term_network(gene_term_count, gene_ids_list,
     terms_list, id_sym):
+    
+    graph = []
     for i in xrange(len(terms_list)):
         for j in xrange(len(terms_list)):
+            term_i = terms_list[i]
+            term_j = terms_list[j]
             if(i != j):
                 count_term_i = []
                 count_term_j = []
                 for k in xrange(len(gene_ids_list)):
                     gene_id = gene_ids_list[k]
-                    term_i = terms_list[i]
-                    term_j = terms_list[j]
                     count_term_i.append(gene_term_count[gene_id][term_i])
                     count_term_j.append(gene_term_count[gene_id][term_j])
+                cor = pearson(count_term_i, count_term_j)
+                if(cor > 0.6 and cor < 1.0):
+                    graph.append((term_i, term_j))
+    # draw the graph
+    draw_term_term_graph(graph, filename='../tmp/test2.png')
+    
+    # display the graph
+    print """<a target="_blank" href="../tmp/test2.png">
+            <img src="../tmp/test2.png" height="200" width="200">
+            </a>"""

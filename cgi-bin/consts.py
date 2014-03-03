@@ -79,6 +79,11 @@ html_header = """
             $("#gene_term_network_bottom").html("");
             $("#loading_gene_term_network").css({display: 'none'});
             
+            $("#term_term_network_top").
+                html($("#term_term_network_bottom").html());
+            $("#term_term_network_bottom").html("");
+            $("#loading_term_term_network").css({display: 'none'});
+            
             // Function to get the max value in an Array
             Array.max = function(array){
                 return Math.max.apply(Math,array);
@@ -110,9 +115,9 @@ html_header = """
             $('.heat-map tbody td').not('.stats-title').each(function(){
                 var val = parseInt($(this).text());
                 var pos = parseInt((Math.round((val/max)*100)).toFixed(0));
-                red = parseInt((xr + (( pos * (yr - xr)) / (n-1))).toFixed(0));
-                green = parseInt((xg + (( pos * (yg - xg)) / (n-1))).toFixed(0));
-                blue = parseInt((xb + (( pos * (yb - xb)) / (n-1))).toFixed(0));
+                red = parseInt((xr + (( pos* (yr - xr)) / (n-1))).toFixed(0));
+                green = parseInt((xg+((pos*(yg-xg)) / (n-1))).toFixed(0));
+                blue = parseInt((xb+((pos* (yb- xb)) / (n-1))).toFixed(0));
                 clr = 'rgb('+red+','+green+','+blue+')';
                 $(this).css({backgroundColor:clr});
             });
