@@ -5,6 +5,18 @@ import urllib2
 import xml.etree.ElementTree as ET
 import time
 import sys
+import os
+
+import networkx as nx
+from networkx.algorithms import bipartite
+
+os.environ['HOME'] = '/tmp/'
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+
 
 #################################### HELPERS ###################################
 
@@ -202,7 +214,7 @@ def group_abstract_by_term(abstract_efetch_root, terms_list):
 # print abstract table for tiab search
 def print_abstract_by_term_tiab(term_abstract, terms_list, gene_id, id_sym):
     print '<table id="articles_by_term_gene_id_%s"' % gene_id
-    print 'class="info_table">'
+    print 'class="abstract_table">'
     print """
         <tr><td>Term</td><td colspan="2">Title & Abstract 
         Containing the Term</td></tr>
@@ -242,7 +254,7 @@ def print_abstract_with_sort(abstract_efetch_root, terms_list, gene_id):
     num_terms = len(terms_list)
     
     # print table header
-    print '<table id="articles_gene_id_%s" class="info_table">' % xstr(gene_id)
+    print '<table id="articles_gene_id_%s" class="abstract_table">' % xstr(gene_id)
     print '<tr><td></td><td>Title & Abstract'
     print ' (%d related articles in total)</td>' % num_articles
     for term in terms_list:
@@ -332,7 +344,7 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count, id_sym):
 
     # print table header
     print '<table id="articles_by_term_gene_id_%s"' % gene_id
-    print 'class="info_table">'
+    print 'class="abstract_table">'
     print """
         <tr><td>Term</td><td colspan="2">Title & Abstract 
         Containing the Term</td></tr>
@@ -502,13 +514,17 @@ def print_clinical_trial_result(result):
         print '<tr><td>Small molecule count<td>%s</td></tr>' % row[3]
         print '<tr><td>Small molecule launched count<td>%s</td></tr>' % row[4]
         print '<tr><td>Small molecule registered count<td>%s</td></tr>'%row[5]
-        print '<tr><td>Small molecule pre-registered count<td>%s</td></tr>'%row[6]
+        print """<tr><td>Small molecule 
+                         pre-registered count<td>%s</td></tr>"""%row[6]
         print '<tr><td>Small molecule phase 3 count<td>%s</td></tr>'%row[7]
         print '<tr><td>Small molecule phase 2 count<td>%s</td></tr>'%row[8]
         print '<tr><td>Small molecule phase 1 count<td>%s</td></tr>'%row[9]
-        print '<tr><td>Small molecule pre-clinical count<td>%s</td></tr>'%row[10]
-        print '<tr><td>Small molecule no development count<td>%s</td></tr>'%row[11]
-        print '<tr><td>Small molecule discontinued count<td>%s</td></tr>'%row[12]
+        print """<tr><td>Small molecule
+                         pre-clinical count<td>%s</td></tr>"""%row[10]
+        print """<tr><td>Small molecule no
+                         development count<td>%s</td></tr>"""%row[11]
+        print """<tr><td>Small molecule
+                         discontinued count<td>%s</td></tr>"""%row[12]
         print '<tr><td>Small molecule suspended count<td>%s</td></tr>'%row[13]
         print '<tr><td>Small molecule withdrawn count<td>%s</td></tr>'%row[14]
         print '<tr><td>Antibody count<td>%s</td></tr>' % row[15]
@@ -531,3 +547,158 @@ def print_clinical_trial_result(result):
             </div>
             <br/>
           """
+
+########################### GENE CLUSTER INFO ##################################
+
+# search database by gene id
+def search_hypervariable_count(con, gene_id):
+    if(con == None):
+        return []
+    cur = con.cursor()
+    query = """select * from mouse_gene_hypervariable_count 
+        where human_entrez_id = %s""" % gene_id
+    cur.execute(query)
+    return fetch_from_db(cur)
+
+# print gene cluster info
+def print_hypervariable_count(result):
+    print """
+        <div>
+            <b>Number of Hyper/Hypervariable methylation
+               sites around Gene on Mouse Genome</b>
+            <button class="show_hide" type="button">hide</button>
+            <br/>
+    """
+    
+    print '<table class="info_table">'
+    print '<tr><td>Human Entrez ID</td>'
+    for row in result:
+        print '<td>%d</td>' % row[0]
+    print '</tr>'    
+    
+    print '<tr><td>Mouse homolog gene symbol</td>'
+    for row in result:
+        print '<td>%s</td>' % row[1]
+    print '</tr>'
+    
+    print '<tr><td>Number of intragenic hypermethylation sites</td>'
+    for row in result:
+        print '<td>%d</td>' % row[2]
+    print '</tr>'
+    
+    print '<tr><td>Number of hypermethylation sites 100 kb upstream</td>'
+    for row in result:
+        print '<td>%d</td>' % row[3]
+    print '</tr>'
+    
+    print """<tr><td>Number of hypervariable methylation
+                     between 100kb and 1mb upstream</td>"""
+    for row in result:
+        print '<td>%d</td>' % row[4]
+    print '</tr>'
+    
+    print '<tr><td>Number of hypervariable CGs 100 kb downstream</td>'
+    for row in result:
+        print '<td>%d</td>' % row[5]
+    print '</tr>'
+    
+    print '<tr><td>Number of hypervariable CGs 1mb downstream</td>'
+    for row in result:
+        print '<td>%d</td>' % row[6]
+    print '</tr>'
+        
+    print '</table>'
+    print """
+            </div>
+            <br/>
+          """
+
+############################## GENE TERM NETWORK ###############################
+
+def draw_gene_term_graph(graph, filename, node_size=400, node_alpha=0.5,
+               node_text_size=6, edge_color='blue', edge_alpha=0.3,
+               edge_tickness=1, edge_text_pos=0.3,text_font='sans-serif'):
+
+    # set figure size
+    plt.figure(figsize=(20,20)) 
+    
+    # create networkx graph
+    G=nx.Graph()
+
+    labels = dict()
+    
+    # gene node
+    gene_nodes = set()
+    for edge in graph:
+        gene_nodes.add(edge[0])
+        labels[edge[0]] = edge[0]
+    G.add_nodes_from(gene_nodes)
+    
+    # term node
+    term_nodes = set()
+    for edge in graph:
+        term_nodes.add(edge[1])
+        labels[edge[1]] = edge[1]
+    G.add_nodes_from(term_nodes)
+
+    # add edge
+    G.add_edges_from(set(graph))
+
+    # set style
+    graph_pos=nx.spring_layout(G)
+
+    # draw nodes
+    nx.draw_networkx_nodes(G,graph_pos,nodelist=gene_nodes, 
+        node_color='r', node_size=node_size, alpha=node_alpha)
+    nx.draw_networkx_nodes(G,graph_pos,nodelist=term_nodes,
+        node_color='b', node_size=node_size, alpha=node_alpha)
+    
+    # draw edges
+    nx.draw_networkx_edges(G,graph_pos,width=edge_tickness,
+        alpha=edge_alpha,edge_color=edge_color)
+    
+    # draw labels                       
+    nx.draw_networkx_labels(G,graph_pos,labels,font_size=node_text_size,
+        font_family=text_font)
+
+    # save graph
+    plt.axis('off')
+    plt.savefig(filename)
+
+# display the network
+def create_gene_term_network(gene_term_count, gene_ids_list,
+    terms_list, id_sym):
+
+    # get connected nodes
+    graph = []
+    
+    for i in xrange(len(terms_list)):
+        for j in xrange(len(gene_ids_list)):
+            term = terms_list[i]
+            gene_id = gene_ids_list[j]
+            if(gene_term_count[gene_id][term] > 1):
+                graph.append((id_sym[gene_id], term))
+                    
+    # draw the graph
+    draw_gene_term_graph(graph, filename='../tmp/test.png')
+    
+    # display the graph
+    print """<a target="_blank" href="../tmp/test.png">
+            <img src="../tmp/test.png" height="200" width="200">
+            </a>"""
+
+############################## TERM TERM NETWORK ###############################
+
+def create_term_term_network(gene_term_count, gene_ids_list,
+    terms_list, id_sym):
+    for i in xrange(len(terms_list)):
+        for j in xrange(len(terms_list)):
+            if(i != j):
+                count_term_i = []
+                count_term_j = []
+                for k in xrange(len(gene_ids_list)):
+                    gene_id = gene_ids_list[k]
+                    term_i = terms_list[i]
+                    term_j = terms_list[j]
+                    count_term_i.append(gene_term_count[gene_id][term_i])
+                    count_term_j.append(gene_term_count[gene_id][term_j])

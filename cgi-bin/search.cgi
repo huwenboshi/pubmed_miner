@@ -98,7 +98,18 @@ print """
     <table id="overview_top" class="heat-map">
     </table>
 </div>
-<br/>
+<hr/>
+"""
+
+# create network
+print """
+<div>
+    <b>Term Network</b>
+    <button class="show_hide" type="button">hide</button><br/>
+    <a id="loading_gene_term_network">Loading...</a>
+    <table id="gene_term_network_top">
+    </table>
+</div>
 <hr/>
 """
 
@@ -136,6 +147,10 @@ for i in xrange(len(gene_ids_list)):
     # print clinical trial table
     clinical_trial_result = search_clinical_trial(con, gene_id)
     print_clinical_trial_result(clinical_trial_result)
+    
+    # print gene cluster talbe
+    gene_cluser_result = search_hypervariable_count(con, gene_id)
+    print_hypervariable_count(gene_cluser_result)
      
     # search result for tiab search
     if(len(terms_list) > 0):
@@ -149,7 +164,9 @@ for i in xrange(len(gene_ids_list)):
         time.sleep(1)
         
     print '<hr/>'
-    
+
+###########################OVERVIEW & NETWORK ##################################
+
 # print overview bottom, this is a dummy and will not be displayed
 print """<table id="overview_bottom" cellpadding="0"
           cellspacing="0" border="0">
@@ -181,6 +198,13 @@ for term in terms_list:
     print '</tr>'
 print """</tbody>
          </table>"""
+
+# create the term network
+print '<table id="gene_term_network_bottom">'
+print '<tr><td>'
+create_gene_term_network(gene_term_count, gene_ids_list, terms_list, id_sym)
+print '</td></tr>'
+print '</table>'
 
 #################################### HTML END ##################################
 

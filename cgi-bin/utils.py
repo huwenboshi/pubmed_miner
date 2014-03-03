@@ -2,6 +2,7 @@ import urllib
 import urllib2
 import xml.etree.ElementTree as ET
 import MySQLdb
+from math import sqrt
 
 ################################# DB STUFF #####################################
 
@@ -108,3 +109,34 @@ def entrez2symbol(gene_ids_list):
                 id_sym[entrez_id] = gene_sym
     
     return id_sym
+
+######################### CORRELATION ##########################################
+
+def pearson(dataseries1, dataseries2):
+    result = 0.0
+    sum_sq_x = 0.0
+    sum_sq_y = 0.0
+    sum_coproduct = 0.0
+    mean_x = dataseries1[0]
+    mean_y = dataseries2[0]
+
+    for i in range(2,len(dataseries1)+1):
+        sweep = (i-1)/float(i)
+        delta_x = dataseries1[i-1]-mean_x
+        delta_y = dataseries2[i-1]-mean_y
+        sum_sq_x += delta_x * delta_x * sweep
+        sum_sq_y += delta_y * delta_y * sweep
+        sum_coproduct += delta_x * delta_y * sweep
+        mean_x += delta_x / float(i)
+        mean_y += delta_y / float(i)
+
+    pop_sd_x = (sum_sq_x / float(len(dataseries1)))**0.5
+    pop_sd_y = (sum_sq_y / float(len(dataseries1)))**0.5
+    cov_x_y = sum_coproduct / float(len(dataseries1))
+
+    if(pop_sd_x*pop_sd_y == 0):
+        return 0
+        
+    result = cov_x_y / (pop_sd_x*pop_sd_y)
+
+    return result

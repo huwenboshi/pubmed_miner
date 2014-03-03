@@ -33,7 +33,6 @@ html_header = """
     <title>Search Result</title>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script src="../javascripts/sorttable.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
@@ -75,12 +74,18 @@ html_header = """
             $("#overview_bottom").html("");
             $("#loading").css({display: 'none'});
             
+            $("#gene_term_network_top").
+                html($("#gene_term_network_bottom").html());
+            $("#gene_term_network_bottom").html("");
+            $("#loading_gene_term_network").css({display: 'none'});
+            
             // Function to get the max value in an Array
             Array.max = function(array){
                 return Math.max.apply(Math,array);
             };
          
-            // Get all data values from our table cells making sure to ignore the first column of text
+            // Get all data values from our table cells making
+            // sure to ignore the first column of text
             // Use the parseInt function to convert the text string to a number
          
             var counts= $('.heat-map tbody td').not('.stats-title').map(function() {
