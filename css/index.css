@@ -1,0 +1,48 @@
+html, body {
+    height: 100%;
+}
+
+html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: center;
+}
+
+.trait_div {
+    white-space: nowrap;
+    overflow: scroll;
+    height: 200px;
+    width: 400px;
+}
+
+.terms_div {
+    white-space: nowrap;
+    overflow: scroll;
+    height: 200px;
+    width: 250px;
+}
+
+.trait_header td {
+    width: 400px;
+}
+
+table {
+    border-collapse:collapse;
+}
+
+#ewas_form_wrapper {
+    border: 1px dashed #000000;
+}
+
+#gwas_form_wrapper {
+    border: 1px dashed #000000;
+}
+
+#submit_btn {
+    width: 20em;
+    height: 2em;
+}

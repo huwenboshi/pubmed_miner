@@ -1,0 +1,8 @@
+html, body {
+    height: 100%;
+}
+
+#confirm_btn {
+    width: 20em;
+    height: 2em;
+}
