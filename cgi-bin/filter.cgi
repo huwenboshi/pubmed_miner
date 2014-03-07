@@ -9,6 +9,12 @@ import sys
 import codecs
 import os
 
+"""
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/mysql_python/MySQL-python-1.2.3')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/mysql_python/MySQL-python-1.2.3/build/lib.linux-x86_64-2.7')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/mysql_python/MySQL-python-1.2.3/build/lib.linux-x86_64-2.7/_mysql.so')
+"""
+
 from consts import *
 from filter_utils import *
 from utils import *
@@ -204,36 +210,30 @@ user_terms = form.getvalue("user_terms")
 expand_term = form.getvalue("expand_term")
 search_scope = form.getvalue("search_scope")
 
+############################## Check User Input ################################
+
+check_user_input(imp_types, imp_type_logic_sel, ewas_tables,
+    ewas_gene_exp_pval, ewas_prot_exp_pval, ewas_trait_pval,
+    ewas_gene_exp_max_distance, ewas_prot_exp_max_distance,
+    ewas_trait_max_distance, ewas_gene_exp_cnt, ewas_prot_exp_cnt,
+    ewas_trait_cnt, ewas_trait_names, ewas_assoc_logic_sel,
+    gwas_tables, gwas_gene_exp_pval, gwas_prot_exp_pval, gwas_trait_pval,
+    gwas_gene_exp_max_distance, gwas_prot_exp_max_distance,
+    gwas_trait_max_distance, gwas_gene_exp_cnt, gwas_prot_exp_cnt,
+    gwas_trait_cnt, gwas_trait_names, gwas_assoc_logic_sel)
+
 ############################## Cet Query Result ################################
 
 # get query result from database
-ewas_gwas_result = handle_query(con,
-                            imp_types,
-                            imp_type_logic_sel,
-                            ewas_tables,
-                            ewas_gene_exp_pval, 
-                            ewas_prot_exp_pval,
-                            ewas_trait_pval,
-                            ewas_gene_exp_max_distance,
-                            ewas_prot_exp_max_distance,
-                            ewas_trait_max_distance,
-                            ewas_gene_exp_cnt, 
-                            ewas_prot_exp_cnt,
-                            ewas_trait_cnt,
-                            ewas_trait_names,
-                            ewas_assoc_logic_sel,
-                            gwas_tables,
-                            gwas_gene_exp_pval, 
-                            gwas_prot_exp_pval,
-                            gwas_trait_pval,
-                            gwas_gene_exp_max_distance,
-                            gwas_prot_exp_max_distance,
-                            gwas_trait_max_distance,
-                            gwas_gene_exp_cnt, 
-                            gwas_prot_exp_cnt,
-                            gwas_trait_cnt,
-                            gwas_trait_names,
-                            gwas_assoc_logic_sel)
+ewas_gwas_result = handle_query(con,imp_types, imp_type_logic_sel, ewas_tables,
+    ewas_gene_exp_pval, ewas_prot_exp_pval, ewas_trait_pval,
+    ewas_gene_exp_max_distance, ewas_prot_exp_max_distance,
+    ewas_trait_max_distance, ewas_gene_exp_cnt, ewas_prot_exp_cnt,
+    ewas_trait_cnt, ewas_trait_names, ewas_assoc_logic_sel,
+    gwas_tables, gwas_gene_exp_pval, gwas_prot_exp_pval, gwas_trait_pval,
+    gwas_gene_exp_max_distance, gwas_prot_exp_max_distance,
+    gwas_trait_max_distance, gwas_gene_exp_cnt, gwas_prot_exp_cnt,
+    gwas_trait_cnt, gwas_trait_names, gwas_assoc_logic_sel)
                             
 ewas_query_result = ewas_gwas_result['ewas_query_result']
 gwas_query_result = ewas_gwas_result['gwas_query_result']
@@ -244,11 +244,12 @@ ewas_gene_support_info = count_implicating_sites_ewas(con, ewas_tables)
 gwas_gene_support_info = count_implicating_sites_gwas(con, gwas_tables)
 id_sym_trial = get_symbol_citeline_count(con)
 
-# get user genes
+############################ PROCESS USER ADD-ON ###############################
+
+# get genes
 gene_list = combined_entrez_id_set
 if(user_genes != None):
     user_genes_list = user_genes.split()
-    # conver user gene to entrez id if it's gene symbol
     if(id_type == 'GENE_SYM'):
         sym_id_map = symbol2entrez(user_genes_list)
         user_genes_list = list(sym_id_map.values())
@@ -257,24 +258,16 @@ if(user_genes != None):
             gene_list.add(int(gene))
 gene_list = list(gene_list)
 
-# get terms - add traits first
+# get terms
 all_terms_list = set()
 if('ewas_imp' in imp_types):
     all_terms_list = all_terms_list.union(set(ewas_trait_names))
 if('gwas_imp' in imp_types):
     all_terms_list = all_terms_list.union(set(gwas_trait_names))
-
-# get curated terms
 if(curated_terms != None):
-    for term in curated_terms:
-        all_terms_list.add(term.strip())
-
-# get user terms
+    all_terms_list.union(set(curated_terms))
 if(user_terms != None):
-    user_terms_list = user_terms.split('\n')
-    for term in user_terms_list:
-        term = term.strip()
-        all_terms_list.add(term)
+    all_terms_list.union(set(user_terms.split('\n')))
 all_terms_list = list(all_terms_list)
 
 # check user search scope
@@ -418,7 +411,7 @@ print_gwas_query_result(gwas_query_result, gwas_tables)
 
 genes_form_str = ''
 for i in xrange(len(gene_list)):
-    genes_form_str += str(gene_list[i][0])
+    genes_form_str += str(gene_list[i][0]).strip()
     if(i < len(gene_list)-1):
         genes_form_str += '\n'
 

@@ -1,6 +1,8 @@
 from consts import *
 from utils import *
 
+import sys
+import fractions
 import math
 
 ############################## CONSTANTS #######################################
@@ -22,17 +24,152 @@ gwas_simp_map = {'tbl_gwas_gene_exp': 'gene_exp',
                  'tbl_gwas_prot_exp': 'prot_exp',
                  'tbl_gwas_trait':    'trait'}
 
+################################ INPUT #########################################
+
+# return true if input is a number
+def isnumber(s):
+   try:
+     float(s)
+     return True
+   except ValueError:
+     try: 
+       fractions.Fraction(s)
+       return True
+     except ValueError: 
+       return False
+
+# check input validity
+def is_input_valid(pval, max_distance, cnt):
+    if(pval == None or max_distance == None or cnt == None):
+        return False
+    return (isnumber(pval) and isnumber(max_distance) and isnumber(cnt))
+
+# check if user input is valid
+def check_user_input_ewas_gwas(tables, gene_exp_pval, prot_exp_pval,
+    trait_pval, gene_exp_max_distance, prot_exp_max_distance,
+    trait_max_distance, gene_exp_cnt, prot_exp_cnt, trait_cnt, trait_names,
+    assoc_logic_sel):
+    
+    # check if any table is selected
+    if(len(tables) == 0):
+        print '<b>No association type selected</b>'
+        sys.exit()
+        
+    # for each selected table check validity of input
+    status = True
+    for tbl in tables:
+        if(tbl.find('gene_exp') >= 0):
+            status = is_input_valid(gene_exp_pval,
+                gene_exp_max_distance, gene_exp_cnt)
+            if(status == False):
+                break
+        if(tbl.find('prot_exp') >= 0):
+            status = is_input_valid(prot_exp_pval,
+                prot_exp_max_distance, prot_exp_cnt)
+            if(status == False):
+                break
+        if(tbl.find('trait') >= 0):
+            status = is_input_valid(trait_pval,
+                trait_max_distance, trait_cnt)
+            # trait table selected, trait_names should not be empty
+            if(len(trait_names) == 0):
+                status = False
+            if(status == False):
+                break
+    
+    # exist if invalid input detected
+    if(status == False):
+        print '<b>Invalid input detected</b>'
+        sys.exit()
+    
+    # if trait table not selected, trait_names should be empty
+    if(len(trait_names) > 0
+       and ('tbl_ewas_trait' not in tables)
+       and ('tbl_gwas_trait' not in tables)):
+       print """<b>Please check "Association with clinical and
+           metabolite traits" if you want to search trait related genes</b>"""
+       sys.exit()
+    
+    # assoc_logic_sel can take only INTERSECTION or UNION
+    if(assoc_logic_sel.upper() != 'INTERSECTION' and
+       assoc_logic_sel.upper() != 'UNION'):
+        print "<b>Only intersection or union is supported</b>"
+        sys.exit()
+
+# check user input for ewas and gwas
+def check_user_input(imp_types, imp_type_logic_sel, ewas_tables,
+    ewas_gene_exp_pval, ewas_prot_exp_pval, ewas_trait_pval,
+    ewas_gene_exp_max_distance, ewas_prot_exp_max_distance,
+    ewas_trait_max_distance, ewas_gene_exp_cnt, ewas_prot_exp_cnt,
+    ewas_trait_cnt, ewas_trait_names, ewas_assoc_logic_sel,
+    gwas_tables, gwas_gene_exp_pval, gwas_prot_exp_pval, gwas_trait_pval,
+    gwas_gene_exp_max_distance, gwas_prot_exp_max_distance,
+    gwas_trait_max_distance, gwas_gene_exp_cnt, gwas_prot_exp_cnt,
+    gwas_trait_cnt, gwas_trait_names, gwas_assoc_logic_sel):
+    
+    # assoc_logic_sel can take only INTERSECTION or UNION
+    if(imp_type_logic_sel.upper() != 'INTERSECTION' and
+       imp_type_logic_sel.upper() != 'UNION'):
+        print "<b>Only intersection or union is supported</b>"
+        sys.exit() 
+    
+    # if ewas_tables not empty ewas_imp must be in imp_types
+    if(len(ewas_tables) > 0 and 'ewas_imp' not in imp_types):
+        print """<b>Please check Implication by EWAS if you want to search
+            by EWAS"""
+        sys.exit()
+
+    # check if there is any table for ewas implication
+    if('ewas_imp' in imp_types):
+        
+        # if ewas implication is selected, there must be some ewas table
+        cnt = 0
+        for key in ewas_tbl_map:
+            if(key in ewas_tables):
+                cnt += 1
+        if(cnt == 0):
+            print """<b>At least one assocation type
+                must be selected for EWAS</b>"""
+            sys.exit()
+            
+        check_user_input_ewas_gwas(ewas_tables, ewas_gene_exp_pval, 
+            ewas_prot_exp_pval, ewas_trait_pval, ewas_gene_exp_max_distance,
+            ewas_prot_exp_max_distance, ewas_trait_max_distance,
+            ewas_gene_exp_cnt, 
+            ewas_prot_exp_cnt, ewas_trait_cnt, ewas_trait_names,
+            ewas_assoc_logic_sel)
+    
+    # if ewas_tables not empty ewas_imp must be in imp_types
+    if(len(gwas_tables) > 0 and 'gwas_imp' not in imp_types):
+        print """<b>Please check Implication by GWAS if you want to search
+            by GWAS"""
+        sys.exit()
+
+    # check if there is any table for gwas implication
+    if('gwas_imp' in imp_types):
+    
+        # if gwas implication is selected, there must be some ewas table
+        cnt = 0
+        for key in gwas_tbl_map:
+            if(key in gwas_tables):
+                cnt += 1
+        if(cnt == 0):
+            print """<b>At least one assocation type
+                must be selected for GWAS</b>"""
+            sys.exit()
+        
+        check_user_input_ewas_gwas(gwas_tables, gwas_gene_exp_pval, 
+            gwas_prot_exp_pval, gwas_trait_pval, gwas_gene_exp_max_distance,
+            gwas_prot_exp_max_distance, gwas_trait_max_distance,
+            gwas_gene_exp_cnt, 
+            gwas_prot_exp_cnt, gwas_trait_cnt, gwas_trait_names,
+            gwas_assoc_logic_sel)
+
 ############################# DATABASE #########################################
 
 # create temporary tables for handling ewas database query
-def handle_ewas_gwas_query_general(dbcon,
-                                   tables,
-                                   tbl_map,
-                                   pval_map,
-                                   dist_map,
-                                   cnt_map,
-                                   trait_names,
-                                   assoc_logic_sel):
+def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
+    pval_map, dist_map, cnt_map, trait_names, assoc_logic_sel):
 
     # get cursor, mapping between user input and data
     cur = dbcon.cursor()
@@ -102,8 +239,8 @@ def handle_ewas_gwas_query_general(dbcon,
                     %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id
                 """ % (db_table,db_table,tbl_map[tables[0]],db_table)
         query = """
-            create temporary table human_entrez_id_ewas_tmp as %s
-        """ % (sub_query)
+            create temporary table human_entrez_id_%s_tmp as %s
+        """ % (ewas_or_gwas, sub_query)
         
         # execute query
         cur.execute(query)
@@ -122,9 +259,9 @@ def handle_ewas_gwas_query_general(dbcon,
             """ % (db_table, db_table)
             sub_query_list.append(sub_query)
         query = """
-            create temporary table human_entrez_id_ewas_tmp as
+            create temporary table human_entrez_id_%s_tmp as
             select distinct(human_entrez_id) from ((%s) as A)
-        """ % (' union '.join(sub_query_list))
+        """ % (ewas_or_gwas, ' union '.join(sub_query_list))
         
         # execute query
         cur.execute(query)
@@ -157,6 +294,7 @@ def handle_ewas_query(dbcon,
                      'tbl_ewas_trait':    ewas_trait_cnt}
     
     handle_ewas_gwas_query_general(dbcon,
+                                   'ewas',
                                    ewas_tables,
                                    ewas_tbl_map,
                                    ewas_pval_map,
@@ -193,6 +331,7 @@ def handle_gwas_query(dbcon,
                      'tbl_gwas_trait':    gwas_trait_cnt}
     
     handle_ewas_gwas_query_general(dbcon,
+                                   'gwas',
                                    gwas_tables,
                                    gwas_tbl_map,
                                    gwas_pval_map,
@@ -789,8 +928,8 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
                 window_ed = snp_pos+500000
                 window_str = "chr%s:%s-%s" % (result[3], str(window_st),
                     str(window_ed))
-                print '<td><a target="_blank" href="%s%s">%s</a></td>'%(ucsc_url,
-                    window_str, window_str)
+                print '<td><a target="_blank" href="%s%s">%s</a></td>' % (
+                    ucsc_url, window_str, window_str)
                 
                 # trait
                 print '<td>%s</td>' % result[0]
@@ -804,8 +943,8 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
                 # gene position
                 gene_pos_str = 'chr%s:%s-%s' % (result[14], result[15],
                     result[16])
-                print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
-                    gene_pos_str, gene_pos_str)
+                print '<td><a target="_blank" href="%s%s">%s</a></td>' % (
+                    ucsc_url, gene_pos_str, gene_pos_str)
                 
                 # p-value
                 print '<td>%s</td>' % result[2]

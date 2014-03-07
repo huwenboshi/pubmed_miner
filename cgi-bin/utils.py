@@ -10,10 +10,14 @@ from math import sqrt
 def connect_db():
     con = None
     try:
+        """
+            con = MySQLdb.connect(host="127.0.0.1", user="UCLApanelRW",
+                                  passwd="PanelWrite", db="UCLApanel")
+        """
         con = MySQLdb.connect(host="localhost", user="huwenbo",
                               passwd="goldandblue", db="pubmed_miner")
         return con
-    except lite.Error, e:
+    except:
         return None
 
 # get rows from database

@@ -21,7 +21,8 @@ genecards_url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='
 ucsc_url = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=mm9&position='
 
 # http header
-http_header = 'Content-Type: text/html Connection: keep-alive'
+# http_header = 'Keep-Alive: timeout=5,max=100\nConnection: Keep-Alive\nContent-Type: text/html'
+http_header = 'Connection: Keep-Alive Content-Type: text/html'
 
 # html header
 html_header = """
@@ -74,15 +75,10 @@ html_header = """
             $("#overview_bottom").html("");
             $("#loading").css({display: 'none'});
             
-            $("#gene_term_network_top").
-                html($("#gene_term_network_bottom").html());
-            $("#gene_term_network_bottom").html("");
-            $("#loading_gene_term_network").css({display: 'none'});
-            
-            $("#term_term_network_top").
-                html($("#term_term_network_bottom").html());
-            $("#term_term_network_bottom").html("");
-            $("#loading_term_term_network").css({display: 'none'});
+            $("#networks_top").
+                html($("#networks_bottom").html());
+            $("#networks_bottom").html("");
+            $("#loading_networks").css({display: 'none'});
             
             // Function to get the max value in an Array
             Array.max = function(array){

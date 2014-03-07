@@ -1,3 +1,5 @@
+#!/UCSC/Panel-Auxiliary/python/Python-2.7.3/python -u
+
 from utils import *
 from consts import *
 import urllib
@@ -7,8 +9,9 @@ import time
 import sys
 import os
 
+os.umask(0o027)
+
 import networkx as nx
-from networkx.algorithms import bipartite
 
 os.environ['HOME'] = '/tmp/'
 
@@ -241,10 +244,12 @@ def print_abstract_by_term_tiab(term_abstract, terms_list, gene_id, id_sym):
             url = term_abstract[term][j]['url']
             title = term_abstract[term][j]['title']
             print '<a href="%s" target="_blank">%s</a>' % (url, title)
+            """
             print '<div class="abstract_txt"><button class="show_more_less"'
             text = term_abstract[term][j]['text']
             print 'type="button">show more</button>%s</div>' % text
             print '</td>'
+            """
             print '</tr>'
     print '</table>'
 
@@ -620,7 +625,7 @@ def draw_gene_term_graph(graph, filename, node_size=400, node_alpha=0.5,
                edge_tickness=1, edge_text_pos=0.3,text_font='sans-serif'):
 
     # set figure size
-    plt.figure(figsize=(20,20)) 
+    plt.figure(figsize=(30,30)) 
     
     # create networkx graph
     G=nx.Graph()
@@ -645,7 +650,7 @@ def draw_gene_term_graph(graph, filename, node_size=400, node_alpha=0.5,
     G.add_edges_from(set(graph))
 
     # set style
-    graph_pos=nx.spring_layout(G)
+    graph_pos=nx.graphviz_layout(G)
 
     # draw nodes
     nx.draw_networkx_nodes(G,graph_pos,nodelist=gene_nodes, 
@@ -665,6 +670,9 @@ def draw_gene_term_graph(graph, filename, node_size=400, node_alpha=0.5,
     plt.axis('off')
     plt.savefig(filename)
 
+    # change permission
+    os.chown(filename, 407, 507)
+
 # display the network
 def create_gene_term_network(gene_term_count, gene_ids_list,
     terms_list, id_sym):
@@ -680,21 +688,24 @@ def create_gene_term_network(gene_term_count, gene_ids_list,
                 graph.append((id_sym[gene_id], term))
                     
     # draw the graph
-    draw_gene_term_graph(graph, filename='../tmp/test.png')
-    
+    fnm = '/UCSC/Apache-2.2.11/htdocs-UCLApanel/tmp/gene_term_network_%d.png' % os.getpid()
+    fnm_html = '../tmp/gene_term_network_%d.png' % os.getpid()
+    draw_gene_term_graph(graph, filename=fnm)
+ 
     # display the graph
-    print """<a target="_blank" href="../tmp/test.png">
-            <img src="../tmp/test.png" height="200" width="200">
-            </a>"""
+    print """<a target="_blank" href="%s">
+            <img src="%s" height="200" width="200">
+            </a>""" % (fnm_html, fnm_html)
 
 ############################## TERM TERM NETWORK ###############################
 
-def draw_term_term_graph(graph, filename, node_size=400, node_alpha=0.5,
+def draw_x_x_graph(graph,filename,fsr=30, fsc=30, node_size=400,
+               node_alpha=0.5,ncolor='b',
                node_text_size=8, edge_color='blue', edge_alpha=0.3,
                edge_tickness=1, edge_text_pos=0.3,text_font='sans-serif'):
 
     # set figure size
-    plt.figure(figsize=(30,30)) 
+    plt.figure(figsize=(fsr,fsc)) 
     
     # create networkx graph
     G=nx.Graph()
@@ -702,23 +713,23 @@ def draw_term_term_graph(graph, filename, node_size=400, node_alpha=0.5,
     labels = dict()
     
     # term node
-    term_nodes = set()
+    nodes = set()
     for edge in graph:
-        term_nodes.add(edge[0])
-        term_nodes.add(edge[1])
+        nodes.add(edge[0])
+        nodes.add(edge[1])
         labels[edge[0]] = edge[0]
         labels[edge[1]] = edge[1]
-    G.add_nodes_from(term_nodes)
+    G.add_nodes_from(nodes)
 
     # add edge
     G.add_edges_from(set(graph))
 
     # set style
-    graph_pos=nx.spring_layout(G)
+    graph_pos=nx.graphviz_layout(G)
 
     # draw nodes
-    nx.draw_networkx_nodes(G,graph_pos,nodelist=term_nodes,
-        node_color='b', node_size=node_size, alpha=node_alpha)
+    nx.draw_networkx_nodes(G,graph_pos,nodelist=nodes,
+        node_color=ncolor, node_size=node_size, alpha=node_alpha)
     
     # draw edges
     nx.draw_networkx_edges(G,graph_pos,width=edge_tickness,
@@ -731,6 +742,9 @@ def draw_term_term_graph(graph, filename, node_size=400, node_alpha=0.5,
     # save graph
     plt.axis('off')
     plt.savefig(filename)
+
+    # change permission
+    os.chown(filename, 407, 507)
 
 # create term term network
 def create_term_term_network(gene_term_count, gene_ids_list,
@@ -749,12 +763,43 @@ def create_term_term_network(gene_term_count, gene_ids_list,
                     count_term_i.append(gene_term_count[gene_id][term_i])
                     count_term_j.append(gene_term_count[gene_id][term_j])
                 cor = pearson(count_term_i, count_term_j)
-                if(cor > 0.6 and cor < 1.0):
+                if(cor > 0.8 and cor < 1.0):
                     graph.append((term_i, term_j))
     # draw the graph
-    draw_term_term_graph(graph, filename='../tmp/test2.png')
+    fnm = '/UCSC/Apache-2.2.11/htdocs-UCLApanel/tmp/term_term_network_%d.png' % os.getpid()
+    fnm_html = '../tmp/term_term_network_%d.png' % os.getpid()
+    draw_x_x_graph(graph, filename=fnm)
     
     # display the graph
-    print """<a target="_blank" href="../tmp/test2.png">
-            <img src="../tmp/test2.png" height="200" width="200">
-            </a>"""
+    print """<a target="_blank" href="%s">
+            <img src="%s" height="200" width="200">
+            </a>""" % (fnm_html, fnm_html)
+
+# create gene gene network
+def create_gene_gene_network(gene_term_count, gene_ids_list,
+    terms_list, id_sym):
+    
+    graph = []
+    for i in xrange(len(gene_ids_list)):
+        for j in xrange(len(gene_ids_list)):
+            gene_i = gene_ids_list[i]
+            gene_j = gene_ids_list[j]
+            if(i != j):
+                count_gene_i = []
+                count_gene_j = []
+                for k in xrange(len(terms_list)):
+                    term = terms_list[k]
+                    count_gene_i.append(gene_term_count[gene_i][term])
+                    count_gene_j.append(gene_term_count[gene_j][term])
+                cor = pearson(count_gene_i, count_gene_j)
+                if(cor > 0.8 and cor < 1.0):
+                    graph.append((id_sym[gene_i], id_sym[gene_j]))
+    # draw the graph
+    fnm = '/UCSC/Apache-2.2.11/htdocs-UCLApanel/tmp/gene_gene_network_%d.png' % os.getpid()
+    fnm_html = '../tmp/gene_gene_network_%d.png' % os.getpid()
+    draw_x_x_graph(graph, fsr=10, fsc=10, ncolor='r', filename=fnm)
+    
+    # display the graph
+    print """<a target="_blank" href="%s">
+            <img src="%s" height="200" width="200">
+            </a>""" % (fnm_html, fnm_html)

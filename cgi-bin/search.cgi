@@ -9,6 +9,27 @@ import sys
 import codecs
 import os
 
+"""
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/mysql_python/MySQL-python-1.2.3')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/mysql_python/MySQL-python-1.2.3/build/lib.linux-x86_64-2.7')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/mysql_python/MySQL-python-1.2.3/build/lib.linux-x86_64-2.7/_mysql.so')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/networkx/networkx-1.6')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/networkx/networkx-1.6/build/lib.linux-x86_64-2.6')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/matplotlib/matplotlib-1.1.1')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/matplotlib/matplotlib-1.1.1/build/lib.linux-x86_64-2.7')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/dateutil/python-dateutil-1.5')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/dateutil/python-dateutil-1.5/lib')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/dateutil/python-dateutil-1.5/dateutil')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/pyparsing/pyparsing-1.5.7')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/numpy/numpy-1.6.1/lib/python2.7/site-packages')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/scipy/scipy-0.9.0/lib/python2.7/site-packages')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/pygraphviz/pygraphviz-1.2')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/pygraphviz/pygraphviz-1.2/lib/python2.7/site-packages')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/graphviz/graphviz-2.36.0')
+sys.path.insert(0,'/UCSC/Panel-Auxiliary/graphviz/graphviz-2.36.0/bin')
+os.environ["PATH"] += os.pathsep + '/UCSC/Panel-Auxiliary/graphviz/graphviz-2.36.0/bin'
+"""
+
 from utils import *
 from search_utils import *
 from consts import *
@@ -101,25 +122,13 @@ print """
 <hr/>
 """
 
-# create gene term network
+# create networks
 print """
 <div>
-    <b>Gene-Term Network</b>
+    <b>Networks</b>
     <button class="show_hide" type="button">hide</button><br/>
-    <a id="loading_gene_term_network">Loading...</a>
-    <table id="gene_term_network_top">
-    </table>
-</div>
-<hr/>
-"""
-
-# create term term network
-print """
-<div>
-    <b>Term-Term Network</b>
-    <button class="show_hide" type="button">hide</button><br/>
-    <a id="loading_term_term_network">Loading...</a>
-    <table id="term_term_network_top">
+    <a id="loading_networks">Loading...</a>
+    <table id="networks_top">
     </table>
 </div>
 <hr/>
@@ -190,10 +199,10 @@ for i in xrange(len(gene_ids_list)):
     gene_sym = id_sym[gene_id]
     if(i == len(gene_ids_list)-1):
         print """<td class="last">
-                 <a href="#gene_id_%s">%s(%s)</a>
+                 <a href="#gene_id_%s">%s<br/>(%s)</a>
                  </td>"""%(gene_id, gene_sym, gene_id)
     else:
-        print '<td><a href="#gene_id_%s">%s(%s)</a></td>'%(gene_id,
+        print '<td><a href="#gene_id_%s">%s<br/>(%s)</a></td>'%(gene_id,
             gene_sym, gene_id)
 print """</tr>
          </thead>
@@ -211,18 +220,19 @@ for term in terms_list:
 print """</tbody>
          </table>"""
 
-# create the gene term network
-print '<table id="gene_term_network_bottom">'
-print '<tr><td>'
+print '<table id="networks_bottom">'
+print '<tr><td>gene-term</td><td>term-term</td><td>gene-gene</td></tr>'
+print '<tr>'
+print '<td>'
 create_gene_term_network(gene_term_count, gene_ids_list, terms_list, id_sym)
-print '</td></tr>'
-print '</table>'
-
-# create the term term network
-print '<table id="term_term_network_bottom">'
-print '<tr><td>'
+print '</td>'
+print '<td>'
 create_term_term_network(gene_term_count, gene_ids_list, terms_list, id_sym)
-print '</td></tr>'
+print '</td>'
+print '<td>'
+create_gene_gene_network(gene_term_count, gene_ids_list, terms_list, id_sym)
+print '</td>'
+print '</tr>'
 print '</table>'
 
 #################################### HTML END ##################################
