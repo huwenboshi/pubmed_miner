@@ -19,7 +19,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-
+dir_prefix = '/UCSC/Apache-2.2.11/htdocs-UCLApanel'
+dir_prefix = '..'
 
 #################################### HELPERS ###################################
 
@@ -34,7 +35,7 @@ def get_abstract_text(text_elements):
     str_list = []
     for element in text_elements:
         str_list.append(element.text)
-    return '<br/><br/>'.join(str_list)
+    return '<br/>'.join(str_list)
 
 # count number of occurence of terms in text
 def get_term_count(term_list, text):
@@ -56,6 +57,28 @@ def init_gene_term_cnt(gene_ids_list, terms_list):
         for term in terms_list:
             gene_term_count[gene_id][term] = 0
     return gene_term_count
+
+# safe url open - catches exceptions if there is any
+def safe_urlopen(url):
+    data = None
+    
+    for i in xrange(5):
+        try:
+            data = urllib2.urlopen(url)
+            break
+        except urllib2.HTTPError as e:
+            if(e.code == 414):
+                print """<b>Query too long, please reduce
+                    the number of genes or terms</b>"""
+                sys.exit()
+        except:
+            continue
+    
+    if(data == None):
+        print """Network error, please try again later"""
+        sys.exit()
+    
+    return data
     
 ################################## GENE STUFF ##################################
 
@@ -65,7 +88,8 @@ def get_gene_info(gene_ids_list):
     # download gene summary from eutils esummary
     gene_ids_esummary_qstr = 'id='+','.join(gene_ids_list)
     qstr_url = esummary_url+'&db=gene&'+gene_ids_esummary_qstr
-    genes_info = urllib2.urlopen(qstr_url)
+    genes_info = None
+    genes_info = safe_urlopen(qstr_url)
     genes_info_str = genes_info.read()
     genes_info_root = ET.fromstring(genes_info_str)
     
@@ -98,7 +122,8 @@ def get_genes_pmid_count(gene_ids_list):
     # download lists of pmids for all genes
     gene_ids_elink_qstr = 'id='+'&id='.join(gene_ids_list)
     qstr_url = elink_url + dbfrom_db_lknm + gene_ids_elink_qstr
-    genes_pmids = urllib2.urlopen(qstr_url)
+    
+    genes_pmids = safe_urlopen(qstr_url)
     genes_pmids_str = genes_pmids.read()
     genes_pmids_root = ET.fromstring(genes_pmids_str)
     
@@ -158,7 +183,7 @@ def get_webenv_querykey(gene_ids_list, terms_list):
     terms_qstr = terms_qstr.replace(' ', '+')
     gene_ids_qstr = 'id='+'&id='.join(gene_ids_list)
     qstr_url = elink_url+dbfrom_db_lknm_cmd+'&'+gene_ids_qstr+'&'+terms_qstr
-    abstract_elink = urllib2.urlopen(qstr_url)
+    abstract_elink = safe_urlopen(qstr_url)
     abstract_elink_str = abstract_elink.read()
     
     # parse out WebEnv and QueryKey
@@ -186,7 +211,7 @@ def fetch_abstract_tiab(webenv_querykey):
     if(querykey != None):
         efetch_qstr = efetch_url+efetch_fixed_param
         efetch_qstr += '&WebEnv='+webenv+'&query_key='+querykey
-        efetch = urllib2.urlopen(efetch_qstr)
+        efetch = safe_urlopen(efetch_qstr)
         efetch_str = efetch.read()
         efetch_root = ET.fromstring(efetch_str)
         
@@ -229,8 +254,8 @@ def print_abstract_by_term_tiab(term_abstract, terms_list, gene_id, id_sym):
             print '<tr>'
             print """<td id="%s" valign="top" rowspan="%d">
                         %s<br/>
-                        (%d in total)<br/><br/>
-                        <a href="#gene_id_%s">%s(%s)</a><br/><br/>
+                        (%d in total)<br/>
+                        <a href="#gene_id_%s">%s(%s)</a><br/>
                         <a href="#top">Return to Top</a>
                      </td>""" % (td_id, in_total, term, in_total,
                         gene_id, id_sym[gene_id], gene_id)
@@ -327,7 +352,7 @@ def get_webenv_querykey_full_text(gene_id, term):
     terms_qstr = 'term=' + term
     gene_ids_qstr = 'id=' + gene_id
     qstr_url = elink_url+dbfrom_db_lknm_cmd+'&'+gene_ids_qstr+'&'+terms_qstr
-    abstract_elink = urllib2.urlopen(qstr_url)
+    abstract_elink = safe_urlopen(qstr_url)
     abstract_elink_str = abstract_elink.read()
     abstract_elink_root = ET.fromstring(abstract_elink_str)
     query_key_element = abstract_elink_root[0].find('.//QueryKey')
@@ -372,7 +397,7 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count, id_sym):
         if(query_key != None):
             efetch_qstr = efetch_url+efetch_fixed_param
             efetch_qstr += '&WebEnv='+webenv+'&query_key='+query_key
-            efetch = urllib2.urlopen(efetch_qstr)
+            efetch = safe_urlopen(efetch_qstr)
             efetch_str = efetch.read()
             efetch_root = ET.fromstring(efetch_str)
         
@@ -383,8 +408,8 @@ def print_fulltext_search_result(terms_list, gene_id, gene_term_count, id_sym):
         if(in_total > 0):
             print """<td id="%s" valign="top" rowspan="%d">
                         %s<br/>
-                        (%d in total)<br/><br/>
-                        <a href="#gene_id_%s">%s(%s)</a><br/><br/>
+                        (%d in total)<br/>
+                        <a href="#gene_id_%s">%s(%s)</a><br/>
                         <a href="#top">Return to Top</a>
                      </td>""" % (td_id, in_total, term, in_total,
                         gene_id, id_sym[gene_id], gene_id)
@@ -671,7 +696,7 @@ def draw_gene_term_graph(graph, filename, node_size=400, node_alpha=0.5,
     plt.savefig(filename)
 
     # change permission
-    os.chown(filename, 407, 507)
+    # os.chown(filename, 407, 507)
 
 # display the network
 def create_gene_term_network(gene_term_count, gene_ids_list,
@@ -688,7 +713,7 @@ def create_gene_term_network(gene_term_count, gene_ids_list,
                 graph.append((id_sym[gene_id], term))
                     
     # draw the graph
-    fnm = '/UCSC/Apache-2.2.11/htdocs-UCLApanel/tmp/gene_term_network_%d.png' % os.getpid()
+    fnm = dir_prefix+'/tmp/gene_term_network_%d.png' % os.getpid()
     fnm_html = '../tmp/gene_term_network_%d.png' % os.getpid()
     draw_gene_term_graph(graph, filename=fnm)
  
@@ -744,7 +769,7 @@ def draw_x_x_graph(graph,filename,fsr=30, fsc=30, node_size=400,
     plt.savefig(filename)
 
     # change permission
-    os.chown(filename, 407, 507)
+    # os.chown(filename, 407, 507)
 
 # create term term network
 def create_term_term_network(gene_term_count, gene_ids_list,
@@ -766,7 +791,7 @@ def create_term_term_network(gene_term_count, gene_ids_list,
                 if(cor > 0.8 and cor < 1.0):
                     graph.append((term_i, term_j))
     # draw the graph
-    fnm = '/UCSC/Apache-2.2.11/htdocs-UCLApanel/tmp/term_term_network_%d.png' % os.getpid()
+    fnm = dir_prefix+'/tmp/term_term_network_%d.png' % os.getpid()
     fnm_html = '../tmp/term_term_network_%d.png' % os.getpid()
     draw_x_x_graph(graph, filename=fnm)
     
@@ -795,7 +820,7 @@ def create_gene_gene_network(gene_term_count, gene_ids_list,
                 if(cor > 0.8 and cor < 1.0):
                     graph.append((id_sym[gene_i], id_sym[gene_j]))
     # draw the graph
-    fnm = '/UCSC/Apache-2.2.11/htdocs-UCLApanel/tmp/gene_gene_network_%d.png' % os.getpid()
+    fnm = dir_prefix+'/tmp/gene_gene_network_%d.png' % os.getpid()
     fnm_html = '../tmp/gene_gene_network_%d.png' % os.getpid()
     draw_x_x_graph(graph, fsr=10, fsc=10, ncolor='r', filename=fnm)
     

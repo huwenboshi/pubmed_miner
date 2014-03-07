@@ -103,8 +103,11 @@ time.sleep(1)
 # print body start, navigation bar
 print """
 <body>
-    <h2><a id="top">Search Result</a></h2>
+    <div align="left">
     <a href="../index.html">Make Another Search</a><br/>
+    </div>
+    <h1 align="center"><a id="top">PubMed Miner - 
+    Literature and Druggability Search Result</a></h1>
     <hr/>
 """
 
@@ -197,13 +200,8 @@ print '<td class="first">Term\Gene</t>'
 for i in xrange(len(gene_ids_list)):
     gene_id = gene_ids_list[i]
     gene_sym = id_sym[gene_id]
-    if(i == len(gene_ids_list)-1):
-        print """<td class="last">
-                 <a href="#gene_id_%s">%s<br/>(%s)</a>
-                 </td>"""%(gene_id, gene_sym, gene_id)
-    else:
-        print '<td><a href="#gene_id_%s">%s<br/>(%s)</a></td>'%(gene_id,
-            gene_sym, gene_id)
+    print """<td class="abs_cnt_td"><a href="#gene_id_%s">
+        %s<br/>(%s)</a></td>"""%(gene_id,gene_sym, gene_id)
 print """</tr>
          </thead>
          <tbody>"""
@@ -212,7 +210,7 @@ for term in terms_list:
     print '<td class="stats-title"><input type="radio" name="sort_choice"'
     print ' class="overview_opt" id="overview_%s">%s</td>' % (term, term)
     for gene_id in gene_ids_list:
-        print '<td><a class="abstract_count"'
+        print '<td class="abs_cnt_td"><a class="abstract_count"'
         if(gene_term_count[gene_id][term]):
             print 'href="#%s"' % (term+"_"+gene_id)
         print '>%d</a></td>' % gene_term_count[gene_id][term]

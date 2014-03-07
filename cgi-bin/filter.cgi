@@ -44,6 +44,7 @@ print """
         </style>
         <link rel="stylesheet" 
             href="../javascripts/table_sorter/themes/blue/style.css" />
+        <link rel="stylesheet" type="text/css" href="../css/filter.css" />
         <script type="text/javascript"
                 src="../javascripts/table_sorter/jquery-latest.js">
         </script>
@@ -146,11 +147,14 @@ print """
         </script>
     </head>
     <body>
-        <h2>
-            Filter Result
-        </h2>
+        <div align="left">
         <a href="../index.html">Make Another Search</a>
-        <br/>
+        </div>
+        <div align="center">
+        <h1>
+            PubMed Miner - Gene Filter Result
+        </h1>
+        </div>
         <hr/>
 """
 
@@ -261,13 +265,15 @@ gene_list = list(gene_list)
 # get terms
 all_terms_list = set()
 if('ewas_imp' in imp_types):
+    ewas_trait_names = format_trait_names(ewas_trait_names)
     all_terms_list = all_terms_list.union(set(ewas_trait_names))
 if('gwas_imp' in imp_types):
+    gwas_trait_names = format_trait_names(gwas_trait_names)
     all_terms_list = all_terms_list.union(set(gwas_trait_names))
 if(curated_terms != None):
-    all_terms_list.union(set(curated_terms))
+    all_terms_list = all_terms_list.union(set(curated_terms))
 if(user_terms != None):
-    all_terms_list.union(set(user_terms.split('\n')))
+    all_terms_list = all_terms_list.union(set(user_terms.split('\n')))
 all_terms_list = list(all_terms_list)
 
 # check user search scope
@@ -282,12 +288,12 @@ else:
 
 # print query summary
 print """
-    <h3>
-    Query summary
-    </h3>
+    <h2 align="center">
+    Literature search query summary
+    </h2>
 """
 
-print '<table id="summary_tbl">'
+print '<table id="summary_tbl" align="center">'
 print '<tr>'
 print '<td><b>Number of genes</b></td><td>%d</td>' % len(gene_list)
 print '</tr>'
@@ -299,12 +305,14 @@ print '<td><b>Search scope</b></td><td>%s</td>' % search_scope
 print '</tr>'
 print '</table>'
 print '<br/>'
+print '<div align="center">'
 print '<button id="confirm_btn">search in literature</button>'
+print '</div>'
 print '<hr/>'
 
 # print gene implication summary
 print """
-    <div>
+    <div align="center">
     <b>Gene implication summary</b>
     <button class="show_hide" type="button">hide</button>
     <br/>
@@ -327,7 +335,7 @@ if('tbl_gwas_gene_exp' in gwas_tables):
     print '<th>Number of GWAS loci<br/>associated with gene expression</th>'
 if('tbl_gwas_prot_exp' in gwas_tables):
     print '<th>Number of GWAS loci<br/>associated with protein expression</th>'
-if('tbl_gwas_trait_exp' in gwas_tables):
+if('tbl_gwas_trait' in gwas_tables):
     print '<th>Number of GWAS loci<br/>associated with phenotypes</th>'
     
 if(len(ewas_tables) > 0):

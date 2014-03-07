@@ -4,32 +4,7 @@
         <title>
             PubMed Miner - Gene Filter
         </title>
-        <style type="text/css">
-            .trait_div {
-                white-space: nowrap;
-                overflow: scroll;
-                height: 300px;
-                width: 400px;
-            }
-            .terms_div {
-                white-space: nowrap;
-                overflow: scroll;
-                height: 300px;
-                width: 250px;
-            }
-            .trait_header td {
-                width: 400px;
-            }
-            table {
-                border-collapse:collapse;
-            }
-            #ewas_imp_form {
-                margin-left: 50px;
-            }
-            #gwas_imp_form {
-                margin-left: 50px;
-            }
-        </style>
+        <link rel="stylesheet" type="text/css" href="./css/index.css" />
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
         <script type="text/javascript">
@@ -76,6 +51,7 @@
                         $('.mt_opt').attr("checked", false);
                     }
                 });
+                
                 $('#check_all_ct_gwas').live('click', function() {
                     status = $('#check_all_ct_gwas').attr("checked");
                     if(status == 'checked') {
@@ -105,18 +81,14 @@
                         $('.curated_terms_opt').attr("checked", false);
                     }
                 });
-                
-                $('.ewas_tbl_checkbox').live('click', function() {
-                    $('#ewas_imp_checkbox').attr("checked", true);
-                });
-                
             });
         </script>
     </head>
     <body>
         <h1>
-            PubMed Miner
+            PubMed Miner - Gene Filter
         </h1>
+        <hr/>
         <form name="user_input" action="./cgi-bin/filter.cgi" method="post">
             
             <h2>
@@ -128,13 +100,16 @@
             </h3>
         
 <!--/////////////////////// Implication Type ////////////////////////////////-->
-
+            <a>You can find genes through implication by EWAS and implication by GWAS.</a>
+            <br/>
             <a>If more than one implication types are selected, take </a>
             <select name="imp_type_logic_sel">
                 <option value="INTERSECTION">intersection</option>
                 <option value="UNION">union</option>
             </select>
             <a> of the set of genes implicated.</a>
+            <br/>
+            <br/>
 
 <!--///////////////////////// Union or Intersectin //////////////////////////-->
 
@@ -142,31 +117,33 @@
                 <h4>
                     <input type="checkbox" name="imp_type" 
                         id="ewas_imp_checkbox" value="ewas_imp" />
-                    Implication by EWAS (mouse)
+                    Implication by EWAS
                     <button class="show_hide" type="button">hide options</button>
                 </h4>
 
                 <div id="ewas_imp_form">
-                    <b>Take </b>
+                    <a>You can find genes through 3 types of associations:
+                     association with gene expression, protein expression, and trait.</a>
+                    <br/>
+                    <a>If more than one association types are selected, take </a>
                     <select name="ewas_assoc_logic_sel">
                         <option value="INTERSECTION">intersection</option>
                         <option value="UNION">union</option>
                     </select>
-                    <b> of the set of genes found by the following 
-                    selected assciations.</b>
+                    <a> of the set of genes found by the selected associations types.</a>
                     <br/>
                     <br/>
 
-        <!--///////////////////////// Gene Expression  //////////////////////////////-->
+<!--///////////////////////// Gene Expression  //////////////////////////////-->
                     
                     <input class="ewas_tbl_checkbox" type="checkbox" name="ewas_tables" value="tbl_ewas_gene_exp"/>
                     <b>Association with gene expression</b>
                     <br/>
-                    <a>p-value less than 10^(-<a/>
-                    <input name="ewas_gene_exp_pval" style="width: 25px" type="text" /> 
+                    <a>p-value &le; 10^(-<a/>
+                    <input name="ewas_gene_exp_pval" style="width: 25px" type="text" value="8"/> 
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and mCG/SNP site less than</a>
+                    <a>Distance between gene and methylation site &le;</a>
                     <select name="ewas_gene_exp_max_distance">
                         <option value="10000">10 Kb</option>
                         <option value="100000">100 Kb</option>
@@ -174,27 +151,20 @@
                         <option value="10000000">10 Mb</option>
                     </select>
                     <br/>
-                    <a>Number of Citeline clinical trials on implicated genes greater than</a>
-                    <select name="ewas_gene_exp_trial">
-                        <option value="-1">Ignore This Option</option>
-                        <option value="0">0</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="150">150</option>
-                        <option value="200">200</option>
-                    </select>
+                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                    <input name="ewas_gene_exp_trial" style="width: 50px" type="text" value="0"/>
                     <br/><br/>
 
-        <!--///////////////////////// Protein Expression ////////////////////////////-->
+<!--///////////////////////// Protein Expression ////////////////////////////-->
                     
                     <input class="ewas_tbl_checkbox" type="checkbox" name="ewas_tables" value="tbl_ewas_prot_exp"/>
                     <b>Association with protein expression</b>
                     <br/>
-                    <a>p-value less than 10^(-<a/>
-                    <input name="ewas_prot_exp_pval" style="width: 25px" type="text" /> 
+                    <a>p-value &le; 10^(-<a/>
+                    <input name="ewas_prot_exp_pval" style="width: 25px" type="text" value="8"/> 
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and mCG/SNP site less than</a>
+                    <a>Distance between gene and methylation site &le;</a>
                     <select name="ewas_prot_exp_max_distance">
                         <option value="10000">10 Kb</option>
                         <option value="100000">100 Kb</option>
@@ -202,27 +172,20 @@
                         <option value="10000000">10 Mb</option>
                     </select>
                     <br/>
-                    <a>Number of Citeline clinical trials on implicated genes greater than</a>
-                    <select name="ewas_prot_exp_trial">
-                        <option value="-1">Ignore This Option</option>
-                        <option value="0">0</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="150">150</option>
-                        <option value="200">200</option>
-                    </select>
+                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                    <input name="ewas_prot_exp_trial" style="width: 50px" type="text" value="0"/>
                     <br/><br/>
 
-        <!--////////////////////////// Clinical Trait ///////////////////////////////-->
+<!--////////////////////////// Clinical Trait ///////////////////////////////-->
                     
                     <input class="ewas_tbl_checkbox" type="checkbox" name="ewas_tables" value="tbl_ewas_trait"/>
                     <b>Association with clinical and metabolite traits</b>
                     <br/>
-                    <a>p-value less than 10^(-<a/>
-                    <input name="ewas_trait_pval" style="width: 25px" type="text" />
+                    <a>p-value &le; 10^(-<a/>
+                    <input name="ewas_trait_pval" style="width: 25px" type="text" value="8"/>
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and mCG/SNP site less than</a>
+                    <a>Distance between gene and methylation site &le;</a>
                     <select name="ewas_trait_max_distance">
                         <option value="10000">10 Kb</option>
                         <option value="100000">100 Kb</option>
@@ -230,23 +193,16 @@
                         <option value="10000000">10 Mb</option>
                     </select>
                     <br/>
-                    <a>Number of Citeline clinical trials on implicated genes greater than</a>
-                    <select name="ewas_trait_trial">
-                        <option value="-1">Ignore This Option</option>
-                        <option value="0">0</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="150">150</option>
-                        <option value="200">200</option>
-                    </select>
+                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                    <input name="ewas_trait_trial" style="width: 50px" type="text" value="0"/>
                     <br/>
                     <a>Please select a list of traits you are interested in: </a>
                     <br/>
 
                     <table border="1">
                         <tr class="trait_header">
-                            <td><input id="check_all_ct" type="checkbox">Clinical Trait</td>
-                            <td><input id="check_all_mt" type="checkbox">Metabolite Trait</td>
+                            <td><input id="check_all_ct" type="checkbox">Clinical trait</td>
+                            <td><input id="check_all_mt" type="checkbox">Metabolite trait</td>
                         </tr>    
 
                         <tr class="trait_row">
@@ -630,6 +586,7 @@
                     </table>
                 </div>
             </div>
+            <br/>
 
 <!-- ////////////////////////////////////////////////////////////////////////-->
 <!-- /////////////////////////// GWAS PART //////////////////////////////////-->
@@ -638,30 +595,32 @@
             <div id="gwas_form_wrapper">
                 <h4>
                     <input type="checkbox" name="imp_type" value="gwas_imp" />
-                    Implication by GWAS (mouse)
+                    Implication by GWAS
                     <button class="show_hide" type="button">hide options</button>
                 </h4>
                 <div id="gwas_imp_form">
-                    <b>Take </b>
+                    <a>You can find genes through 3 types of associations:
+                     association with gene expression, protein expression, and trait.</a>
+                    <br/>
+                    <a>If more than one association types are selected, take </a>
                     <select name="gwas_assoc_logic_sel">
                         <option value="INTERSECTION">intersection</option>
                         <option value="UNION">union</option>
                     </select>
-                    <b> of the set of genes found by the following 
-                    selected assciations.</b>
+                    <a> of the set of genes found by the selected associations types.</a>
                     <br/>
                     <br/>
 
-        <!--///////////////////////// Gene Expression  //////////////////////////////-->
+<!--///////////////////////// Gene Expression  //////////////////////////////-->
                     
                     <input type="checkbox" name="gwas_tables" value="tbl_gwas_gene_exp"/>
                     <b>Association with gene expression</b>
                     <br/>
-                    <a>p-value less than 10^(-<a/>
-                    <input name="gwas_gene_exp_pval" style="width: 25px" type="text" />
+                    <a>p-value &le; 10^(-<a/>
+                    <input name="gwas_gene_exp_pval" style="width: 25px" type="text" value="8"/>
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and mCG/SNP site less than</a>
+                    <a>Distance between gene and SNP site &le;</a>
                     <select name="gwas_gene_exp_max_distance">
                         <option value="10000">10 Kb</option>
                         <option value="100000">100 Kb</option>
@@ -669,27 +628,20 @@
                         <option value="10000000">10 Mb</option>
                     </select>
                     <br/>
-                    <a>Number of Citeline clinical trials on implicated genes greater than</a>
-                    <select name="gwas_gene_exp_trial">
-                        <option value="-1">Ignore This Option</option>
-                        <option value="0">0</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="150">150</option>
-                        <option value="200">200</option>
-                    </select>
+                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                    <input name="gwas_gene_exp_trial" style="width: 50px" type="text" value="0"/>
                     <br/><br/>
 
-        <!--///////////////////////// Protein Expression ////////////////////////////-->
+<!--///////////////////////// Protein Expression ////////////////////////////-->
                     
                     <input type="checkbox" name="gwas_tables" value="tbl_gwas_prot_exp"/>
                     <b>Association with protein expression</b>
                     <br/>
-                    <a>p-value less than 10^(-<a/>
-                    <input name="gwas_prot_exp_pval" style="width: 25px" type="text" />
+                    <a>p-value &le; 10^(-<a/>
+                    <input name="gwas_prot_exp_pval" style="width: 25px" type="text" value="8"/>
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and mCG/SNP site less than</a>
+                    <a>Distance between gene and SNP site &le;</a>
                     <select name="gwas_prot_exp_max_distance">
                         <option value="10000">10 Kb</option>
                         <option value="100000">100 Kb</option>
@@ -697,27 +649,21 @@
                         <option value="10000000">10 Mb</option>
                     </select>
                     <br/>
-                    <a>Number of Citeline clinical trials on implicated genes greater than</a>
-                    <select name="gwas_prot_exp_trial">
-                        <option value="-1">Ignore This Option</option>
-                        <option value="0">0</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="150">150</option>
-                        <option value="200">200</option>
-                    </select>
-                    <br/><br/>
+                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                    <input name="gwas_prot_exp_trial" style="width: 50px" type="text" value="0"/>
+                    <br/>
+                    <br/>
                     
-        <!--////////////////////////////// TRAITS ///////////////////////////////////-->
+<!--////////////////////////////// TRAITS ///////////////////////////////////-->
 
                     <input type="checkbox" name="gwas_tables" value="tbl_gwas_trait"/>
                     <b>Association with clinical and metabolite traits</b>
                     <br/>
-                    <a>p-value less than 10^(-<a/>
-                    <input name="gwas_trait_pval" style="width: 25px" type="text" />
+                    <a>p-value &le; 10^(-<a/>
+                    <input name="gwas_trait_pval" style="width: 25px" type="text" value="8"/>
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and mCG/SNP site less than</a>
+                    <a>Distance between gene and SNP site &le;</a>
                     <select name="gwas_trait_max_distance">
                         <option value="10000">10 Kb</option>
                         <option value="100000">100 Kb</option>
@@ -725,23 +671,16 @@
                         <option value="10000000">10 Mb</option>
                     </select>
                     <br/>
-                    <a>Number of Citeline clinical trials on implicated genes greater than</a>
-                    <select name="gwas_trait_trial">
-                        <option value="-1">Ignore This Option</option>
-                        <option value="0">0</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="150">150</option>
-                        <option value="200">200</option>
-                    </select>
+                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                    <input name="gwas_trait_trial" style="width: 50px" type="text" value="0"/>
                     <br/>
                     <a>Please select a list of traits you are interested in: </a>
                     <br/>
 
                     <table border="1">
                         <tr class="trait_header">
-                            <td><input id="check_all_ct_gwas" type="checkbox">Phenotypes</td>
-                            <td><input id="check_all_mt_gwas" type="checkbox">Metabolite Traits</td>
+                            <td><input id="check_all_ct_gwas" type="checkbox">Clinical trait</td>
+                            <td><input id="check_all_mt_gwas" type="checkbox">Metabolite traits</td>
                         </tr>    
 
                         <tr class="trait_row">
@@ -897,15 +836,16 @@
                 1.2 Append your own genes
             </h3>
 
-            <b>Please enter entrez gene IDs or HGNC gene symbols here</b>
+            <b>Please enter Entrez gene IDs or HGNC gene symbols here</b>
             <br/>
             <input type="radio" id="gene_entrez"
                    name="id_type" value="ENTREZ_ID" checked>
-                   Entrez ID(recommended)
+                   Entrez ID (recommended)
             <input type="radio" id="gene_sym"
                    name="id_type" value="GENE_SYM" >Gene symbol
             <br/>
-            <textarea id="gene_txt" name="user_genes" rows="5" cols="20"></textarea>
+            <textarea id="gene_txt" name="user_genes" rows="5" cols="80"></textarea>
+            <hr/>
 
 <!--/////////////////////////// Term Selection //////////////////////////////-->
 
@@ -1095,12 +1035,13 @@
             
             <b>Please enter terms here</b>
             <br/>
-            <textarea id="terms_txt" name="user_terms" rows="5" cols="20"></textarea>
+            <textarea id="terms_txt" name="user_terms" rows="5" cols="80"></textarea>
             
             <!--
             <br/>
             <input type="checkbox" name="expand_term">Expand terms into disease ontology
             -->
+            <hr/>
             
 <!--////////////////////////// Scope Selection //////////////////////////////-->
 
@@ -1111,9 +1052,12 @@
             <input type="radio" value="TIAB" name="search_scope" checked>Title and abstract
             <input type="radio" value="FULL_TEXT"name="search_scope" >Full text
             
-            <br/><br/>
+            <hr/>
             
-            <input type="submit" value="submit"/>
+            <div align="center">
+            <input id="submit_btn" type="submit" value="submit"/>
+            </div>
+            <br/>
         </form>
     </body>
 </html>

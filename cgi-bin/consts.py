@@ -31,7 +31,8 @@ html_header = """
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
     <head>
     <meta charset="utf-8"/>
-    <title>Search Result</title>
+    <title>PubMed Miner - Literature and Druggability Search</title>
+    <link rel="stylesheet" type="text/css" href="../css/search.css" />
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
     <script src="../javascripts/sorttable.js"></script>
@@ -89,8 +90,9 @@ html_header = """
             // sure to ignore the first column of text
             // Use the parseInt function to convert the text string to a number
          
-            var counts= $('.heat-map tbody td').not('.stats-title').map(function() {
-                return parseInt($(this).text());
+            var counts= $('.heat-map tbody td').not('.stats-title').
+                map(function() {
+                    return parseInt($(this).text());
             }).get();
             
             // run max value function and store in variable
@@ -119,46 +121,5 @@ html_header = """
             });
         });
     </script>
-    <style>
-        table {
-            border-bottom: 1px Solid Black;         
-            border-right: 1px Solid Black;         
-            border-collapse : collapse;  
-        }
-        table td, table th {    
-            border-left: 1px Solid Black;         
-            border-top: 1px Solid Black;              
-            border-bottom: 1px Solid Black;    
-            border-right:none;  
-        }
-        table td {
-            max-width:800px;
-            word-wrap:break-word;
-        }
-        .gwas_title {
-            max-width:450px;
-            word-wrap:break-word;
-        }
-        .gwas_trait {
-            max-width:150px;
-            word-wrap:break-word;
-        }
-        .gwas_snp {
-            max-width:100px;
-            word-wrap:break-word;
-        }
-        .gwas_gene {
-            max-width:150px;
-            word-wrap:break-word;
-        }
-        .abstract_txt {
-            line-height:25px;
-            height:75px;
-            overflow: hidden;
-         }
-        #overview_bottom {
-            display: none;
-        }
-    </style>
     </head>
 """
