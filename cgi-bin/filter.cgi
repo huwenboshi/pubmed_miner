@@ -265,6 +265,7 @@ if('gwas_imp' in imp_types):
 if(curated_terms != None):
     all_terms_list = all_terms_list.union(set(curated_terms))
 if(user_terms != None):
+    user_terms = user_terms.replace('\r','')
     all_terms_list = all_terms_list.union(set(user_terms.split('\n')))
 all_terms_list = list(all_terms_list)
 
