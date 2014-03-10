@@ -321,20 +321,13 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
         """ % (ewas_or_gwas, assoc_table, ewas_or_gwas)
         cur.execute(query)
         
-        # site abs pos list
-        query = """select * from site_abs_pos_%s_tmp""" % ewas_or_gwas
-        cur.execute(query)
-        result = fetch_from_db(cur)
-        abs_pos_list = set()
-        for row in result:
-            abs_pos_list.add(str(row[0]))
-        abs_pos_qstr = '(%s)' % ','.join(list(abs_pos_list))
-
         # create temp table for trait
         query = """create temporary table %s_tmp(
-            pval double, beta double, phenotype varchar(100),
+            pval double, phenotype varchar(100),
             phenotype_class varchar(100), site_chr varchar(10),
-            site_bp bigint, site_abs_pos bigint, mouse_gene_sym varchar(20),
+            site_bp bigint, site_abs_pos bigint,
+            gene_annot_chr varchar(10), gene_annot_bp_start_pos bigint,
+            gene_annot_bp_end_pos bigint, mouse_gene_sym varchar(20),
             human_entrez_id varchar(50), symbol varchar(50),
             citeline_count int)""" % trait_table_name
         cur.execute(query)
@@ -344,16 +337,21 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
             if(tbl.find('trait') >= 0):
                 continue
             db_table = tbl_map[tbl]
-            query = """ insert into %s_tmp (pval, beta, phenotype,
+            query = """ insert into %s_tmp (pval, phenotype,
                 phenotype_class, site_chr, site_bp, site_abs_pos,
+                gene_annot_chr, gene_annot_bp_start_pos, gene_annot_bp_end_pos,
                 mouse_gene_sym, human_entrez_id, symbol, citeline_count)
-                select %s_tmp.*, A.gene_annot_gene_sym,
+                select %s_tmp.pval, %s_tmp.phenotype, %s_tmp.phenotype_class,
+                %s_tmp.site_char, %s_tmp.site_bp, %s_tmp.site_abs_bp,
+                A.gene_annot_chr, A.gene_annot_bp_start_pos,
+                A.gene_annot_bp_end_pos, A.gene_annot_gene_sym,
                 A.human_entrez_id, A.symbol,
                 A.citeline_count from %s_tmp join
-                (select * from %s_tmp where site_abs_pos in %s) as A on
+                (select * from %s_tmp where site_abs_pos in 
+                    (select * from site_abs_pos_%s_tmp)) as A on
                 %s_tmp.site_abs_pos = A.site_abs_pos
             """ % (trait_table_name, assoc_table, assoc_table, 
-                db_table, abs_pos_qstr, assoc_table)
+                db_table, ewas_or_gwas, assoc_table)
             cur.execute(query)
         
     return
@@ -410,6 +408,7 @@ def handle_gwas_query(dbcon,
                       gwas_prot_exp_cnt,
                       gwas_trait_cnt,
                       gwas_trait_names,
+                      gwas_trait_dist_or_assoc,
                       gwas_assoc_logic_sel):
                       
     gwas_pval_map = {'tbl_gwas_gene_exp': gwas_gene_exp_pval,
@@ -430,6 +429,7 @@ def handle_gwas_query(dbcon,
                                    gwas_dist_map,
                                    gwas_cnt_map,
                                    gwas_trait_names,
+                                   gwas_trait_dist_or_assoc,
                                    gwas_assoc_logic_sel)
 
     return
@@ -462,6 +462,7 @@ def handle_query(dbcon,
                  gwas_prot_exp_cnt,
                  gwas_trait_cnt,
                  gwas_trait_names,
+                 gwas_trait_dist_or_assoc,
                  gwas_assoc_logic_sel):
     
     # initialization
@@ -513,6 +514,7 @@ def handle_query(dbcon,
                           gwas_prot_exp_cnt,
                           gwas_trait_cnt,
                           gwas_trait_names,
+                          gwas_trait_dist_or_assoc,
                           gwas_assoc_logic_sel)
     
     # apply intersectoin
@@ -561,10 +563,20 @@ def handle_query(dbcon,
     query = """select * from site_abs_pos_ewas_gwas_tmp"""
     cur.execute(query)
     
+    trait_query_fields =  """pval, phenotype, phenotype_class, site_chr,
+                site_bp, site_abs_pos, gene_annot_chr,
+                gene_annot_bp_start_pos, gene_annot_bp_end_pos,
+                mouse_gene_sym, human_entrez_id,
+                symbol, citeline_count"""
+    
     for table in ewas_tables:
         db_tbl = ewas_tbl_map[table]
-        tmp_query = """select * from %s_tmp where site_abs_pos in
-            (select * from site_abs_pos_ewas_gwas_tmp)""" % db_tbl
+        fields = '*'
+        if(table.find('trait') >= 0):
+            fields = trait_query_fields
+
+        tmp_query = """select %s from %s_tmp where site_abs_pos in
+            (select * from site_abs_pos_ewas_gwas_tmp)""" % (fields, db_tbl)
         query = """create temporary table %s_tmp_final 
             as %s""" % (db_tbl, tmp_query)
         cur.execute(query)
@@ -575,8 +587,11 @@ def handle_query(dbcon,
 
     for table in gwas_tables:
         db_tbl = gwas_tbl_map[table]
-        tmp_query = """select * from %s_tmp where site_abs_pos in
-            (select * from site_abs_pos_ewas_gwas_tmp)""" % db_tbl
+        fields = '*'
+        if(table.find('trait') >= 0):
+            fields = trait_query_fields
+        tmp_query = """select %s from %s_tmp where site_abs_pos in
+            (select * from site_abs_pos_ewas_gwas_tmp)""" % (fields, db_tbl)
         query = """create temporary table %s_tmp_final 
             as %s""" % (db_tbl, tmp_query)
         cur.execute(query)
@@ -820,35 +835,35 @@ def print_ewas_query_result(ewas_query_result, ewas_tables):
             print '<tr>'
             
             # mCG position
-            print '<td>chr%s:%s</td>' % (result[4],result[5])
+            print '<td>chr%s:%s</td>' % (result[3],result[4])
             
             # mCG window
-            window_st = result[5]-500000 if(result[5]-500000 > 0) else 0
-            window_ed = result[5]+500000
-            window_str = "chr%s:%s-%s" % (result[4], str(window_st),
+            window_st = result[4]-500000 if(result[4]-500000 > 0) else 0
+            window_ed = result[4]+500000
+            window_str = "chr%s:%s-%s" % (result[3], str(window_st),
                 str(window_ed))
             print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
                 window_str, window_str)
             
             # gene symbol
-            print '<td>%s</td>' % result[18]
+            print '<td>%s</td>' % result[9]
             
             # gene position
-            gene_pos_str = 'chr%s:%s-%s' % (result[12], result[13], result[14])
+            gene_pos_str = 'chr%s:%s-%s' % (result[6], result[7], result[8])
             print '<td><a target="_blank" href="%s%s">%s</a></td>' % (ucsc_url,
                 gene_pos_str, gene_pos_str)
             
             # phenotype
-            print '<td>%s</td>' % result[2]
+            print '<td>%s</td>' % result[1]
             
             # phenotype class
-            print '<td>%s</td>' % result[3]
+            print '<td>%s</td>' % result[2]
             
             # pvalue
             print '<td>%s</td>' % result[0]
             
             # human entrez id
-            print '<td>%s</td>' % result[20]
+            print '<td>%s</td>' % result[10]
             
             print '</tr>'
         
@@ -1007,7 +1022,6 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
         print """
                 <thead>
                 <tr>
-                    <th>SNP name</th>
                     <th>SNP position</th>
                     <th>1Mb-window</th>
                     <th>Trait</th>
@@ -1023,9 +1037,6 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
         for result in trait_result:
             print '<tr>'
             
-            # snp name
-            print '<td>%s</td>' % result[6]
-            
             # snp position
             print '<td>chr%s:%s</td>' % (result[3], result[4])
             
@@ -1039,25 +1050,25 @@ def print_gwas_query_result(gwas_query_result, gwas_tables):
                 ucsc_url, window_str, window_str)
             
             # trait
-            print '<td>%s</td>' % result[0]
-            
-            # trait type
             print '<td>%s</td>' % result[1]
             
+            # trait type
+            print '<td>%s</td>' % result[2]
+            
             # gene symbol
-            print '<td>%s</td>' % result[20]
+            print '<td>%s</td>' % result[9]
             
             # gene position
-            gene_pos_str = 'chr%s:%s-%s' % (result[14], result[15],
-                result[16])
+            gene_pos_str = 'chr%s:%s-%s' % (result[6], result[7],
+                result[8])
             print '<td><a target="_blank" href="%s%s">%s</a></td>' % (
                 ucsc_url, gene_pos_str, gene_pos_str)
             
             # p-value
-            print '<td>%s</td>' % result[2]
+            print '<td>%s</td>' % result[0]
             
             # human entrez gene id
-            print '<td>%s</td>' % result[22]
+            print '<td>%s</td>' % result[10]
             
             print '</tr>'
         

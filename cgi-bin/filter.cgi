@@ -55,7 +55,7 @@ print """
             $(document).ready(function(){
             
                 $.tablesorter.addParser({
-                    id: 'ewas_gene_exp_pval',
+                    id: 'sort_pval',
                     is: function(s) {
                         return false;
                     },
@@ -68,7 +68,7 @@ print """
                 $('#ewas_gene_exp_tbl').tablesorter({
                     headers: {
                         4: {
-                            sorter: 'ewas_gene_exp_pval'
+                            sorter: 'sort_pval'
                         }
                     }
                 });
@@ -76,26 +76,15 @@ print """
                 $('#gwas_gene_exp_tbl').tablesorter({
                     headers: {
                         4: {
-                            sorter: 'ewas_gene_exp_pval'
+                            sorter: 'sort_pval'
                         }
                     }
-                });
-                
-                $.tablesorter.addParser({
-                    id: 'ewas_prot_exp_pval',
-                    is: function(s) {
-                        return false;
-                    },
-                    format: function(text, table, cell) {
-                        return parseFloat(text);
-                    },
-                    type: 'numeric'
                 });
                 
                 $('#ewas_prot_exp_tbl').tablesorter({
                     headers: {
                         4: {
-                            sorter: 'ewas_prot_exp_pval'
+                            sorter: 'sort_pval'
                         }
                     }
                 });
@@ -103,26 +92,23 @@ print """
                 $('#gwas_prot_exp_tbl').tablesorter({
                     headers: {
                         4: {
-                            sorter: 'ewas_prot_exp_pval'
+                            sorter: 'sort_pval'
                         }
                     }
-                });
-                
-                $.tablesorter.addParser({
-                    id: 'ewas_trait_pval',
-                    is: function(s) {
-                        return false;
-                    },
-                    format: function(text, table, cell) {
-                        return parseFloat(text);
-                    },
-                    type: 'numeric'
                 });
                 
                 $('#ewas_trait_tbl').tablesorter({
                     headers: {
                         6: {
-                            sorter: 'ewas_trait_pval'
+                            sorter: 'sort_pval'
+                        }
+                    }
+                });
+                
+                $('#gwas_trait_tbl').tablesorter({
+                    headers: {
+                        6: {
+                            sorter: 'sort_pval'
                         }
                     }
                 });
@@ -208,6 +194,7 @@ ewas_trait_cnt = form.getvalue("ewas_trait_trial")
 
 # get gene trait assoc method
 ewas_trait_dist_or_assoc = form.getvalue("ewas_trait_dist_or_assoc")
+gwas_trait_dist_or_assoc = form.getvalue("gwas_trait_dist_or_assoc")
 
 # get user additional input
 id_type = form.getvalue("id_type")
@@ -241,7 +228,8 @@ ewas_gwas_result = handle_query(con,imp_types, imp_type_logic_sel, ewas_tables,
     gwas_tables, gwas_gene_exp_pval, gwas_prot_exp_pval, gwas_trait_pval,
     gwas_gene_exp_max_distance, gwas_prot_exp_max_distance,
     gwas_trait_max_distance, gwas_gene_exp_cnt, gwas_prot_exp_cnt,
-    gwas_trait_cnt, gwas_trait_names, gwas_assoc_logic_sel)
+    gwas_trait_cnt, gwas_trait_names,
+    gwas_trait_dist_or_assoc,gwas_assoc_logic_sel)
                             
 ewas_query_result = ewas_gwas_result['ewas_query_result']
 gwas_query_result = ewas_gwas_result['gwas_query_result']
@@ -421,7 +409,7 @@ print_gwas_query_result(gwas_query_result, gwas_tables)
 
 genes_form_str = ''
 for i in xrange(len(gene_list)):
-    genes_form_str += str(gene_list[i][0]).strip()
+    genes_form_str += str(gene_list[i]).strip()
     if(i < len(gene_list)-1):
         genes_form_str += '\n'
 

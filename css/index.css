@@ -31,7 +31,7 @@ body {
 }
 
 .thru_proximity_div {
-    background-color:#b0c4de;
+    border: 1px dashed #000000;
 }
 
 table {

@@ -153,6 +153,7 @@
                         <option value="100000">100 Kb</option>
                         <option value="1000000">1 Mb</option>
                         <option value="10000000">10 Mb</option>
+                        <option value="3000000000">no constraint</option>
                     </select>
                     <br/>
                     <a>Number of Citeline clinical trials on implicated genes &ge;</a>
@@ -174,6 +175,7 @@
                         <option value="100000">100 Kb</option>
                         <option value="1000000">1 Mb</option>
                         <option value="10000000">10 Mb</option>
+                        <option value="3000000000">no constraint</option>
                     </select>
                     <br/>
                     <a>Number of Citeline clinical trials on implicated genes &ge;</a>
@@ -204,6 +206,7 @@
                             <option value="100000">100 Kb</option>
                             <option value="1000000">1 Mb</option>
                             <option value="10000000">10 Mb</option>
+                            <option value="3000000000">no constraint</option>
                         </select>
                         <br/>
                         <a>Number of Citeline clinical trials on implicated genes &ge;</a>
@@ -619,7 +622,9 @@
                         <option value="INTERSECTION">intersection</option>
                         <option value="UNION">union</option>
                     </select>
-                    <a> of the set of genes found by the selected associations types.</a>
+                    <a> of the sites found by the selected association types.</a>
+                    <br/>
+                    <a>You will get all the genes implicated by these sites found in the selected association types.</a>
                     <br/>
                     <br/>
 
@@ -638,6 +643,7 @@
                         <option value="100000">100 Kb</option>
                         <option value="1000000">1 Mb</option>
                         <option value="10000000">10 Mb</option>
+                        <option value="3000000000">no constraint</option>
                     </select>
                     <br/>
                     <a>Number of Citeline clinical trials on implicated genes &ge;</a>
@@ -659,6 +665,7 @@
                         <option value="100000">100 Kb</option>
                         <option value="1000000">1 Mb</option>
                         <option value="10000000">10 Mb</option>
+                        <option value="3000000000">no constraint</option>
                     </select>
                     <br/>
                     <a>Number of Citeline clinical trials on implicated genes &ge;</a>
@@ -675,17 +682,28 @@
                     <input name="gwas_trait_pval" style="width: 25px" type="text" value="8"/>
                     <a>)</a>
                     <br/>
-                    <a>Distance between gene and SNP site &le;</a>
-                    <select name="gwas_trait_max_distance">
-                        <option value="10000">10 Kb</option>
-                        <option value="100000">100 Kb</option>
-                        <option value="1000000">1 Mb</option>
-                        <option value="10000000">10 Mb</option>
-                    </select>
-                    <br/>
-                    <a>Number of Citeline clinical trials on implicated genes &ge;</a>
-                    <input name="gwas_trait_trial" style="width: 50px" type="text" value="0"/>
-                    <br/>
+                    
+                    <input name="gwas_trait_dist_or_assoc" type="radio" value="assoc" checked/>
+                    Link trait and gene through association with gene/protein expression
+                    
+                    <div class="thru_proximity_div">
+                        <input name="gwas_trait_dist_or_assoc" type="radio" value="dist"/>
+                        Link trait and gene through proximity
+                        <br/>
+                        <a>Distance between gene and methylation site &le;</a>
+                        <a>Distance between gene and SNP site &le;</a>
+                        <select name="gwas_trait_max_distance">
+                            <option value="10000">10 Kb</option>
+                            <option value="100000">100 Kb</option>
+                            <option value="1000000">1 Mb</option>
+                            <option value="10000000">10 Mb</option>
+                            <option value="3000000000">no constraint</option>
+                        </select>
+                        <br/>
+                        <a>Number of Citeline clinical trials on implicated genes &ge;</a>
+                        <input name="gwas_trait_trial" style="width: 50px" type="text" value="0"/>
+                    </div>
+
                     <a>Please select a list of traits you are interested in: </a>
                     <br/>
 
