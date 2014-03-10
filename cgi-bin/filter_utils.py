@@ -341,8 +341,7 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
                 phenotype_class, site_chr, site_bp, site_abs_pos,
                 gene_annot_chr, gene_annot_bp_start_pos, gene_annot_bp_end_pos,
                 mouse_gene_sym, human_entrez_id, symbol, citeline_count)
-                select %s_tmp.pval, %s_tmp.phenotype, %s_tmp.phenotype_class,
-                %s_tmp.site_char, %s_tmp.site_bp, %s_tmp.site_abs_bp,
+                select %s_tmp.*,
                 A.gene_annot_chr, A.gene_annot_bp_start_pos,
                 A.gene_annot_bp_end_pos, A.gene_annot_gene_sym,
                 A.human_entrez_id, A.symbol,
@@ -350,8 +349,8 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
                 (select * from %s_tmp where site_abs_pos in 
                     (select * from site_abs_pos_%s_tmp)) as A on
                 %s_tmp.site_abs_pos = A.site_abs_pos
-            """ % (trait_table_name, assoc_table, assoc_table, 
-                db_table, ewas_or_gwas, assoc_table)
+            """ % (trait_table_name, assoc_table, assoc_table,
+                   db_table, ewas_or_gwas, assoc_table)
             cur.execute(query)
         
     return
