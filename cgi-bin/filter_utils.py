@@ -181,10 +181,17 @@ def format_trait_names(trait_names):
 
 # create temporary tables for handling ewas database query
 def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
-    pval_map, dist_map, cnt_map, trait_names, assoc_logic_sel):
+    pval_map, dist_map, cnt_map, trait_names,
+    trait_dist_or_assoc, assoc_logic_sel):
 
     # get cursor, mapping between user input and data
     cur = dbcon.cursor()
+    
+    # flag to denote if trait-related query need to be handled separately
+    handle_trait_query = False
+    trait_table_name = ''
+    trait_table_name_user = ''
+    trait_additional = ''
     
     # create temp tables for ewas tables
     for tbl in tables:
@@ -193,7 +200,6 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
         db_table = tbl_map[tbl]
         
         # add additional constraint for searching in trait table
-        trait_additional = ''
         if(db_table.find('clinical_metabolite') >= 0):
             trait_names_tmp = [];
             for i in xrange(len(trait_names)):
@@ -201,6 +207,12 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
                 trait_names_tmp.append('\''+clean_trait_name+'\'')
             trait_additional += ' and phenotype in '
             trait_additional += ' (%s) ' % (','.join(trait_names_tmp))
+            if(trait_dist_or_assoc == 'assoc'):
+                # will be handled after the gene/prot exp
+                handle_trait_query = True
+                trait_table_name = db_table
+                trait_table_name_user = tbl
+                continue
         
         # convert numers to strings
         pval = pval_map[tbl]
@@ -220,8 +232,8 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
                     ((abs(dist_gene_start_site) <= %s or
                       abs(dist_gene_end_site) <= %s) or
                      (dist_gene_start_site <= 0 and
-                      dist_gene_end_site >= 0))
-                    %s) as A join clinical_trial on
+                      dist_gene_end_site >= 0)) %s) as A
+                join clinical_trial on 
                     human_entrez_id = gene_id
                     where citeline_count >= %s
         """ % (db_table, db_table, pval_str, max_distance,
@@ -230,33 +242,42 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
         # execute query
         cur.execute(query)
 
-    # create temp human gene id table, ewas intersection case
+    # create temp site_abs_pos table, intersection case
     if(assoc_logic_sel == 'INTERSECTION'):
-    
-        # create query to get intersection of human entrez ids
+
+        # create query to get intersection of site_abs_pos
         sub_query = ''
         for i in xrange(len(tables)):
             tbl = tables[i]
+            
+            # handle trait at the end
+            if(tbl.find('trait') >= 0 and trait_dist_or_assoc == 'assoc'):
+                continue
+            
             db_table = tbl_map[tbl]
             if(i == 0):
                 sub_query = """
-                    select distinct(%s_tmp.human_entrez_id) from %s_tmp
+                    select distinct(%s_tmp.site_abs_pos) from %s_tmp
                 """ % (db_table, db_table)
             if(i > 0):
                 sub_query += """
-                    join
-                    (select distinct(human_entrez_id) from %s_tmp)
-                    as %s_tmp_id
-                    on
-                    %s_tmp.human_entrez_id = %s_tmp_id.human_entrez_id
+                    join (select distinct(site_abs_pos) from %s_tmp)
+                    as %s_site_abs_pos on
+                    %s_tmp.site_abs_pos = %s_site_abs_pos.site_abs_pos
                 """ % (db_table,db_table,tbl_map[tables[0]],db_table)
-        query = """
-            create temporary table human_entrez_id_%s_tmp as %s
-        """ % (ewas_or_gwas, sub_query)
+                
+        if(handle_trait_query == False):
+            query = """
+                create temporary table site_abs_pos_%s_tmp as %s
+            """ % (ewas_or_gwas, sub_query)
+        else:
+            query = """
+                create temporary table site_abs_pos_%s_tmp_before_trait as %s
+            """ % (ewas_or_gwas, sub_query)
         
         # execute query
         cur.execute(query)
-
+        
     # create temp human gene id table, ewas union case
     elif(assoc_logic_sel == 'UNION'):
     
@@ -266,18 +287,75 @@ def handle_ewas_gwas_query_general(dbcon, ewas_or_gwas, tables, tbl_map,
         for tbl in tables:
             db_table = tbl_map[tbl]
             sub_query = """
-                (select distinct(human_entrez_id) from %s_tmp 
-                as %s_tmp_id)
+                (select distinct(site_abs_pos) from %s_tmp 
+                as %s_site_abs_pos)
             """ % (db_table, db_table)
             sub_query_list.append(sub_query)
         query = """
-            create temporary table human_entrez_id_%s_tmp as
-            select distinct(human_entrez_id) from ((%s) as A)
+            create temporary table site_abs_pos_%s_tmp as
+            select distinct(site_abs_pos) from ((%s) as A)
         """ % (ewas_or_gwas, ' union '.join(sub_query_list))
         
         # execute query
         cur.execute(query)
-    
+        
+    # handle trait related query separately
+    if(handle_trait_query == True):
+        assoc_table = trait_table_name+'_assoc'
+        pval = pval_map[trait_table_name_user]
+        pval_str = str(math.pow(10.0, -1.0*float(pval)))
+        
+        # filter based on p-value and trait first
+        query = """
+            create temporary table %s_tmp as
+            select * from %s where pval < %s %s
+        """ % (assoc_table, assoc_table, pval_str, trait_additional)
+        cur.execute(query)
+        
+        # get the intersection of site abs pos
+        query = """
+            create temporary table site_abs_pos_%s_tmp as
+            select distinct(site_abs_pos) from %s_tmp where
+            site_abs_pos in 
+            (select * from site_abs_pos_%s_tmp_before_trait)
+        """ % (ewas_or_gwas, assoc_table, ewas_or_gwas)
+        cur.execute(query)
+        
+        # site abs pos list
+        query = """select * from site_abs_pos_%s_tmp""" % ewas_or_gwas
+        cur.execute(query)
+        result = fetch_from_db(cur)
+        abs_pos_list = set()
+        for row in result:
+            abs_pos_list.add(str(row[0]))
+        abs_pos_qstr = '(%s)' % ','.join(list(abs_pos_list))
+
+        # create temp table for trait
+        query = """create temporary table %s_tmp(
+            pval double, beta double, phenotype varchar(100),
+            phenotype_class varchar(100), site_chr varchar(10),
+            site_bp bigint, site_abs_pos bigint, mouse_gene_sym varchar(20),
+            human_entrez_id varchar(50), symbol varchar(50),
+            citeline_count int)""" % trait_table_name
+        cur.execute(query)
+        
+        for i in xrange(len(tables)):
+            tbl = tables[i]
+            if(tbl.find('trait') >= 0):
+                continue
+            db_table = tbl_map[tbl]
+            query = """ insert into %s_tmp (pval, beta, phenotype,
+                phenotype_class, site_chr, site_bp, site_abs_pos,
+                mouse_gene_sym, human_entrez_id, symbol, citeline_count)
+                select %s_tmp.*, A.gene_annot_gene_sym,
+                A.human_entrez_id, A.symbol,
+                A.citeline_count from %s_tmp join
+                (select * from %s_tmp where site_abs_pos in %s) as A on
+                %s_tmp.site_abs_pos = A.site_abs_pos
+            """ % (trait_table_name, assoc_table, assoc_table, 
+                db_table, abs_pos_qstr, assoc_table)
+            cur.execute(query)
+        
     return
 
 # create temporary tables for handling ewas database query
@@ -293,6 +371,7 @@ def handle_ewas_query(dbcon,
                       ewas_prot_exp_cnt,
                       ewas_trait_cnt,
                       ewas_trait_names,
+                      ewas_trait_dist_or_assoc,
                       ewas_assoc_logic_sel):
 
     ewas_pval_map = {'tbl_ewas_gene_exp': ewas_gene_exp_pval,
@@ -313,6 +392,7 @@ def handle_ewas_query(dbcon,
                                    ewas_dist_map,
                                    ewas_cnt_map,
                                    ewas_trait_names,
+                                   ewas_trait_dist_or_assoc,
                                    ewas_assoc_logic_sel)
     
     return
@@ -369,6 +449,7 @@ def handle_query(dbcon,
                  ewas_prot_exp_cnt,
                  ewas_trait_cnt,
                  ewas_trait_names,
+                 ewas_trait_dist_or_assoc,
                  ewas_assoc_logic_sel,
                  gwas_tables,
                  gwas_gene_exp_pval, 
@@ -397,11 +478,11 @@ def handle_query(dbcon,
                    'trait':    []}
 
     # human entrez id tables
-    human_entrez_id_tables = []
+    site_abs_pos_tables = []
 
     # handle ewas query
     if('ewas_imp' in imp_types):
-        human_entrez_id_tables.append('human_entrez_id_ewas_tmp')
+        site_abs_pos_tables.append('site_abs_pos_ewas_tmp')
         handle_ewas_query(dbcon,
                           ewas_tables,
                           ewas_gene_exp_pval, 
@@ -414,11 +495,12 @@ def handle_query(dbcon,
                           ewas_prot_exp_cnt,
                           ewas_trait_cnt,
                           ewas_trait_names,
+                          ewas_trait_dist_or_assoc,
                           ewas_assoc_logic_sel)
     
     # handle gwas query
     if('gwas_imp' in imp_types):
-        human_entrez_id_tables.append('human_entrez_id_gwas_tmp')
+        site_abs_pos_tables.append('site_abs_pos_gwas_tmp')
         handle_gwas_query(dbcon,
                           gwas_tables,
                           gwas_gene_exp_pval, 
@@ -432,25 +514,25 @@ def handle_query(dbcon,
                           gwas_trait_cnt,
                           gwas_trait_names,
                           gwas_assoc_logic_sel)
+    
     # apply intersectoin
     if(imp_type_logic_sel == 'INTERSECTION'):
     
         # create query to get intersection of human entrez ids
         sub_query = ''
-        for i in xrange(len(human_entrez_id_tables)):
-            tbl = human_entrez_id_tables[i]
+        for i in xrange(len(site_abs_pos_tables)):
+            tbl = site_abs_pos_tables[i]
             if(i == 0):
                 sub_query = """
-                    select distinct(%s.human_entrez_id) from %s
+                    select distinct(%s.site_abs_pos) from %s
                 """ % (tbl, tbl)
             if(i > 0):
                 sub_query += """
-                    join (select distinct(human_entrez_id) from %s) as %s_sub
-                    on
-                    %s.human_entrez_id = %s_sub.human_entrez_id
-                """ % (tbl,tbl,human_entrez_id_tables[0],tbl)
+                    join (select distinct(site_abs_pos) from %s) as %s_sub
+                    on %s.site_abs_pos = %s_sub.site_abs_pos
+                """ % (tbl,tbl,site_abs_pos_tables[0],tbl)
         query = """
-            create temporary table human_entrez_id_ewas_gwas_tmp as %s
+            create temporary table site_abs_pos_ewas_gwas_tmp as %s
         """ % (sub_query)
         
         cur.execute(query)
@@ -461,39 +543,40 @@ def handle_query(dbcon,
         # create query to get union of human entrez ids
         sub_query = ''
         sub_query_list = []
-        for tbl in human_entrez_id_tables:
+        for tbl in site_abs_pos_tables:
             sub_query = """
-                (select distinct(human_entrez_id) from %s as %s_sub)
+                (select distinct(site_abs_pos) from %s as %s_sub)
             """ % (tbl, tbl)
             sub_query_list.append(sub_query)
         query = """
-            create temporary table human_entrez_id_ewas_gwas_tmp as
-            select distinct(human_entrez_id) from ((%s) as A)
+            create temporary table site_abs_pos_ewas_gwas_tmp as
+            select distinct(site_abs_pos) from ((%s) as A)
         """ % (' union '.join(sub_query_list))
         
         # execute query
         cur.execute(query)
+        
     
     # parse out result
-    query = """select * from human_entrez_id_ewas_gwas_tmp"""
+    query = """select * from site_abs_pos_ewas_gwas_tmp"""
     cur.execute(query)
-    human_entrez_gene_id_set = fetch_from_db(cur)
     
     for table in ewas_tables:
         db_tbl = ewas_tbl_map[table]
-        tmp_query = """select * from %s_tmp where human_entrez_id in
-            (select * from human_entrez_id_ewas_gwas_tmp)""" % db_tbl
+        tmp_query = """select * from %s_tmp where site_abs_pos in
+            (select * from site_abs_pos_ewas_gwas_tmp)""" % db_tbl
         query = """create temporary table %s_tmp_final 
             as %s""" % (db_tbl, tmp_query)
         cur.execute(query)
         query = """select * from %s_tmp_final""" % db_tbl
         cur.execute(query)
         ewas_result[ewas_simp_map[table]] = fetch_from_db(cur)
-    
+        
+
     for table in gwas_tables:
         db_tbl = gwas_tbl_map[table]
-        tmp_query = """select * from %s_tmp where human_entrez_id in
-            (select * from human_entrez_id_ewas_gwas_tmp)""" % db_tbl
+        tmp_query = """select * from %s_tmp where site_abs_pos in
+            (select * from site_abs_pos_ewas_gwas_tmp)""" % db_tbl
         query = """create temporary table %s_tmp_final 
             as %s""" % (db_tbl, tmp_query)
         cur.execute(query)
@@ -501,6 +584,13 @@ def handle_query(dbcon,
         cur.execute(query)
         gwas_result[gwas_simp_map[table]] = fetch_from_db(cur)
     
+    human_entrez_gene_id_set = set()
+    for assoc_type in ['gene_exp', 'prot_exp', 'trait']:
+        for row in ewas_result[assoc_type]:
+            human_entrez_gene_id_set.add(row[len(row)-3])
+        for row in gwas_result[assoc_type]:
+            human_entrez_gene_id_set.add(row[len(row)-3])
+
     # combine result
     result = {'human_gene_set': human_entrez_gene_id_set,
               'ewas_query_result': ewas_result,
@@ -519,8 +609,7 @@ def count_implicating_sites_ewas_gwas_general(dbcon, tables, tbl_map, simp_map):
         db_tbl = tbl_map[table]
         query = """
             select human_entrez_id, symbol, count(distinct site_chr, site_bp)
-                from %s_tmp_final 
-            group by human_entrez_id
+            from %s_tmp_final group by human_entrez_id
         """ % db_tbl
         cur.execute(query)
         result = fetch_from_db(cur)
@@ -552,20 +641,25 @@ def count_implicating_sites_ewas(dbcon, ewas_tables):
     return imp_count
 
 # get gene symbol citeline count data
-def get_symbol_citeline_count(dbcon):
-    cur = dbcon.cursor()
+def get_symbol_citeline_count(ewas_result, gwas_result):
     id_sym_trial = dict()
-    query = """select gene_id, symbol, citeline_count from clinical_trial where
-               gene_id in (select * from human_entrez_id_ewas_gwas_tmp)"""
-    cur.execute(query)
-    result = fetch_from_db(cur)
-    for row in result:
-        gene_id = row[0]
-        gene_sym = row[1]
-        citeline_cnt = row[2]
-        id_sym_trial[str(gene_id)] = dict()
-        id_sym_trial[str(gene_id)]['gene_sym'] = gene_sym
-        id_sym_trial[str(gene_id)]['citeline_cnt'] = citeline_cnt
+    
+    for assoc_type in ['gene_exp', 'prot_exp', 'trait']:
+        for row in ewas_result[assoc_type]:
+            gene_id = str(row[len(row)-3])
+            gene_sym = row[len(row)-2]
+            cnt = row[len(row)-1]
+            id_sym_trial[gene_id] = dict()
+            id_sym_trial[gene_id]['gene_sym'] = gene_sym
+            id_sym_trial[gene_id]['citeline_cnt'] = cnt
+        for row in gwas_result[assoc_type]:
+            gene_id = str(row[len(row)-3])
+            gene_sym = row[len(row)-2]
+            cnt = row[len(row)-1]
+            id_sym_trial[gene_id] = dict()
+            id_sym_trial[gene_id]['gene_sym'] = gene_sym
+            id_sym_trial[gene_id]['citeline_cnt'] = cnt
+    
     return id_sym_trial
 
 ############################# DISPLAY ##########################################

@@ -206,6 +206,9 @@ ewas_gene_exp_cnt = form.getvalue("ewas_gene_exp_trial")
 ewas_prot_exp_cnt = form.getvalue("ewas_prot_exp_trial")
 ewas_trait_cnt = form.getvalue("ewas_trait_trial")
 
+# get gene trait assoc method
+ewas_trait_dist_or_assoc = form.getvalue("ewas_trait_dist_or_assoc")
+
 # get user additional input
 id_type = form.getvalue("id_type")
 user_genes = form.getvalue("user_genes")
@@ -233,7 +236,8 @@ ewas_gwas_result = handle_query(con,imp_types, imp_type_logic_sel, ewas_tables,
     ewas_gene_exp_pval, ewas_prot_exp_pval, ewas_trait_pval,
     ewas_gene_exp_max_distance, ewas_prot_exp_max_distance,
     ewas_trait_max_distance, ewas_gene_exp_cnt, ewas_prot_exp_cnt,
-    ewas_trait_cnt, ewas_trait_names, ewas_assoc_logic_sel,
+    ewas_trait_cnt, ewas_trait_names, ewas_trait_dist_or_assoc,
+    ewas_assoc_logic_sel,
     gwas_tables, gwas_gene_exp_pval, gwas_prot_exp_pval, gwas_trait_pval,
     gwas_gene_exp_max_distance, gwas_prot_exp_max_distance,
     gwas_trait_max_distance, gwas_gene_exp_cnt, gwas_prot_exp_cnt,
@@ -246,7 +250,7 @@ combined_entrez_id_set = ewas_gwas_result['human_gene_set']
 # count the number of implicating sites for each implicated gene
 ewas_gene_support_info = count_implicating_sites_ewas(con, ewas_tables)
 gwas_gene_support_info = count_implicating_sites_gwas(con, gwas_tables)
-id_sym_trial = get_symbol_citeline_count(con)
+id_sym_trial = get_symbol_citeline_count(ewas_query_result, gwas_query_result)
 
 ############################ PROCESS USER ADD-ON ###############################
 
@@ -351,8 +355,6 @@ print """
 """
 
 for key in combined_entrez_id_set:
-    key = key[0]
-    
     gene_sym = ''
     citeline_cnt = 0
     if(key in id_sym_trial):

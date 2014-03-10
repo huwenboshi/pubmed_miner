@@ -30,6 +30,10 @@ body {
     width: 400px;
 }
 
+.thru_proximity_div {
+    background-color:#b0c4de;
+}
+
 table {
     border-collapse:collapse;
 }
